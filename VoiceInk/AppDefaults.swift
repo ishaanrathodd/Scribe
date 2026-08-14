@@ -18,7 +18,6 @@ enum AppDefaults {
             // Onboarding & General
             "hasCompletedOnboardingV2": false,
             "hasPreparedOnboardingV2": false,
-            "enableAnnouncements": true,
 
             // Clipboard
             "restoreClipboardAfterPaste": true,
@@ -61,6 +60,9 @@ enum AppDefaults {
             "ShortEnhancementWordThreshold": 3,
             "EnhancementTimeoutSeconds": 7,
             "EnhancementRetryOnTimeout": true,
+            // Assistant answers can require model reasoning and therefore need more
+            // time than a short text-cleanup request.
+            "AssistantTimeoutSeconds": 75,
 
             // Model
             "PrewarmModelOnWake": true,

@@ -5,11 +5,11 @@ struct AudioVisualizer: View {
     let color: Color
     let isActive: Bool
 
-    private let barCount = 15
-    private let barWidth: CGFloat = 3
-    private let barSpacing: CGFloat = 2
+    private let barCount = 14
+    private let barWidth: CGFloat = 1.5
+    private let barSpacing: CGFloat = 3
     private let minHeight: CGFloat = 4
-    private let maxHeight: CGFloat = 28
+    private let maxHeight: CGFloat = 23
 
     private let phases: [Double]
 
@@ -45,7 +45,7 @@ struct AudioVisualizer: View {
         guard isActive else { return minHeight }
 
         let time = date.timeIntervalSince1970
-        let amplitude = max(0, min(1, pow(audioMeter.averagePower, 0.7)))  // boosted for visibility
+        let amplitude = max(0.12, min(1, pow(audioMeter.averagePower, 0.7)))
         let wave = sin(time * 8 + phases[index]) * 0.5 + 0.5
         let centerDistance = abs(Double(index) - Double(barCount) / 2) / Double(barCount / 2)
         let centerBoost = 1.0 - (centerDistance * 0.4)
@@ -56,10 +56,10 @@ struct AudioVisualizer: View {
 
 // Flat bars shown when the recorder is idle (no audio input)
 struct StaticVisualizer: View {
-    private let barCount = 15
-    private let barWidth: CGFloat = 3
+    private let barCount = 14
+    private let barWidth: CGFloat = 1.5
     private let barHeight: CGFloat = 4
-    private let barSpacing: CGFloat = 2
+    private let barSpacing: CGFloat = 3
     let color: Color
 
     var body: some View {
@@ -79,6 +79,8 @@ struct ProcessingStatusDisplay: View {
     enum Mode {
         case transcribing
         case enhancing
+        case thinking
+        case searching
     }
 
     let mode: Mode
@@ -88,6 +90,8 @@ struct ProcessingStatusDisplay: View {
         switch mode {
         case .transcribing: return "Transcribing"
         case .enhancing: return "Enhancing"
+        case .thinking: return "Thinking"
+        case .searching: return "Searching the web"
         }
     }
 
@@ -95,6 +99,7 @@ struct ProcessingStatusDisplay: View {
         switch mode {
         case .transcribing: return 0.18
         case .enhancing: return 0.22
+        case .thinking, .searching: return 0.22
         }
     }
 

@@ -20,9 +20,9 @@ struct CustomModelCardView: View {
 
                 actionSection
             }
-            .padding(16)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
         }
-        .background(AppMaterialCardBackground())
     }
 
     private var headerSection: some View {
@@ -68,8 +68,6 @@ struct CustomModelCardView: View {
 
     private var actionSection: some View {
         HStack(spacing: 8) {
-            modelStatusPill("Configured", systemImage: "checkmark.circle")
-
             Menu {
                 Button {
                     editAction(model)
@@ -88,7 +86,9 @@ struct CustomModelCardView: View {
             }
             .menuStyle(.borderlessButton)
             .menuIndicator(.hidden)
-            .frame(width: 20, height: 20)
+            .frame(width: 32, height: 32)
+
+            modelStatusPill("Configured", systemImage: "checkmark.circle")
         }
     }
 }

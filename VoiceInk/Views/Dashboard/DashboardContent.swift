@@ -11,14 +11,10 @@ struct DashboardContent: View {
     private static let displayNameMinWidth: CGFloat = 72
     private static let displayNameMaxWidth: CGFloat = 280
     private static let displayNameHorizontalPadding: CGFloat = 8
-    private static let insightsUnlockDuration: TimeInterval = 30 * 60
-    private static let peakHoursUnlockDuration: TimeInterval = 30 * 60
     // Above this count, skip live auto-refresh (full reload is expensive); tab reopen still refreshes.
     private static let automaticStatsRefreshMetricLimit = 2_000
     private static let statsRefreshDebounceNanoseconds: UInt64 = 750_000_000
     let modelContext: ModelContext
-    let licenseState: LicenseViewModel.LicenseState
-    let onAddLicenseKey: () -> Void
 
     @State private var statsSummary: DashboardStatsSummary = .empty
     @State private var hasLoadedStatsSnapshot: Bool = false
@@ -33,7 +29,6 @@ struct DashboardContent: View {
     @State private var isAccessibilityEnabled = AXIsProcessTrusted()
     @EnvironmentObject private var updaterViewModel: UpdaterViewModel
     @ObservedObject private var modeManager = ModeManager.shared
-    @ObservedObject private var starPrompt = GitHubStarPromptCoordinator.shared
     @State private var isSystemInfoCopied = false
     @State private var isEditingDisplayName = false
     @State private var displayNameDraft = ""
@@ -49,14 +44,8 @@ struct DashboardContent: View {
         return descriptor
     }
 
-    init(
-        modelContext: ModelContext,
-        licenseState: LicenseViewModel.LicenseState,
-        onAddLicenseKey: @escaping () -> Void
-    ) {
+    init(modelContext: ModelContext) {
         self.modelContext = modelContext
-        self.licenseState = licenseState
-        self.onAddLicenseKey = onAddLicenseKey
 
         let cachedSummary = DashboardStatsCache.shared.currentSummary()
         let cachedMetadata = DashboardStatsCache.shared.currentMetadata()
@@ -74,7 +63,7 @@ struct DashboardContent: View {
 
                 ScrollView {
                     Group {
-                        if isInsightsViewPresented && canViewInsights {
+                        if isInsightsViewPresented {
                             dashboardInsightsView
                         } else {
                             dashboardMainContent(availableWidth: contentWidth)
@@ -131,8 +120,6 @@ struct DashboardContent: View {
 
     private func dashboardMainContent(availableWidth: CGFloat) -> some View {
         VStack(alignment: .leading, spacing: DashboardLayout.sectionSpacing) {
-            licenseStatusMessage
-
             greetingHeader
 
             nameEditorDismissArea {
@@ -232,44 +219,24 @@ struct DashboardContent: View {
         return String(format: String(localized: "Updated at %@"), formattedDate)
     }
 
-    private var canViewInsights: Bool {
-        hasLoadedStatsSnapshot && statsSummary.totalDuration >= Self.insightsUnlockDuration
-    }
-
-    private var shouldShowLockedInsightsState: Bool {
-        hasLoadedStatsSnapshot && !canViewInsights
-    }
-
-    private var canViewPeakHours: Bool {
-        hasLoadedStatsSnapshot && selectedTotals.duration >= Self.peakHoursUnlockDuration && selectedPeakHours.hasData
-    }
-
-    private var shouldLockPeakHours: Bool {
-        hasLoadedStatsSnapshot && !canViewPeakHours
-    }
-
     private var shouldRefreshStatsAfterMetricChange: Bool {
         !hasLoadedStatsSnapshot || statsSummary.totalCount < Self.automaticStatsRefreshMetricLimit
     }
 
     private var insightsActionTitle: LocalizedStringKey {
-        canViewInsights ? "View Insights" : "Insights Locked"
+        "View Insights"
     }
 
     private var insightsActionIcon: String {
-        canViewInsights ? "chart.line.uptrend.xyaxis" : "lock.fill"
+        "chart.line.uptrend.xyaxis"
     }
 
     private var insightsActionHelp: String {
-        if canViewInsights {
-            return String(localized: "View dashboard insights")
-        }
-
-        return String(localized: "Continue using VoiceInk to unlock these stats.")
+        String(localized: "View dashboard insights")
     }
 
     private var insightsActionAccessibilityLabel: String {
-        canViewInsights ? "View insights" : "Insights locked"
+        "View insights"
     }
 
     private var accessibilityReminder: some View {
@@ -370,11 +337,7 @@ struct DashboardContent: View {
         }
     }
 
-    private func openInsightsIfAvailable() {
-        guard canViewInsights else {
-            return
-        }
-
+    private func openInsights() {
         isInsightsViewPresented = true
     }
 
@@ -492,38 +455,11 @@ struct DashboardContent: View {
 
     // MARK: - Sections
 
-    @ViewBuilder
-    private var licenseStatusMessage: some View {
-        switch licenseState {
-        case .unlicensed:
-            TrialMessageView(
-                message: Text("Activate a license to continue using VoiceInk."),
-                type: .licenseRequired,
-                onAddLicenseKey: onAddLicenseKey
-            )
-        case .trial(let daysRemaining):
-            TrialMessageView(
-                message: Text(String(localized: "You have \(daysRemaining) days left in your trial")),
-                type: daysRemaining <= 2 ? .warning : .info,
-                onAddLicenseKey: onAddLicenseKey
-            )
-        case .trialExpired:
-            TrialMessageView(
-                message: nil,
-                type: .expired,
-                onAddLicenseKey: onAddLicenseKey
-            )
-        case .licensed:
-            EmptyView()
-        }
-    }
-
     private var dashboardInsightsView: some View {
         DashboardInsightsView(
             selectedPeriod: $selectedInsightPeriod,
             productivityPoints: selectedProductivityPoints,
             peakHoursSummary: selectedPeakHours,
-            isPeakHoursLocked: shouldLockPeakHours,
             timeSavedSummary: selectedTimeSavedSummary,
             modelUsage: selectedModelUsage,
             modelPerformanceSummaries: selectedModelPerformance,
@@ -538,46 +474,18 @@ struct DashboardContent: View {
 
     private var heroSection: some View {
         DashboardHeroCard(
-            isLocked: shouldShowLockedInsightsState,
             headline: momentumHeadline,
             subtext: momentumSubtext,
             actionTitle: insightsActionTitle,
             actionIcon: insightsActionIcon,
-            canViewInsights: canViewInsights,
             actionHelp: insightsActionHelp,
             actionAccessibilityLabel: insightsActionAccessibilityLabel,
-            onViewInsights: openInsightsIfAvailable
+            onViewInsights: openInsights
         )
-    }
-
-    @ViewBuilder
-    private var footerStarButtonLabel: some View {
-        if starPrompt.openFailed {
-            footerActionLabel(icon: "exclamationmark.triangle.fill", title: "Couldn't open — try again", color: .orange)
-        } else {
-            switch starPrompt.completionState {
-            case .starred:
-                footerActionLabel(icon: "checkmark", title: "Starred — thank you!", color: AppTheme.Sidebar.license)
-            case .opened:
-                footerActionLabel(icon: "arrow.up.right", title: "GitHub opened", color: AppTheme.Sidebar.fallback)
-            case .none:
-                footerActionLabel(icon: "star", title: "Star on GitHub", color: AppTheme.Sidebar.fallback)
-            }
-        }
     }
 
     private var footerActionsView: some View {
         HStack(alignment: .center, spacing: 12) {
-            if starPrompt.showsFooterStarButton {
-                Button(action: { starPrompt.star() }) {
-                    footerStarButtonLabel
-                }
-                .buttonStyle(.plain)
-                .fixedSize(horizontal: true, vertical: true)
-                .disabled(starPrompt.isStarring || starPrompt.completionState != .none)
-                .animation(.easeInOut(duration: 0.15), value: starPrompt.openFailed)
-            }
-
             if let availableUpdate = updaterViewModel.availableUpdate {
                 Button(action: updaterViewModel.checkForUpdates) {
                     footerActionLabel(

@@ -16,7 +16,7 @@ final class SystemInfoService {
             APP INFORMATION:
             App Version: \(getAppVersion())
             Build Version: \(getBuildVersion())
-            License Status: \(getLicenseStatus())
+            Edition: Community
 
             OPERATING SYSTEM:
             macOS Version: \(ProcessInfo.processInfo.operatingSystemVersionString)
@@ -203,10 +203,6 @@ final class SystemInfoService {
         @unknown default:
             return "Unknown"
         }
-    }
-
-    private func getLicenseStatus() -> String {
-        LicenseViewModel.shared.diagnosticLicenseStatus
     }
 
     private func getCurrentLanguage() -> String {

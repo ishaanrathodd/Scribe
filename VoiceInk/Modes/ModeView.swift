@@ -69,91 +69,28 @@ struct ModeView: View {
         activePanel != nil
     }
 
-    private var headerControls: some View {
-        HStack(spacing: 8) {
-            addModeButton
-            settingsButton
-        }
-    }
-
-    private var addModeButton: some View {
-        AppIconButton(
-            systemName: "plus.circle.fill",
-            help: "Add a new mode"
-        ) {
-            openPanel(mode: .add)
-        }
-    }
-
-    private var settingsButton: some View {
-        AppIconButton(
-            systemName: "gearshape.fill",
-            help: "Modes Settings"
-        ) {
-            openSettingsPanel()
-        }
-    }
-
     var body: some View {
         VStack(spacing: 0) {
-            AppScreenHeader(
-                title: "Modes",
-                infoMessage: "Modes help you set up VoiceInk for different writing tasks, workflows, and scenarios.",
-                infoURL: "https://tryvoiceink.com/docs/modes"
-            ) {
-                headerControls
-            }
-
             Group {
-                GeometryReader { geometry in
-                    ScrollView {
-                        VStack(spacing: 0) {
-                            if modeManager.configurations.isEmpty {
-                                VStack(spacing: 24) {
-                                    Spacer()
-                                        .frame(height: geometry.size.height * 0.2)
-
-                                    VStack(spacing: 16) {
-                                        Image(systemName: "square.grid.2x2.fill")
-                                            .font(.system(size: 48, weight: .regular))
-                                            .foregroundColor(.secondary.opacity(0.6))
-
-                                        VStack(spacing: 8) {
-                                            Text("Create your first mode")
-                                                .font(.system(size: 20, weight: .medium))
-                                                .foregroundColor(.primary)
-
-                                            Text(
-                                                "Set how VoiceInk transcribes and formats your speech, then start dictating in any app."
-                                            )
-                                            .font(.system(size: 14))
-                                            .foregroundColor(.secondary)
-                                            .multilineTextAlignment(.center)
-                                            .lineSpacing(2)
-                                        }
-                                    }
-
-                                    Spacer()
-                                }
-                                .frame(maxWidth: .infinity)
-                                .frame(minHeight: geometry.size.height)
-                            } else {
-                                VStack(spacing: 0) {
-                                    ModeConfigurationsGrid(
-                                        modeManager: modeManager,
-                                        onEditConfig: { config in
-                                            openPanel(mode: .edit(config))
-                                        }
-                                    )
-                                    .padding(.horizontal, 24)
-                                    .padding(.vertical, 20)
-
-                                    Spacer()
-                                        .frame(height: 40)
-                                }
+                if modeManager.configurations.isEmpty {
+                    ContentUnavailableView(
+                        "No Modes",
+                        systemImage: "square.grid.2x2",
+                        description: Text("Add a mode to control how VoiceInk transcribes and formats your speech.")
+                    )
+                } else {
+                    Form {
+                        Section {
+                        ModeConfigurationsGrid(
+                            modeManager: modeManager,
+                            onEditConfig: { config in
+                                openPanel(mode: .edit(config))
                             }
+                        )
                         }
                     }
+                    .formStyle(.grouped)
+                    .scrollContentBackground(.hidden)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -181,6 +118,25 @@ struct ModeView: View {
                 enhancementService: enhancementService,
                 transcriptionModelManager: transcriptionModelManager
             )
+        }
+        .toolbar {
+            ToolbarItemGroup(placement: .primaryAction) {
+                Button {
+                    openPanel(mode: .add)
+                } label: {
+                    Label("Add Mode", systemImage: "plus")
+                }
+                .labelStyle(.iconOnly)
+                .help("Add Mode")
+
+                Button {
+                    openSettingsPanel()
+                } label: {
+                    Label("Modes Settings", systemImage: "gearshape")
+                }
+                .labelStyle(.iconOnly)
+                .help("Modes Settings")
+            }
         }
     }
 

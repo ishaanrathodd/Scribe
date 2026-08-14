@@ -95,6 +95,7 @@ class VoiceInkEngine: NSObject, ObservableObject {
     @Published var recordingState: RecordingState = .idle
     @Published var shouldCancelRecording = false
     @Published var partialTranscript: String = ""
+    @Published private(set) var activeOutputMode: ModeOutputMode = .paste
     var currentSession: TranscriptionSession?
     private var currentSessionTranscriptionConfiguration: TranscriptionRuntimeConfiguration?
     private var activeRecordingStartID: UUID?
@@ -225,6 +226,10 @@ class VoiceInkEngine: NSObject, ObservableObject {
             let canContinueAssistantSession = isAssistantFollowUp && assistantSession.canSendFollowUp
             let recordingUseCase: RecordingUseCase = canContinueAssistantSession ? .assistantFollowUp : .newSession
 
+            // Do not let a previous Ask session leak its UI into the next
+            // recording while the frontmost-app mode is being resolved.
+            activeOutputMode = canContinueAssistantSession ? .respond : .paste
+
             activePipelineTranscriptionID = nil
             shouldCancelRecording = false
             partialTranscript = ""
@@ -249,6 +254,9 @@ class VoiceInkEngine: NSObject, ObservableObject {
                             guard let self else { return false }
                             return self.activeRecordingStartID == startID && !self.shouldCancelRecording
                         }
+                        self.activeOutputMode = canContinueAssistantSession
+                            ? .respond
+                            : ModeRuntimeResolver.outputConfiguration().outputMode
 
                         do {
                             let fileName = "\(UUID().uuidString).wav"
@@ -282,6 +290,10 @@ class VoiceInkEngine: NSObject, ObservableObject {
                             self.recordingState = .recording
 
                             await activeModeTask.value
+
+                            self.activeOutputMode = canContinueAssistantSession
+                                ? .respond
+                                : ModeRuntimeResolver.outputConfiguration().outputMode
 
                             guard self.recordingState == .recording,
                                 self.activeRecordingStartID == startID,
@@ -606,8 +618,10 @@ class VoiceInkEngine: NSObject, ObservableObject {
                         modelName: configuration.modelName ?? configuration.provider?.defaultModel,
                         modeName: configuration.mode?.name,
                         modeEmoji: configuration.mode?.icon.value,
-                        promptName: configuration.prompt?.title
+                        promptName: configuration.prompt?.title,
+                        isWebSearchEnabled: configuration.isWebSearchEnabled
                     )
+                    AskHistoryStore.shared.save(session: self.assistantSession)
                 },
                 showResponse: { [weak self] response, systemPrompt in
                     guard let self, self.activePipelineTranscriptionID == transcriptionID else { return }
@@ -616,6 +630,7 @@ class VoiceInkEngine: NSObject, ObservableObject {
                 failResponse: { [weak self] message in
                     guard let self, self.activePipelineTranscriptionID == transcriptionID else { return }
                     self.assistantSession.fail(message)
+                    AskHistoryStore.shared.save(session: self.assistantSession)
                 }
             )
         )

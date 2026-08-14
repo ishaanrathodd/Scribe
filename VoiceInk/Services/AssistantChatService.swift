@@ -15,8 +15,8 @@ final class AssistantChatService {
     private let aiService: AIService
 
     private var requestTimeout: TimeInterval {
-        let stored = UserDefaults.standard.integer(forKey: "EnhancementTimeoutSeconds")
-        return stored > 0 ? TimeInterval(stored) : 7
+        let stored = UserDefaults.standard.integer(forKey: "AssistantTimeoutSeconds")
+        return stored > 0 ? TimeInterval(stored) : 75
     }
 
     init(modelContext: ModelContext, aiService: AIService) {
@@ -28,6 +28,7 @@ final class AssistantChatService {
         provider: AIProvider,
         modelName: String?,
         systemPrompt: String?,
+        enableWebSearch: Bool,
         messages: [AssistantDisplayMessage]
     ) async throws -> Reply {
         let chatMessages = messages.map { message in
@@ -39,13 +40,17 @@ final class AssistantChatService {
             }
         }
 
+        // A live-search turn includes provider-side search and synthesis, so give it
+        // a larger budget than a regular completion.
+        let timeout = enableWebSearch ? max(requestTimeout, 90) : requestTimeout
         let startTime = Date()
         let text = try await aiService.completeChat(
             provider: provider,
             modelName: modelName,
             messages: chatMessages,
             systemPrompt: systemPrompt,
-            timeout: requestTimeout
+            enableWebSearch: enableWebSearch,
+            timeout: timeout
         )
 
         return Reply(

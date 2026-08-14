@@ -7,6 +7,7 @@ extension AIService {
         modelName: String?,
         messages: [ChatMessage],
         systemPrompt: String? = nil,
+        enableWebSearch: Bool = false,
         timeout: TimeInterval = 30
     ) async throws -> String {
         let resolvedModel = modelName?.isEmpty == false ? modelName! : selectedModel(for: provider)
@@ -74,7 +75,8 @@ extension AIService {
             )
             let extraBody = ReasoningConfig.getExtraBodyParameters(
                 for: provider,
-                modelName: resolvedModel
+                modelName: resolvedModel,
+                enablingWebSearch: enableWebSearch
             )
             result = try await OpenAILLMClient.chatCompletion(
                 baseURL: baseURL,

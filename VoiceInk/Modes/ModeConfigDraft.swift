@@ -20,6 +20,7 @@ struct ModeConfigDraft {
     var selectedAIProvider: String?
     var selectedAIModel: String?
     var outputMode: ModeOutputMode
+    var isWebSearchEnabled: Bool
     var autoSendKey: AutoSendKey
     var customCommand: String
     var isDefault: Bool
@@ -51,6 +52,7 @@ struct ModeConfigDraft {
             selectedAIProvider = inheritedConfig?.selectedAIProvider
             selectedAIModel = inheritedConfig?.selectedAIModel
             outputMode = .paste
+            isWebSearchEnabled = false
             autoSendKey = .none
             customCommand = inheritedConfig?.customCommand?.command ?? ""
             isDefault = false
@@ -78,6 +80,7 @@ struct ModeConfigDraft {
             selectedAIProvider = latestConfig.selectedAIProvider
             selectedAIModel = latestConfig.selectedAIModel
             outputMode = latestConfig.outputMode
+            isWebSearchEnabled = latestConfig.isWebSearchEnabled
             autoSendKey = latestConfig.autoSendKey
             customCommand = latestConfig.customCommand?.command ?? ""
             isDefault = latestConfig.isDefault
@@ -189,6 +192,7 @@ struct ModeConfigDraft {
                 selectedAIProvider: selectedAIProvider,
                 selectedAIModel: selectedAIModel,
                 outputMode: outputMode,
+                isWebSearchEnabled: isWebSearchEnabled,
                 autoSendKey: savedAutoSendKey,
                 customCommand: savedCustomCommand,
                 isDefault: savedIsDefault
@@ -214,6 +218,7 @@ struct ModeConfigDraft {
             updatedConfig.selectedAIProvider = selectedAIProvider
             updatedConfig.selectedAIModel = selectedAIModel
             updatedConfig.outputMode = outputMode
+            updatedConfig.isWebSearchEnabled = isWebSearchEnabled
             updatedConfig.autoSendKey = savedAutoSendKey
             updatedConfig.customCommand = savedCustomCommand
             updatedConfig.isDefault = savedIsDefault

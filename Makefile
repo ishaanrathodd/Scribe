@@ -1,8 +1,10 @@
-# Define a directory for dependencies in the user's home folder
-DEPS_DIR := $(HOME)/VoiceInk-Dependencies
+# Keep local build dependencies next to the source checkout.
+DEPS_DIR := $(CURDIR)/../voiceink-dependencies
 WHISPER_CPP_DIR := $(DEPS_DIR)/whisper.cpp
 FRAMEWORK_PATH := $(WHISPER_CPP_DIR)/build-apple/whisper.xcframework
 LOCAL_DERIVED_DATA := $(CURDIR)/.local-build
+LOCAL_SIGNING_IDENTITY := 28FF917713EAE42C193553D16761A5570984279C
+LOCAL_APP_PATH := /Applications/VoiceInk.app
 
 .PHONY: all clean whisper setup build local check healthcheck help dev run release release-setup
 
@@ -60,13 +62,15 @@ local: check setup
 		build
 	@APP_PATH="$(LOCAL_DERIVED_DATA)/Build/Products/Debug/VoiceInk.app" && \
 	if [ -d "$$APP_PATH" ]; then \
-		echo "Copying VoiceInk.app to ~/Downloads..."; \
-		rm -rf "$$HOME/Downloads/VoiceInk.app"; \
-		ditto "$$APP_PATH" "$$HOME/Downloads/VoiceInk.app"; \
-		xattr -cr "$$HOME/Downloads/VoiceInk.app"; \
+		echo "Signing VoiceInk with the local Apple Development identity..."; \
+		codesign --force --deep --sign "$(LOCAL_SIGNING_IDENTITY)" --entitlements "$(CURDIR)/VoiceInk/VoiceInk.local.entitlements" "$$APP_PATH"; \
+		echo "Installing VoiceInk.app to $(LOCAL_APP_PATH)..."; \
+		rm -rf "$(LOCAL_APP_PATH)"; \
+		ditto "$$APP_PATH" "$(LOCAL_APP_PATH)"; \
+		xattr -cr "$(LOCAL_APP_PATH)"; \
 		echo ""; \
-		echo "Build complete! App saved to: ~/Downloads/VoiceInk.app"; \
-		echo "Run with: open ~/Downloads/VoiceInk.app"; \
+		echo "Build complete! App installed to: $(LOCAL_APP_PATH)"; \
+		echo "Run with: open $(LOCAL_APP_PATH)"; \
 		echo ""; \
 		echo "Limitations of local builds:"; \
 		echo "  - No iCloud dictionary sync"; \
@@ -78,9 +82,9 @@ local: check setup
 
 # Run application
 run:
-	@if [ -d "$$HOME/Downloads/VoiceInk.app" ]; then \
-		echo "Opening ~/Downloads/VoiceInk.app..."; \
-		open "$$HOME/Downloads/VoiceInk.app"; \
+	@if [ -d "$(LOCAL_APP_PATH)" ]; then \
+		echo "Opening $(LOCAL_APP_PATH)..."; \
+		open "$(LOCAL_APP_PATH)"; \
 	else \
 		echo "Looking for VoiceInk.app in DerivedData..."; \
 		APP_PATH=$$(find "$$HOME/Library/Developer/Xcode/DerivedData" -name "VoiceInk.app" -type d | head -1) && \

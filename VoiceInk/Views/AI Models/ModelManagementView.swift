@@ -84,22 +84,17 @@ struct ModelManagementView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            headerSection
-
-            ScrollView {
-                VStack(alignment: .leading, spacing: 18) {
-                    if SystemArchitecture.isIntelMac {
-                        intelMacWarningBanner
-                    }
-
-                    availableModelsSection
-                }
+            modelFilterPicker
                 .padding(.horizontal, 24)
-                .padding(.top, 18)
-                .padding(.bottom, 28)
-                .frame(maxWidth: .infinity, alignment: .topLeading)
+                .padding(.top, 12)
+                .padding(.bottom, 12)
+
+            switch selectedFilter {
+            case .local:
+                localModelsForm
+            case .cloud, .custom:
+                remoteModelsContent
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .frame(minWidth: 600, minHeight: 500)
         .sidePanel(
@@ -118,11 +113,16 @@ struct ModelManagementView: View {
                 secondaryButton: .cancel()
             )
         }
-    }
-
-    private var headerSection: some View {
-        AppScreenHeader(title: "Model Catalog") {
-            settingsButton
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    toggleSettingsPanel()
+                } label: {
+                    Label("Model Settings", systemImage: "gearshape")
+                }
+                .labelStyle(.iconOnly)
+                .help("Model Settings")
+            }
         }
     }
 
@@ -166,21 +166,17 @@ struct ModelManagementView: View {
         }
     }
 
-    private var availableModelsSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            modelFilterPicker
-
-            switch selectedFilter {
-            case .local:
-                localModelsSection
-            case .cloud:
+    @ViewBuilder
+    private var remoteModelsContent: some View {
+        switch selectedFilter {
+        case .cloud:
                 CloudProviderManagementView(
                     selectedProviderID: selectedCloudProviderID,
                     onSelectProvider: openCloudProviderPanel
                 )
                 .environmentObject(aiService)
                 .environmentObject(transcriptionModelManager)
-            case .custom:
+        case .custom:
                 CustomProviderManagementView(
                     customModelManager: customModelManager,
                     customAIProviderManager: customAIProviderManager,
@@ -203,65 +199,70 @@ struct ModelManagementView: View {
                         confirmDeleteCustomEnhancementModel(provider)
                     }
                 )
-            }
+        case .local:
+            EmptyView()
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var remoteModelsScrollView: some View {
+        ScrollView {
+            remoteModelsContent
+                .padding(.horizontal, 24)
+                .padding(.top, 18)
+                .padding(.bottom, 28)
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var modelFilterPicker: some View {
-        HStack(spacing: 12) {
-            ForEach(ModelFilter.allCases, id: \.self) { filter in
-                Button(action: {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                        selectedFilter = filter
-                    }
-                    activePanel = nil
-                }) {
-                    Text(filter.title)
-                        .font(.system(size: 14, weight: selectedFilter == filter ? .semibold : .medium))
-                        .foregroundColor(selectedFilter == filter ? .primary : .primary.opacity(0.7))
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 8)
-                        .background(
-                            AppMaterialCardBackground(isSelected: selectedFilter == filter, cornerRadius: 22)
-                        )
+        Picker("Model source", selection: $selectedFilter) {
+            ForEach(ModelFilter.allCases) { filter in
+                Text(filter.title).tag(filter)
+            }
+        }
+        .pickerStyle(.segmented)
+        .labelsHidden()
+        .frame(width: 320)
+        .frame(maxWidth: .infinity, alignment: .center)
+        .onChange(of: selectedFilter) { _, _ in
+            activePanel = nil
+        }
+    }
+
+    private var localModelsForm: some View {
+        Form {
+            if SystemArchitecture.isIntelMac {
+                Section {
+                    intelMacWarningBanner
                 }
-                .buttonStyle(PlainButtonStyle())
-            }
-        }
-        .padding(.bottom, 8)
-    }
-
-    private var settingsButton: some View {
-        AppIconButton(
-            systemName: "gearshape.fill",
-            help: "Model Settings"
-        ) {
-            toggleSettingsPanel()
-        }
-    }
-
-    private var localModelsSection: some View {
-        VStack(spacing: 12) {
-            VoiceInkRefineModelCardView(
-                service: voiceInkRefineService,
-                deleteAction: confirmDeleteVoiceInkRefineModel
-            )
-
-            ForEach(appleSpeechModels, id: \.id) { model in
-                localModelCard(model)
             }
 
-            ForEach(downloadableLocalModels, id: \.id) { model in
-                localModelCard(model)
+            Section {
+                VoiceInkRefineModelCardView(
+                    service: voiceInkRefineService,
+                    deleteAction: confirmDeleteVoiceInkRefineModel
+                )
+
+                ForEach(appleSpeechModels, id: \.id) { model in
+                    localModelCard(model)
+                }
+
+                ForEach(downloadableLocalModels, id: \.id) { model in
+                    localModelCard(model)
+                }
+
+                importLocalModelButton
             }
 
-            importLocalModelButton
-
+            Section {
             LocalEnhancementServiceManagementView()
                 .environmentObject(aiService)
+            }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .formStyle(.grouped)
+        .scrollContentBackground(.hidden)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private func localModelCard(_ model: any TranscriptionModel) -> some View {
@@ -290,24 +291,17 @@ struct ModelManagementView: View {
 
     private var importLocalModelButton: some View {
         HStack(spacing: 8) {
-            Button(action: { presentImportPanel() }) {
-                HStack(spacing: 8) {
-                    Image(systemName: "square.and.arrow.down")
-                    Text("Import Local Model…")
-                        .font(.system(size: 12, weight: .semibold))
-                }
-                .frame(maxWidth: .infinity)
-                .padding(16)
-                .background(AppMaterialCardBackground(cornerRadius: 10))
-            }
-            .buttonStyle(.plain)
-
+            Button("Import Local Model…", systemImage: "square.and.arrow.down", action: presentImportPanel)
+                .buttonStyle(.bordered)
             InfoTip(
                 "Add a custom fine-tuned whisper model to use with VoiceInk. Select the downloaded .bin file.",
                 learnMoreURL: "https://tryvoiceink.com/docs/custom-local-whisper-models"
             )
             .help("Read more about custom local models")
+            Spacer()
         }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
     }
 
     private var intelMacWarningBanner: some View {

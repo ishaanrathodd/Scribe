@@ -32,6 +32,8 @@ final class AssistantSession: ObservableObject {
     private(set) var modeEmoji: String?
     private(set) var promptName: String?
     private(set) var systemPrompt: String?
+    private(set) var isWebSearchEnabled = false
+    private(set) var conversationID: UUID?
 
     var isVisible: Bool {
         phase != .inactive
@@ -51,13 +53,16 @@ final class AssistantSession: ObservableObject {
         modelName: String?,
         modeName: String?,
         modeEmoji: String?,
-        promptName: String?
+        promptName: String?,
+        isWebSearchEnabled: Bool
     ) {
+        conversationID = UUID()
         self.provider = provider
         self.modelName = modelName
         self.modeName = modeName
         self.modeEmoji = modeEmoji
         self.promptName = promptName
+        self.isWebSearchEnabled = isWebSearchEnabled
         messages = []
 
         let trimmedTranscript = transcript.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -127,6 +132,7 @@ final class AssistantSession: ObservableObject {
     }
 
     func reset() {
+        conversationID = nil
         phase = .inactive
         messages = []
         provider = nil
@@ -135,6 +141,22 @@ final class AssistantSession: ObservableObject {
         modeEmoji = nil
         promptName = nil
         systemPrompt = nil
+        isWebSearchEnabled = false
+    }
+
+    func restore(_ conversation: AskConversation) {
+        conversationID = conversation.id
+        provider = conversation.providerRawValue.flatMap(AIProvider.init(rawValue:))
+        modelName = conversation.modelName
+        modeName = conversation.modeName
+        modeEmoji = conversation.modeEmoji
+        promptName = conversation.promptName
+        systemPrompt = conversation.systemPrompt
+        isWebSearchEnabled = conversation.isWebSearchEnabled
+        messages = conversation.messages.map {
+            AssistantDisplayMessage(id: $0.id, role: $0.role, content: $0.content, createdAt: $0.createdAt)
+        }
+        phase = messages.isEmpty ? .inactive : .ready
     }
 
     private func appendOrReplace(message: AssistantDisplayMessage) {

@@ -597,6 +597,24 @@ struct ModeConfigFormView: View {
                 applyOutputRules()
             }
 
+            if draft.outputMode == .respond {
+                Toggle(isOn: $draft.isWebSearchEnabled) {
+                    HStack(spacing: 6) {
+                        Text("Enable web search")
+                        InfoTip(
+                            "Lets OpenRouter search the web for current information. Search requests can add provider charges."
+                        )
+                    }
+                }
+                .disabled(configuredSelectedAIProvider != .openRouter)
+
+                if configuredSelectedAIProvider != .openRouter {
+                    Text("Web search is available when this mode uses OpenRouter.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
             if draft.outputMode != .respond {
                 Toggle(isOn: $draft.isDefault) {
                     HStack(spacing: 6) {

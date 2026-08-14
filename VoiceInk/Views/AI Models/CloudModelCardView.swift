@@ -118,9 +118,7 @@ struct CloudModelCardView: View {
 
     private var actionSection: some View {
         HStack(spacing: 8) {
-            if isConfigured {
-                modelStatusPill("Connected", systemImage: "checkmark.circle")
-            } else {
+            if !isConfigured {
                 Button(action: {
                     withAnimation(.interpolatingSpring(stiffness: 170, damping: 20)) {
                         isExpanded.toggle()
@@ -157,7 +155,9 @@ struct CloudModelCardView: View {
                 }
                 .menuStyle(.borderlessButton)
                 .menuIndicator(.hidden)
-                .frame(width: 20, height: 20)
+                .frame(width: 32, height: 32)
+
+                modelStatusPill("Connected", systemImage: "checkmark.circle")
             }
         }
     }

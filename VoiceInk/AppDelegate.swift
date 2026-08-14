@@ -5,7 +5,22 @@ import UniformTypeIdentifiers
 class AppDelegate: NSObject, NSApplicationDelegate {
     weak var menuBarManager: MenuBarManager?
 
+    func applicationWillFinishLaunching(_ notification: Notification) {
+        // The system source-list renders unselected symbols in the current
+        // activation appearance. If a Dock-launched app is activated only
+        // after SwiftUI has made its first window, those symbols redraw from
+        // inactive gray to active blue while the selected symbol stays white.
+        // Make the normal user-facing app active before the scene is built so
+        // the native sidebar has its final appearance from its first frame.
+        NSApplication.shared.activate(ignoringOtherApps: true)
+    }
+
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // VoiceInk now always starts as a normal Dock app. Re-applying its
+        // already-correct activation policy here causes a second launch-time
+        // source-list redraw, so this is only meaningful for the legacy
+        // menu-bar-only presentation mode.
+        guard menuBarManager?.isMenuBarOnly == true else { return }
         menuBarManager?.applyActivationPolicy()
     }
 

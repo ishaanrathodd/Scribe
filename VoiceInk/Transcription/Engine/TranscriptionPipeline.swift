@@ -289,7 +289,16 @@ class TranscriptionPipeline {
             )
         )
 
-        saveTranscriptionAndPostCompletion()
+        let finalOutput = outputForDelivery ?? outputConfiguration()
+        if finalOutput.outputMode == .respond {
+            // Ask Mode owns its conversation history. The temporary recording
+            // remains available for the response pipeline but is removed before
+            // it can appear in ordinary transcription history.
+            modelContext.delete(transcription)
+            try? modelContext.save()
+        } else {
+            saveTranscriptionAndPostCompletion()
+        }
     }
 
     private func metadata(for mode: ModeConfig?) -> (name: String?, emoji: String?) {

@@ -60,7 +60,7 @@ struct DashboardProductivitySummaryStrip: View {
             )
             metricCell(
                 title: "Words dictated",
-                value: summary.hasData ? Formatters.formattedCompactNumber(summary.wordCount) : "--",
+                value: summary.hasData ? Formatters.formattedNumber(summary.wordCount) : "--",
                 systemName: "list.bullet.rectangle"
             )
             metricCell(

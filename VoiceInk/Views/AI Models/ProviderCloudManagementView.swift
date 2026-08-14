@@ -55,22 +55,28 @@ struct CloudProviderManagementView: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            ProviderSectionHeader(
-                title: "Cloud Providers",
-                subtitle: "Connect providers here, then choose models inside Modes."
-            )
-
-            ForEach(providerDescriptors) { descriptor in
-                ProviderListRow(
-                    descriptor: descriptor,
-                    isSelected: selectedProviderID == descriptor.id,
-                    onSelect: {
-                        onSelectProvider(descriptor)
-                    }
+        Form {
+            Section {
+                ForEach(providerDescriptors) { descriptor in
+                    ProviderListRow(
+                        descriptor: descriptor,
+                        isSelected: selectedProviderID == descriptor.id,
+                        onSelect: {
+                            onSelectProvider(descriptor)
+                        }
+                    )
+                }
+            } header: {
+                ProviderSectionHeader(
+                    title: "Cloud Providers",
+                    subtitle: "Connect providers here, then choose models inside Modes."
                 )
+                .textCase(nil)
             }
         }
+        .formStyle(.grouped)
+        .scrollContentBackground(.hidden)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private func matchingCloudProvider(for aiProvider: AIProvider) -> (any CloudProvider)? {
@@ -259,10 +265,10 @@ private struct ProviderListRow: View {
                     .foregroundStyle(.secondary)
             }
             .contentShape(Rectangle())
-            .padding(14)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
         }
         .buttonStyle(.plain)
-        .background(ProviderSurface(isActive: isSelected, cornerRadius: 10))
     }
 
 }

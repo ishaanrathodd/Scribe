@@ -83,6 +83,7 @@ struct ModeConfig: Codable, Identifiable, Equatable {
     var selectedAIProvider: String?
     var selectedAIModel: String?
     var outputMode: ModeOutputMode = .paste
+    var isWebSearchEnabled: Bool = false
     var autoSendKey: AutoSendKey = .none
     var customCommand: ModeCustomCommand?
     var isEnabled: Bool = true
@@ -92,7 +93,7 @@ struct ModeConfig: Codable, Identifiable, Equatable {
         case id, name, icon, appConfigs, urlConfigs, triggerGroups, triggerWords, isAIEnhancementEnabled,
             selectedPrompt, isRealtimeTranscriptionEnabled, selectedLanguage, isTextFormattingEnabled,
             useClipboardContext, useSelectedTextContext, useScreenCapture, selectedAIProvider, selectedAIModel,
-            outputMode, isAutoSendEnabled, autoSendKey, customCommand, isEnabled, isDefault
+            outputMode, isWebSearchEnabled, isAutoSendEnabled, autoSendKey, customCommand, isEnabled, isDefault
         case legacyEmoji = "emoji"
         case selectedWhisperModel
         case selectedTranscriptionModelName
@@ -106,7 +107,8 @@ struct ModeConfig: Codable, Identifiable, Equatable {
         selectedLanguage: String? = nil, useClipboardContext: Bool = false, useSelectedTextContext: Bool = true,
         useScreenCapture: Bool = false,
         isTextFormattingEnabled: Bool = false, selectedAIProvider: String? = nil, selectedAIModel: String? = nil,
-        outputMode: ModeOutputMode = .paste, autoSendKey: AutoSendKey = .none, customCommand: ModeCustomCommand? = nil,
+        outputMode: ModeOutputMode = .paste, isWebSearchEnabled: Bool = false,
+        autoSendKey: AutoSendKey = .none, customCommand: ModeCustomCommand? = nil,
         isEnabled: Bool = true, isDefault: Bool = false
     ) {
         self.id = id
@@ -123,6 +125,7 @@ struct ModeConfig: Codable, Identifiable, Equatable {
         self.useScreenCapture = useScreenCapture
         self.autoSendKey = autoSendKey
         self.outputMode = outputMode
+        self.isWebSearchEnabled = isWebSearchEnabled
         self.customCommand = customCommand
         self.selectedAIProvider = selectedAIProvider
         self.selectedAIModel = selectedAIModel
@@ -185,6 +188,7 @@ struct ModeConfig: Codable, Identifiable, Equatable {
         selectedAIProvider = try container.decodeIfPresent(String.self, forKey: .selectedAIProvider)
         selectedAIModel = try container.decodeIfPresent(String.self, forKey: .selectedAIModel)
         outputMode = try container.decodeIfPresent(ModeOutputMode.self, forKey: .outputMode) ?? .paste
+        isWebSearchEnabled = try container.decodeIfPresent(Bool.self, forKey: .isWebSearchEnabled) ?? false
         customCommand = try container.decodeIfPresent(ModeCustomCommand.self, forKey: .customCommand)
         // Migrate from old isAutoSendEnabled bool to new autoSendKey enum
         if let rawValue = try container.decodeIfPresent(String.self, forKey: .autoSendKey),
@@ -228,6 +232,7 @@ struct ModeConfig: Codable, Identifiable, Equatable {
         try container.encodeIfPresent(selectedAIProvider, forKey: .selectedAIProvider)
         try container.encodeIfPresent(selectedAIModel, forKey: .selectedAIModel)
         try container.encode(outputMode, forKey: .outputMode)
+        try container.encode(isWebSearchEnabled, forKey: .isWebSearchEnabled)
         try container.encode(autoSendKey, forKey: .autoSendKey)
         try container.encodeIfPresent(customCommand, forKey: .customCommand)
         try container.encodeIfPresent(selectedTranscriptionModelName, forKey: .selectedTranscriptionModelName)

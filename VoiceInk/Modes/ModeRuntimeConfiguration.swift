@@ -32,6 +32,7 @@ struct EnhancementRuntimeConfiguration {
     let prompt: CustomPrompt?
     let provider: AIProvider?
     let modelName: String?
+    let isWebSearchEnabled: Bool
     let useClipboardContext: Bool
     let useSelectedTextContext: Bool
     let useScreenCaptureContext: Bool
@@ -43,6 +44,7 @@ struct EnhancementRuntimeConfiguration {
             prompt: prompt,
             provider: provider,
             modelName: modelName,
+            isWebSearchEnabled: isWebSearchEnabled,
             useClipboardContext: useClipboardContext,
             useSelectedTextContext: useSelectedTextContext,
             useScreenCaptureContext: useScreenCaptureContext
@@ -171,6 +173,7 @@ enum ModeRuntimeResolver {
             prompt: prompt,
             provider: provider,
             modelName: modelName,
+            isWebSearchEnabled: provider == .openRouter && (mode?.isWebSearchEnabled ?? false),
             useClipboardContext: provider == .voiceInkRefine ? false : mode?.useClipboardContext ?? false,
             useSelectedTextContext: provider == .voiceInkRefine ? false : mode?.useSelectedTextContext ?? true,
             useScreenCaptureContext: provider == .voiceInkRefine ? false : mode?.useScreenCapture ?? false

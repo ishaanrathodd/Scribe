@@ -12,68 +12,64 @@ struct CustomProviderManagementView: View {
     let onDeleteEnhancementModel: (CustomAIProviderConfig) -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            customTranscriptionSection
-            customEnhancementSection
-        }
-    }
-
-    private var customTranscriptionSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            sectionHeader(
-                title: "Custom Transcription Models",
-                subtitle: "Supports any provider that uses the same API format as OpenAI transcription.",
-                addHelp: "Add transcription model",
-                onAdd: onAddTranscriptionModel
-            )
-
-            if customModelManager.customModels.isEmpty {
-                CustomProviderEmptyState(
-                    systemImage: "waveform",
-                    title: "No Custom Transcription Models"
-                )
-            } else {
-                ForEach(customModelManager.customModels) { model in
-                    CustomModelCardView(
-                        model: model,
-                        deleteAction: {
-                            onDeleteTranscriptionModel(model)
-                        },
-                        editAction: onEditTranscriptionModel
+        Form {
+            Section {
+                if customModelManager.customModels.isEmpty {
+                    CustomProviderEmptyState(
+                        systemImage: "waveform",
+                        title: "No Custom Transcription Models"
                     )
+                } else {
+                    ForEach(customModelManager.customModels) { model in
+                        CustomModelCardView(
+                            model: model,
+                            deleteAction: {
+                                onDeleteTranscriptionModel(model)
+                            },
+                            editAction: onEditTranscriptionModel
+                        )
+                    }
                 }
+            } header: {
+                sectionHeader(
+                    title: "Custom Transcription Models",
+                    subtitle: "Supports any provider that uses the same API format as OpenAI transcription.",
+                    addHelp: "Add transcription model",
+                    onAdd: onAddTranscriptionModel
+                )
+            }
+
+            Section {
+                if customAIProviderManager.providers.isEmpty {
+                    CustomProviderEmptyState(
+                        systemImage: "sparkles",
+                        title: "No Custom Enhancement Models"
+                    )
+                } else {
+                    ForEach(customAIProviderManager.providers) { provider in
+                        CustomEnhancementModelRow(
+                            provider: provider,
+                            onEdit: {
+                                onEditEnhancementModel(provider)
+                            },
+                            onDelete: {
+                                onDeleteEnhancementModel(provider)
+                            }
+                        )
+                    }
+                }
+            } header: {
+                sectionHeader(
+                    title: "Custom Enhancement Models",
+                    subtitle: "Supports any provider that uses the same API format as OpenAI chat completion.",
+                    addHelp: "Add enhancement model",
+                    onAdd: onAddEnhancementModel
+                )
             }
         }
-    }
-
-    private var customEnhancementSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            sectionHeader(
-                title: "Custom Enhancement Models",
-                subtitle: "Supports any provider that uses the same API format as OpenAI chat completion.",
-                addHelp: "Add enhancement model",
-                onAdd: onAddEnhancementModel
-            )
-
-            if customAIProviderManager.providers.isEmpty {
-                CustomProviderEmptyState(
-                    systemImage: "sparkles",
-                    title: "No Custom Enhancement Models"
-                )
-            } else {
-                ForEach(customAIProviderManager.providers) { provider in
-                    CustomEnhancementModelRow(
-                        provider: provider,
-                        onEdit: {
-                            onEditEnhancementModel(provider)
-                        },
-                        onDelete: {
-                            onDeleteEnhancementModel(provider)
-                        }
-                    )
-                }
-            }
-        }
+        .formStyle(.grouped)
+        .scrollContentBackground(.hidden)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private func sectionHeader(
@@ -109,9 +105,8 @@ private struct CustomProviderEmptyState: View {
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 22)
-        .padding(.horizontal, 20)
-        .background(ProviderSurface(cornerRadius: 10))
+        .padding(.vertical, 18)
+        .padding(.horizontal, 12)
     }
 }
 
@@ -126,14 +121,6 @@ private struct CustomEnhancementModelRow: View {
                 .font(.system(size: 15, weight: .semibold))
                 .foregroundStyle(.secondary)
                 .frame(width: 28, height: 28)
-                .background(
-                    RoundedRectangle(cornerRadius: 7)
-                        .fill(AppTheme.Surface.control)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 7)
-                                .stroke(AppTheme.Border.control.opacity(0.45), lineWidth: 1)
-                        )
-                )
 
             VStack(alignment: .leading, spacing: 5) {
                 Text(provider.name)
@@ -165,8 +152,8 @@ private struct CustomEnhancementModelRow: View {
             .menuIndicator(.hidden)
             .frame(width: 22, height: 22)
         }
-        .padding(14)
-        .background(ProviderSurface(cornerRadius: 10))
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
     }
 }
 

@@ -33,6 +33,10 @@ class AIEnhancementService: ObservableObject {
         let stored = UserDefaults.standard.integer(forKey: "EnhancementTimeoutSeconds")
         return stored > 0 ? TimeInterval(stored) : 7
     }
+    private var assistantTimeout: TimeInterval {
+        let stored = UserDefaults.standard.integer(forKey: "AssistantTimeoutSeconds")
+        return stored > 0 ? TimeInterval(stored) : 75
+    }
     private let rateLimitInterval: TimeInterval = 1.0
     private var lastRequestTime: Date?
     private let modelContext: ModelContext
@@ -179,7 +183,39 @@ class AIEnhancementService: ObservableObject {
                 ""
             }
 
-        return [prompt.finalPromptText, customVocabularySection, contextSection]
+        let isAssistantMode = configuration.mode?.outputMode == .respond
+        let baseInstructions: String
+        if isAssistantMode {
+            let webSearchInstruction: String
+            if configuration.isWebSearchEnabled && configuration.provider == .openRouter {
+                webSearchInstruction = """
+                    - You have access to live web search. Use it whenever an answer depends on current, local, or otherwise verifiable information, then include the most useful source links in the answer.
+                    """
+            } else {
+                webSearchInstruction = """
+                    - Do not claim to have searched the web, browsed, or verified live information. For questions that depend on current information, say that live verification is unavailable rather than guessing or presenting stale information as current.
+                    """
+            }
+
+            baseInstructions = """
+                # Role
+                You are a conversational assistant. The user's messages are questions, requests, or follow-up clarifications that require an answer.
+
+                # Rules
+                - Answer the user's message; never merely transcribe, polish, rephrase, or quote it back unless they explicitly ask you to do that.
+                - Treat short messages such as "yes", "no", or a place name as follow-ups to the preceding conversation.
+                - Be direct and useful. Do not restate the question before answering.
+                \(webSearchInstruction)
+                - Follow the mode-specific instructions below only when they do not conflict with answering the user.
+
+                # Mode-Specific Instructions
+                \(prompt.promptText)
+                """
+        } else {
+            baseInstructions = prompt.finalPromptText
+        }
+
+        return [baseInstructions, customVocabularySection, contextSection]
             .filter { !$0.isEmpty }
             .joined(separator: "\n\n")
     }
@@ -227,7 +263,13 @@ class AIEnhancementService: ObservableObject {
         }
 
         let modelName = configuration.modelName ?? provider.defaultModel
+        let isAssistantMode = configuration.mode?.outputMode == .respond
         let formattedText = "\n<TRANSCRIPT>\n\(text)\n</TRANSCRIPT>"
+        let requestText = isAssistantMode ? text : formattedText
+        let requestTimeout =
+            isAssistantMode
+            ? (configuration.isWebSearchEnabled ? max(assistantTimeout, 90) : assistantTimeout)
+            : baseTimeout
         let systemMessage = await getSystemMessage(
             prompt: prompt,
             configuration: configuration,
@@ -237,15 +279,15 @@ class AIEnhancementService: ObservableObject {
         if provider == .ollama {
             do {
                 let result = try await aiService.enhanceWithOllama(
-                    text: formattedText,
+                    text: requestText,
                     systemPrompt: systemMessage,
                     model: modelName,
-                    timeout: baseTimeout
+                    timeout: requestTimeout
                 )
                 return (
                     AIEnhancementOutputFilter.filter(result),
                     systemMessage,
-                    formattedText
+                    requestText
                 )
             } catch {
                 if let localError = error as? LocalAIError {
@@ -265,11 +307,11 @@ class AIEnhancementService: ObservableObject {
         if provider == .localCLI {
             do {
                 let result = try await aiService.enhanceWithLocalCLI(
-                    systemPrompt: systemMessage, userPrompt: formattedText)
+                    systemPrompt: systemMessage, userPrompt: requestText)
                 return (
                     AIEnhancementOutputFilter.filter(result),
                     systemMessage,
-                    formattedText
+                    requestText
                 )
             } catch {
                 if let localError = error as? LocalCLIError {
@@ -290,19 +332,19 @@ class AIEnhancementService: ObservableObject {
                 result = try await GeminiLLMClient.chatCompletion(
                     apiKey: try apiKey(for: provider, modelName: modelName),
                     model: modelName,
-                    messages: [.user(formattedText)],
+                    messages: [.user(requestText)],
                     systemPrompt: systemMessage,
                     thinkingLevel: ReasoningConfig.geminiThinkingLevel(for: modelName),
                     store: false,
-                    timeout: baseTimeout
+                    timeout: requestTimeout
                 )
             case .anthropic:
                 result = try await AnthropicLLMClient.chatCompletion(
                     apiKey: try apiKey(for: provider, modelName: modelName),
                     model: modelName,
-                    messages: [.user(formattedText)],
+                    messages: [.user(requestText)],
                     systemPrompt: systemMessage,
-                    timeout: baseTimeout
+                    timeout: requestTimeout
                 )
             case .custom:
                 guard
@@ -315,10 +357,10 @@ class AIEnhancementService: ObservableObject {
                     baseURL: baseURL,
                     apiKey: customConfiguration.apiKey,
                     model: customConfiguration.modelName,
-                    messages: [.user(formattedText)],
+                    messages: [.user(requestText)],
                     systemPrompt: systemMessage,
                     temperature: 0.3,
-                    timeout: baseTimeout
+                    timeout: requestTimeout
                 )
             default:
                 guard let baseURL = URL(string: provider.baseURL) else {
@@ -332,18 +374,19 @@ class AIEnhancementService: ObservableObject {
                 )
                 let extraBody = ReasoningConfig.getExtraBodyParameters(
                     for: provider,
-                    modelName: modelName
+                    modelName: modelName,
+                    enablingWebSearch: configuration.isWebSearchEnabled
                 )
                 result = try await OpenAILLMClient.chatCompletion(
                     baseURL: baseURL,
                     apiKey: try apiKey(for: provider, modelName: modelName),
                     model: modelName,
-                    messages: [.user(formattedText)],
+                    messages: [.user(requestText)],
                     systemPrompt: systemMessage,
                     temperature: temperature,
                     reasoningEffort: reasoningEffort,
                     extraBody: extraBody,
-                    timeout: baseTimeout
+                    timeout: requestTimeout
                 )
             }
             return (
@@ -351,7 +394,7 @@ class AIEnhancementService: ObservableObject {
                     result.trimmingCharacters(in: .whitespacesAndNewlines)
                 ),
                 systemMessage,
-                formattedText
+                requestText
             )
         } catch let error as LLMKitError {
             throw mapLLMKitError(error)

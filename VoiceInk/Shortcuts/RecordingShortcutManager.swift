@@ -122,6 +122,11 @@ class RecordingShortcutManager: ObservableObject {
             recordingState: {
                 engine.recordingState
             },
+            canStartAssistantFollowUp: {
+                recorderUIManager.isRecorderPanelVisible
+                    && engine.recordingState == .idle
+                    && engine.assistantSession.canSendFollowUp
+            },
             toggleRecorderPanel: { modeId in
                 await recorderUIManager.toggleRecorderPanel(modeId: modeId)
             },
@@ -345,6 +350,7 @@ final class RecordingShortcutModeHandler {
     private let canHandleShortcutAction: @MainActor () -> Bool
     private let isRecorderVisible: @MainActor () -> Bool
     private let recordingState: @MainActor () -> RecordingState
+    private let canStartAssistantFollowUp: @MainActor () -> Bool
     private let toggleRecorderPanel: @MainActor (UUID?) async -> Void
     private let cancelRecording: @MainActor () async -> Void
 
@@ -363,12 +369,14 @@ final class RecordingShortcutModeHandler {
         canHandleShortcutAction: @escaping @MainActor () -> Bool,
         isRecorderVisible: @escaping @MainActor () -> Bool,
         recordingState: @escaping @MainActor () -> RecordingState,
+        canStartAssistantFollowUp: @escaping @MainActor () -> Bool,
         toggleRecorderPanel: @escaping @MainActor (UUID?) async -> Void,
         cancelRecording: @escaping @MainActor () async -> Void
     ) {
         self.canHandleShortcutAction = canHandleShortcutAction
         self.isRecorderVisible = isRecorderVisible
         self.recordingState = recordingState
+        self.canStartAssistantFollowUp = canStartAssistantFollowUp
         self.toggleRecorderPanel = toggleRecorderPanel
         self.cancelRecording = cancelRecording
     }
@@ -407,6 +415,8 @@ final class RecordingShortcutModeHandler {
         lastShortcutPressTime = Date()
         shortcutPressStartTime = eventTime
 
+        let shouldStartRecording = !isRecorderVisible() || canStartAssistantFollowUp()
+
         switch mode {
         case .toggle, .hybrid:
             if isHandsFreeRecording {
@@ -416,13 +426,13 @@ final class RecordingShortcutModeHandler {
                 return
             }
 
-            if !isRecorderVisible() {
+            if shouldStartRecording {
                 guard canHandleShortcutAction() else { return }
                 await toggleRecorderPanel(modeId)
             }
 
         case .pushToTalk:
-            if !isRecorderVisible() {
+            if shouldStartRecording {
                 guard canHandleShortcutAction() else { return }
                 await toggleRecorderPanel(modeId)
             }

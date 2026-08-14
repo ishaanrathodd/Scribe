@@ -13,8 +13,10 @@ class MiniWindowManager {
         recorder: Recorder,
         assistantSession: AssistantSession,
         onRecordButtonTapped: @escaping () -> Void,
+        onCancelTapped: @escaping () -> Void,
         onCloseTapped: @escaping () -> Void,
-        onAssistantFollowUp: @escaping (String) -> Void
+        onAssistantFollowUp: @escaping (String) -> Void,
+        onOpenHistory: @escaping () -> Void
     ) {
         self.makeView = {
             AnyView(
@@ -23,8 +25,10 @@ class MiniWindowManager {
                     recorder: recorder,
                     assistantSession: assistantSession,
                     onRecordButtonTapped: onRecordButtonTapped,
+                    onCancelTapped: onCancelTapped,
                     onCloseTapped: onCloseTapped,
-                    onAssistantFollowUp: onAssistantFollowUp
+                    onAssistantFollowUp: onAssistantFollowUp,
+                    onOpenHistory: onOpenHistory
                 )
             )
         }

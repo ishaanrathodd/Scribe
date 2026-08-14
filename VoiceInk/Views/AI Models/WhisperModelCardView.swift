@@ -30,8 +30,8 @@ struct WhisperModelCardView: View {
             // Action Controls
             actionSection
         }
-        .padding(16)
-        .background(AppMaterialCardBackground())
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
     }
 
     private var headerSection: some View {
@@ -106,9 +106,7 @@ struct WhisperModelCardView: View {
 
     private var actionSection: some View {
         HStack(spacing: 8) {
-            if isDownloaded {
-                modelStatusPill("Downloaded", systemImage: "checkmark.circle")
-            } else {
+            if !isDownloaded {
                 Button(action: downloadAction) {
                     HStack(spacing: 4) {
                         Text(LocalizedStringKey(isDownloading ? "Downloading..." : "Download"))
@@ -148,7 +146,9 @@ struct WhisperModelCardView: View {
                 }
                 .menuStyle(.borderlessButton)
                 .menuIndicator(.hidden)
-                .frame(width: 20, height: 20)
+                .frame(width: 32, height: 32)
+
+                modelStatusPill("Downloaded", systemImage: "checkmark.circle")
             }
         }
     }
@@ -183,10 +183,6 @@ struct ImportedWhisperModelCardView: View {
 
             HStack(spacing: 8) {
                 if isDownloaded {
-                    modelStatusPill("Imported", systemImage: "checkmark.circle")
-                }
-
-                if isDownloaded {
                     Menu {
                         Button(action: deleteAction) {
                             Label("Delete Model", systemImage: "trash")
@@ -204,12 +200,14 @@ struct ImportedWhisperModelCardView: View {
                     }
                     .menuStyle(.borderlessButton)
                     .menuIndicator(.hidden)
-                    .frame(width: 20, height: 20)
+                    .frame(width: 32, height: 32)
+
+                    modelStatusPill("Imported", systemImage: "checkmark.circle")
                 }
             }
         }
-        .padding(16)
-        .background(AppMaterialCardBackground())
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
     }
 }
 
@@ -244,11 +242,14 @@ func performanceColor(value: Double) -> Color {
 }
 
 func modelStatusPill(_ text: LocalizedStringKey, systemImage: String) -> some View {
-    Label(text, systemImage: systemImage)
-        .font(.system(size: 11, weight: .medium))
+    HStack(spacing: 4) {
+        Text(text)
+        Image(systemName: systemImage)
+    }
+        .font(.system(size: 12, weight: .medium))
         .foregroundColor(Color(.secondaryLabelColor))
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
         .background(AppTheme.Surface.card)
         .clipShape(Capsule())
 }

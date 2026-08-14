@@ -54,9 +54,10 @@ struct ProviderBrandIcon: View {
 struct ProviderSectionHeader: View {
     let title: LocalizedStringKey
     let subtitle: LocalizedStringKey
+    var alignment: HorizontalAlignment = .leading
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 3) {
+        VStack(alignment: alignment, spacing: 3) {
             Text(title)
                 .font(.system(size: 15, weight: .semibold))
             Text(subtitle)
@@ -127,13 +128,13 @@ struct ProviderStatusBadge: View {
     let color: Color
 
     var body: some View {
-        HStack(spacing: 5) {
+        HStack(spacing: 6) {
             Circle()
                 .fill(color)
-                .frame(width: 6, height: 6)
+                .frame(width: 9, height: 9)
 
             Text(title)
-                .font(.caption)
+                .font(.system(size: 13, weight: .medium))
                 .foregroundStyle(.secondary)
         }
     }

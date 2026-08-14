@@ -56,8 +56,8 @@ struct TranscribeCppModelCardView: View {
 
             actionSection
         }
-        .padding(16)
-        .background(AppMaterialCardBackground())
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
     }
 
     @ViewBuilder
@@ -94,8 +94,6 @@ struct TranscribeCppModelCardView: View {
     private var actionSection: some View {
         HStack(spacing: 8) {
             if isDownloaded && !isDownloading {
-                modelStatusPill("Downloaded", systemImage: "checkmark.circle")
-
                 Menu {
                     Button(role: .destructive) {
                         modelManager.deleteModel(model)
@@ -114,7 +112,9 @@ struct TranscribeCppModelCardView: View {
                 }
                 .menuStyle(.borderlessButton)
                 .menuIndicator(.hidden)
-                .frame(width: 20, height: 20)
+                .frame(width: 32, height: 32)
+
+                modelStatusPill("Downloaded", systemImage: "checkmark.circle")
             } else {
                 Button {
                     Task { await modelManager.downloadModel(model) }

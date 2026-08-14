@@ -9,11 +9,6 @@ final class RecorderPanelShortcutManager: ObservableObject {
     private var shortcutChangeObserver: NSObjectProtocol?
     private let visibleRecorderMonitor = ShortcutMonitor()
 
-    // Double-tap Escape handling
-    private var firstEscapePressTime: Date? = nil
-    private let escapeDoublePressThreshold: TimeInterval = 1.5
-    private var escapeTimeoutTask: Task<Void, Never>?
-
     init(recorderUIManager: RecorderUIManager) {
         self.recorderUIManager = recorderUIManager
         setupShortcutChangeObserver()
@@ -46,7 +41,6 @@ final class RecorderPanelShortcutManager: ObservableObject {
                     refreshVisibleShortcuts()
                 } else {
                     visibleRecorderMonitor.stop()
-                    resetEscapeState()
                 }
             }
         }
@@ -56,16 +50,9 @@ final class RecorderPanelShortcutManager: ObservableObject {
         !ModeManager.shared.enabledConfigurations.isEmpty
     }
 
-    private func resetEscapeState() {
-        firstEscapePressTime = nil
-        escapeTimeoutTask?.cancel()
-        escapeTimeoutTask = nil
-    }
-
     private func refreshVisibleShortcuts() {
         guard recorderUIManager.isRecorderPanelVisible else {
             visibleRecorderMonitor.stop()
-            resetEscapeState()
             return
         }
 
@@ -113,28 +100,7 @@ final class RecorderPanelShortcutManager: ObservableObject {
 
     private func handleEscapeShortcut() async {
         guard ShortcutStore.shortcut(for: .cancelRecorder) == nil else { return }
-
-        let now = Date()
-        if let firstTime = firstEscapePressTime,
-            now.timeIntervalSince(firstTime) <= escapeDoublePressThreshold
-        {
-            resetEscapeState()
-            await recorderUIManager.cancelRecording()
-            return
-        }
-
-        firstEscapePressTime = now
-        NotificationManager.shared.showNotification(
-            title: String(localized: "Press Esc again to cancel"),
-            type: .info,
-            duration: escapeDoublePressThreshold
-        )
-        escapeTimeoutTask = Task { [weak self] in
-            try? await Task.sleep(nanoseconds: UInt64((self?.escapeDoublePressThreshold ?? 1.5) * 1_000_000_000))
-            await MainActor.run {
-                self?.firstEscapePressTime = nil
-            }
-        }
+        await recorderUIManager.cancelRecording()
     }
 
     private func handleModeSelectionShortcut(index: Int) {
@@ -157,7 +123,6 @@ final class RecorderPanelShortcutManager: ObservableObject {
         visibilityTask?.cancel()
         MainActor.assumeIsolated {
             visibleRecorderMonitor.stop()
-            resetEscapeState()
         }
     }
 

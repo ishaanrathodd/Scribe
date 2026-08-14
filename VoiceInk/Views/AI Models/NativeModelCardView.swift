@@ -18,8 +18,8 @@ struct NativeAppleModelCardView: View {
             // Action Controls
             actionSection
         }
-        .padding(16)
-        .background(AppMaterialCardBackground())
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
     }
 
     private var headerSection: some View {

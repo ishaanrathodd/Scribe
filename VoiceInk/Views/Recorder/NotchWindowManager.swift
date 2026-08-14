@@ -14,7 +14,8 @@ class NotchWindowManager {
         assistantSession: AssistantSession,
         onRecordButtonTapped: @escaping () -> Void,
         onCloseTapped: @escaping () -> Void,
-        onAssistantFollowUp: @escaping (String) -> Void
+        onAssistantFollowUp: @escaping (String) -> Void,
+        onOpenHistory: @escaping () -> Void
     ) {
         self.makeView = {
             AnyView(
@@ -24,7 +25,8 @@ class NotchWindowManager {
                     assistantSession: assistantSession,
                     onRecordButtonTapped: onRecordButtonTapped,
                     onCloseTapped: onCloseTapped,
-                    onAssistantFollowUp: onAssistantFollowUp
+                    onAssistantFollowUp: onAssistantFollowUp,
+                    onOpenHistory: onOpenHistory
                 )
             )
         }

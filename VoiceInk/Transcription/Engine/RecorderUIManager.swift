@@ -99,6 +99,10 @@ class RecorderUIManager: ObservableObject, RecorderPanelPresenting {
                         Task { @MainActor in
                             await engine?.sendAssistantFollowUp(text)
                         }
+                    },
+                    onOpenHistory: {
+                        MainWindowNavigation.shared.navigate(to: .askHistory)
+                        WindowManager.shared.showMainWindow()
                     }
                 )
             }
@@ -114,6 +118,11 @@ class RecorderUIManager: ObservableObject, RecorderPanelPresenting {
                             await self?.toggleRecorderPanel()
                         }
                     },
+                    onCancelTapped: { [weak self] in
+                        Task { @MainActor in
+                            await self?.cancelRecording()
+                        }
+                    },
                     onCloseTapped: { [weak self] in
                         Task { @MainActor in
                             await self?.dismissRecorderPanel()
@@ -123,6 +132,10 @@ class RecorderUIManager: ObservableObject, RecorderPanelPresenting {
                         Task { @MainActor in
                             await engine?.sendAssistantFollowUp(text)
                         }
+                    },
+                    onOpenHistory: {
+                        MainWindowNavigation.shared.navigate(to: .askHistory)
+                        WindowManager.shared.showMainWindow()
                     }
                 )
             }
@@ -194,6 +207,11 @@ class RecorderUIManager: ObservableObject, RecorderPanelPresenting {
         hideRecorderPanel()
         isRecorderPanelVisible = false
         engine.assistantSession.reset()
+    }
+
+    func presentAssistantSession() {
+        guard engine?.assistantSession.isVisible == true else { return }
+        isRecorderPanelVisible = true
     }
 
     func resetOnLaunch() async {

@@ -1,18 +1,22 @@
 import OSLog
 import SwiftUI
 
-enum ViewType: String, CaseIterable, Identifiable {
+enum ViewType: String, CaseIterable, Identifiable, Hashable {
     case dashboard = "Dashboard"
     case modes = "Modes"
     case models = "AI Models"
     case transcribeAudio = "Transcribe Audio"
     case history = "History"
+    case askHistory = "Ask History"
     case audio = "Audio"
     case dictionary = "Dictionary"
     case settings = "Settings"
-    case license = "VoiceInk Pro"
 
     var id: String { rawValue }
+
+    var displayTitle: String {
+        self == .transcribeAudio ? "Transcribe" : rawValue
+    }
 }
 
 final class MainWindowNavigation: ObservableObject {
@@ -37,16 +41,17 @@ final class MainWindowNavigation: ObservableObject {
 
 struct ContentView: View {
     private let logger = Logger(subsystem: "com.prakashjoshipax.voiceink", category: "ContentView")
-    private static let detailBackgroundTintOpacity = 0.50
     @EnvironmentObject private var navigation: MainWindowNavigation
 
     var body: some View {
-        HStack(spacing: 0) {
+        NavigationSplitView {
             AppSidebar(selectedView: $navigation.selectedView)
-
+        } detail: {
             detailContent
         }
-        .frame(width: AppWindowLayout.width)
+        .navigationSplitViewStyle(.balanced)
+        .navigationTitle(navigation.selectedView.displayTitle)
+        .frame(minWidth: AppWindowLayout.width)
         .frame(minHeight: AppWindowLayout.minimumHeight)
         .onAppear {
             logger.notice("ContentView appeared")
@@ -66,20 +71,7 @@ struct ContentView: View {
     private var detailContent: some View {
         detailView(for: navigation.selectedView)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(detailBackground)
-    }
-
-    private var detailBackground: some View {
-        ZStack {
-            VisualEffectView(
-                material: .sidebar,
-                blendingMode: .behindWindow
-            )
-
-            AppTheme.Surface.window
-                .opacity(Self.detailBackgroundTintOpacity)
-        }
-        .ignoresSafeArea(.container, edges: .top)
+        .background(Color(nsColor: .windowBackgroundColor))
     }
 
     @ViewBuilder
@@ -93,6 +85,8 @@ struct ContentView: View {
             AudioTranscribeView()
         case .history:
             InlineHistoryView()
+        case .askHistory:
+            AskHistoryView()
         case .audio:
             AudioSetupView()
         case .dictionary:
@@ -101,8 +95,6 @@ struct ContentView: View {
             ModeView()
         case .settings:
             SettingsView()
-        case .license:
-            LicenseManagementView()
         }
     }
 }

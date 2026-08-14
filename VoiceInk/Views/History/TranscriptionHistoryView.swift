@@ -187,23 +187,7 @@ struct TranscriptionHistoryView: View {
 
     private var leftSidebarView: some View {
         VStack(spacing: 0) {
-            HStack {
-                Image(systemName: "magnifyingglass")
-                    .foregroundColor(.secondary)
-                    .font(.system(size: 13))
-                TextField("Search transcriptions", text: $searchText)
-                    .textFieldStyle(PlainTextFieldStyle())
-                    .font(.system(size: 13))
-            }
-            .padding(10)
-            .background(
-                RoundedRectangle(cornerRadius: AppTheme.Radius.card, style: .continuous)
-                    .fill(AppTheme.Surface.subtle)
-                    .overlay {
-                        RoundedRectangle(cornerRadius: AppTheme.Radius.card, style: .continuous)
-                            .strokeBorder(AppTheme.Border.tint, lineWidth: 1)
-                    }
-            )
+            NativeSearchField("Search transcriptions", text: $searchText)
             .padding(12)
 
             Divider()

@@ -73,12 +73,28 @@ struct ReasoningConfig {
     }
 
     // Provider-specific body params for hiding reasoning.
-    static func getExtraBodyParameters(for provider: AIProvider, modelName: String) -> [String: Any]? {
+    static func getExtraBodyParameters(
+        for provider: AIProvider,
+        modelName: String,
+        enablingWebSearch: Bool = false
+    ) -> [String: Any]? {
+        var parameters: [String: Any] = [:]
+
         if provider == .cerebras && modelName == "gpt-oss-120b" {
-            return ["reasoning_format": "hidden"]
+            parameters["reasoning_format"] = "hidden"
         } else if provider == .groq && (modelName == "openai/gpt-oss-120b" || modelName == "openai/gpt-oss-20b") {
-            return ["include_reasoning": false]
+            parameters["include_reasoning"] = false
         }
-        return nil
+
+        // OpenRouter executes this server-side tool and gives the model its results
+        // before returning the final assistant reply.
+        if enablingWebSearch && provider == .openRouter {
+            parameters["tools"] = [[
+                "type": "openrouter:web_search",
+                "parameters": ["max_results": 3],
+            ]]
+        }
+
+        return parameters.isEmpty ? nil : parameters
     }
 }

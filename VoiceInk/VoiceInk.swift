@@ -21,11 +21,8 @@ struct VoiceInkApp: App {
     @StateObject private var mainWindowNavigation = MainWindowNavigation.shared
     @StateObject private var aiService = AIService()
     @StateObject private var enhancementService: AIEnhancementService
-    @StateObject private var licenseViewModel = LicenseViewModel.shared
     @StateObject private var activeWindowService = ActiveWindowService.shared
     @AppStorage("hasCompletedOnboardingV2") private var hasCompletedOnboardingV2 = false
-    @AppStorage("enableAnnouncements") private var enableAnnouncements = true
-    @State private var showMenuBarIcon = true
     @State private var didShowLaunchReminders = false
 
     // Audio cleanup manager for automatic deletion of old audio files
@@ -148,6 +145,9 @@ struct VoiceInkApp: App {
         let recordingShortcutManager = RecordingShortcutManager(engine: engine, recorderUIManager: recorderUIManager)
         _recordingShortcutManager = StateObject(wrappedValue: recordingShortcutManager)
 
+        // VoiceInk is a normal Dock application; it no longer has a status-bar
+        // entry, so never leave it in the old menu-bar-only presentation mode.
+        UserDefaults.standard.set(false, forKey: "IsMenuBarOnly")
         let menuBarManager = MenuBarManager()
         _menuBarManager = StateObject(wrappedValue: menuBarManager)
         menuBarManager.configure(modelContainer: resolvedContainer, engine: engine)
@@ -296,13 +296,7 @@ struct VoiceInkApp: App {
                         .environmentObject(enhancementService)
                         .modelContainer(container)
                         .onAppear {
-                            if enableAnnouncements {
-                                AnnouncementsService.shared.start()
-                            }
-
                             showLaunchRemindersIfNeeded()
-
-                            GitHubStarPromptCoordinator.shared.scheduleIfNeeded(modelContainer: container)
 
                             // Run due audio-only cleanup and schedule future checks when transcript cleanup is not managing retention.
                             if !UserDefaults.standard.bool(forKey: CleanupSettingsKeys.isTranscriptionCleanupEnabled)
@@ -327,18 +321,17 @@ struct VoiceInkApp: App {
                                 appDelegate.pendingOpenFileURL = nil
                             }
                         }
-                        .background(
-                            WindowAccessor { window in
-                                WindowManager.shared.configureWindow(window)
-                            }
-                        )
                         .onDisappear {
-                            AnnouncementsService.shared.stop()
                             whisperModelManager.unloadModel()
 
                             // Stop the automatic audio cleanup process
                             audioCleanupManager.stopAutomaticCleanup()
                         }
+                        .background(
+                            WindowAccessor { window in
+                                WindowManager.shared.configureWindow(window)
+                            }
+                        )
                 } else {
                     OnboardingView(hasCompletedOnboardingV2: $hasCompletedOnboardingV2)
                         .environmentObject(fluidAudioModelManager)
@@ -350,53 +343,17 @@ struct VoiceInkApp: App {
                         .background(
                             WindowAccessor { window in
                                 WindowManager.shared.configureWindow(window)
-                            })
+                            }
+                        )
                 }
             }
-            .confettiCelebrationPresenter()
-            .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
-                licenseViewModel.refreshLicenseState()
-            }
-            .onReceive(NSWorkspace.shared.notificationCenter.publisher(for: NSWorkspace.didWakeNotification)) { _ in
-                licenseViewModel.refreshLicenseState()
-            }
         }
-        .windowStyle(.hiddenTitleBar)
+        .windowStyle(.automatic)
         .defaultSize(width: AppWindowLayout.width, height: AppWindowLayout.minimumHeight)
-        .windowResizability(.contentSize)
+        .windowResizability(.contentMinSize)
         .commands {
             CommandGroup(replacing: .newItem) {}
-
-            CommandGroup(after: .appInfo) {
-                CheckForUpdatesView(updaterViewModel: updaterViewModel)
-            }
         }
-
-        MenuBarExtra(isInserted: $showMenuBarIcon) {
-            MenuBarView()
-                .environmentObject(engine)
-                .environmentObject(whisperModelManager)
-                .environmentObject(fluidAudioModelManager)
-                .environmentObject(transcriptionModelManager)
-                .environmentObject(recorderUIManager)
-                .environmentObject(recordingShortcutManager)
-                .environmentObject(menuBarManager)
-                .environmentObject(mainWindowNavigation)
-                .environmentObject(updaterViewModel)
-                .environmentObject(aiService)
-                .environmentObject(enhancementService)
-        } label: {
-            let image: NSImage = {
-                let ratio = $0.size.height / $0.size.width
-                $0.size.height = 22
-                $0.size.width = 22 / ratio
-                return $0
-            }(NSImage(named: "menuBarIcon")!)
-
-            Image(nsImage: image)
-                .background(MainWindowRequestBridge(menuBarManager: menuBarManager))
-        }
-        .menuBarExtraStyle(.menu)
 
         #if DEBUG
             WindowGroup("Debug") {

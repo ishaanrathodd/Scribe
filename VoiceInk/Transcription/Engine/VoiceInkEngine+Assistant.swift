@@ -2,7 +2,7 @@ import Foundation
 
 @MainActor
 extension VoiceInkEngine {
-    func sendAssistantFollowUp(_ text: String, transcription: Transcription? = nil) async {
+    func sendAssistantFollowUp(_ text: String, transcription _: Transcription? = nil) async {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty,
             let assistantChat,
@@ -12,17 +12,17 @@ extension VoiceInkEngine {
         }
 
         let modelName = assistantSession.modelName
-        let modeName = assistantSession.modeName
-        let modeEmoji = assistantSession.modeEmoji
-        let promptName = assistantSession.promptName
         let systemPrompt = assistantSession.systemPrompt
+        let isWebSearchEnabled = assistantSession.isWebSearchEnabled
         let userMessage = assistantSession.beginFollowUp(trimmed)
+        AskHistoryStore.shared.save(session: assistantSession)
 
         do {
             let reply = try await assistantChat.requestAssistantReply(
                 provider: provider,
                 modelName: modelName,
                 systemPrompt: systemPrompt,
+                enableWebSearch: isWebSearchEnabled,
                 messages: assistantSession.messages
             )
 
@@ -33,36 +33,7 @@ extension VoiceInkEngine {
             }
 
             assistantSession.finishFollowUp(reply.text)
-
-            do {
-                if let transcription {
-                    assistantChat.applyAssistantTurn(
-                        transcription: transcription,
-                        response: reply,
-                        provider: provider,
-                        modelName: modelName,
-                        promptName: promptName
-                    )
-                } else {
-                    try assistantChat.saveTypedAssistantTurn(
-                        input: trimmed,
-                        response: reply,
-                        provider: provider,
-                        modelName: modelName,
-                        promptName: promptName,
-                        modeName: modeName,
-                        modeEmoji: modeEmoji
-                    )
-                }
-            } catch {
-                let errorDescription = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
-                NotificationManager.shared.showNotification(
-                    title: String(
-                        format: String(localized: "Assistant response was not saved: %@"),
-                        String(errorDescription.prefix(80))),
-                    type: .warning
-                )
-            }
+            AskHistoryStore.shared.save(session: assistantSession)
         } catch {
             guard assistantSession.hasMessage(id: userMessage.id),
                 assistantSession.provider == provider
@@ -71,6 +42,7 @@ extension VoiceInkEngine {
             }
             let errorDescription = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
             assistantSession.fail(errorDescription)
+            AskHistoryStore.shared.save(session: assistantSession)
         }
     }
 
@@ -79,5 +51,6 @@ extension VoiceInkEngine {
         systemPrompt: String?
     ) async {
         assistantSession.finishInitialResponse(response, systemPrompt: systemPrompt)
+        AskHistoryStore.shared.save(session: assistantSession)
     }
 }

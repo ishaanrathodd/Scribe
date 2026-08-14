@@ -46,10 +46,12 @@ class WindowManager: NSObject {
     static let shared = WindowManager()
 
     private static let mainWindowIdentifier = NSUserInterfaceItemIdentifier("com.prakashjoshipax.voiceink.mainWindow")
-    private static let mainWindowAutosaveName = NSWindow.FrameAutosaveName("VoiceInkMainWindowFrame")
-
     private weak var mainWindow: NSWindow?
-    private var didApplyInitialPlacement = false
+    // WindowAccessor can be evaluated more than once while SwiftUI settles the
+    // initial scene. Window configuration must stay idempotent: mutating a
+    // SwiftUI-owned titlebar after the source list appears makes AppKit rebuild
+    // the sidebar rows (and briefly redraw their symbols).
+    private weak var configuredWindow: NSWindow?
     private var shouldShowNextConfiguredMainWindow = false
 
     private override init() {
@@ -62,6 +64,14 @@ class WindowManager: NSObject {
     }
 
     func configureWindow(_ window: NSWindow) {
+        // Keep the native sidebar and titlebar stable after their first render.
+        // Window presentation is handled separately, so subsequent SwiftUI
+        // updates do not need to mutate any AppKit window styling.
+        if configuredWindow === window {
+            registerMainWindowIfNeeded(window)
+            return
+        }
+
         if let existingWindow = NSApplication.shared.windows.first(where: {
             $0.identifier == Self.mainWindowIdentifier && $0 != window
         }) {
@@ -75,24 +85,15 @@ class WindowManager: NSObject {
             return
         }
 
-        let requiredStyleMask: NSWindow.StyleMask = [
-            .titled, .closable, .miniaturizable, .resizable, .fullSizeContentView,
-        ]
-        window.styleMask.formUnion(requiredStyleMask)
-        window.titlebarAppearsTransparent = true
-        window.titleVisibility = .hidden
-        window.backgroundColor = .clear
-        window.isReleasedWhenClosed = false
-        window.title = "VoiceInk"
-        window.collectionBehavior = [.fullScreenPrimary]
-        window.level = .normal
-        window.isOpaque = false
-        window.isMovableByWindowBackground = false
-        window.minSize = NSSize(width: AppWindowLayout.width, height: AppWindowLayout.minimumHeight)
-        window.maxSize = NSSize(width: AppWindowLayout.width, height: CGFloat.greatestFiniteMagnitude)
-        window.setFrameAutosaveName(Self.mainWindowAutosaveName)
-        applyInitialPlacementIfNeeded(to: window)
+        // Do not change styleMask, titlebar, title visibility, or background
+        // here. They are all owned by the Window/NavigationSplitView scene.
+        // Altering any of them after its first render is what produces the
+        // two-pass source-list icon flash at launch.
+        // Size, placement, titlebar, background, and level are all specified
+        // by the `Window` scene. Changing them after the scene has rendered
+        // generates another layout/display pass in the sidebar.
         registerMainWindowIfNeeded(window)
+        configuredWindow = window
 
         if shouldShowNextConfiguredMainWindow {
             shouldShowNextConfiguredMainWindow = false
@@ -140,35 +141,6 @@ class WindowManager: NSObject {
         }
     }
 
-    private func applyInitialPlacementIfNeeded(to window: NSWindow) {
-        guard !didApplyInitialPlacement else { return }
-        // Attempt to restore previous frame if one exists; otherwise fall back to a centered placement
-        if window.setFrameUsingName(Self.mainWindowAutosaveName) {
-            enforceMainWindowFrameIfNeeded(on: window, preserveRestoredOrigin: true)
-        } else {
-            enforceMainWindowFrameIfNeeded(on: window, preserveRestoredOrigin: false)
-            window.center()
-        }
-        didApplyInitialPlacement = true
-    }
-
-    private func enforceMainWindowFrameIfNeeded(on window: NSWindow, preserveRestoredOrigin: Bool) {
-        let currentFrame = window.frame
-        guard currentFrame.width != AppWindowLayout.width || currentFrame.height < AppWindowLayout.minimumHeight else {
-            return
-        }
-
-        let height = max(currentFrame.height, AppWindowLayout.minimumHeight)
-        let x = preserveRestoredOrigin ? currentFrame.origin.x : currentFrame.midX - (AppWindowLayout.width / 2)
-        let frame = NSRect(
-            x: x,
-            y: currentFrame.maxY - height,
-            width: AppWindowLayout.width,
-            height: height
-        )
-        window.setFrame(frame, display: true)
-    }
-
     private func resolveMainWindow() -> NSWindow? {
         if let window = mainWindow {
             return window
@@ -204,7 +176,6 @@ extension WindowManager: NSWindowDelegate {
         guard let window = notification.object as? NSWindow else { return }
         if window.identifier == Self.mainWindowIdentifier {
             mainWindow = nil
-            didApplyInitialPlacement = false
         }
     }
 }

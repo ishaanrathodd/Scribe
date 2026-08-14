@@ -55,15 +55,13 @@ struct ModeConfigurationsGrid: View {
     @EnvironmentObject var enhancementService: AIEnhancementService
 
     var body: some View {
-        LazyVStack(spacing: 12) {
-            ForEach($modeManager.configurations) { $config in
-                ConfigurationRow(
-                    config: $config,
-                    isEditing: false,
-                    modeManager: modeManager,
-                    onEditConfig: onEditConfig
-                )
-            }
+        ForEach($modeManager.configurations) { $config in
+            ConfigurationRow(
+                config: $config,
+                isEditing: false,
+                modeManager: modeManager,
+                onEditConfig: onEditConfig
+            )
         }
     }
 }
@@ -200,239 +198,63 @@ struct ConfigurationRow: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            HStack(spacing: 12) {
-                HStack(spacing: 12) {
-                    ZStack {
-                        ModeIconView(icon: config.icon, size: config.icon.kind == .emoji ? 20 : 16)
+        HStack(spacing: 12) {
+            ModeIconView(icon: config.icon, size: config.icon.kind == .emoji ? 20 : 16)
+                .frame(width: 30, height: 30)
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(config.name)
+                    .font(.body.weight(.medium))
+                    .lineLimit(1)
+
+                HStack(spacing: 8) {
+                    if appCount > 0 {
+                        Label(appText, systemImage: "app")
                     }
-                    .frame(width: 40, height: 40)
-                    .background(
-                        AppCardBackground(isSelected: false, cornerRadius: AppTheme.Radius.pill)
-                    )
+                    if websiteCount > 0 {
+                        Label(websiteText, systemImage: "globe")
+                    }
+                    Label(transcriptionModelMetadata.label, systemImage: "waveform")
+                    if let language = selectedLanguage, language != "Default" {
+                        Text(language)
+                    }
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+            }
 
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(config.name)
-                            .font(.system(size: 15, weight: .semibold))
-                            .lineLimit(1)
-                            .truncationMode(.tail)
+            Spacer(minLength: 12)
 
-                        HStack(spacing: 12) {
-                            if appCount > 0 {
-                                HStack(spacing: 4) {
-                                    Image(systemName: "app.fill")
-                                        .font(.system(size: 10))
-                                    Text(appText)
-                                        .font(.caption2)
-                                }
-                            }
-
-                            if websiteCount > 0 {
-                                HStack(spacing: 4) {
-                                    Image(systemName: "globe")
-                                        .font(.system(size: 10))
-                                    Text(websiteText)
-                                        .font(.caption2)
-                                }
+            if config.isDefault {
+                HStack(spacing: 4) {
+                    Text("Default")
+                    Image(systemName: "checkmark.seal")
+                }
+                .font(.system(size: 13, weight: .medium))
+                .foregroundStyle(.secondary)
+            } else {
+                Toggle(
+                    "Enable \(config.name)",
+                    isOn: Binding(
+                        get: { config.isEnabled },
+                        set: { newValue in
+                            if newValue {
+                                modeManager.enableConfiguration(with: config.id)
+                            } else {
+                                modeManager.disableConfiguration(with: config.id)
                             }
                         }
-                        .padding(.top, 2)
-                        .foregroundColor(.secondary)
-                    }
-
-                    Spacer()
-
-                    if config.isDefault {
-                        DefaultModeIndicator()
-                    }
-                }
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    onEditConfig(config)
-                }
-
-                if !config.isDefault {
-                    Toggle(
-                        "",
-                        isOn: Binding(
-                            get: { config.isEnabled },
-                            set: { newValue in
-                                if newValue {
-                                    modeManager.enableConfiguration(with: config.id)
-                                } else {
-                                    modeManager.disableConfiguration(with: config.id)
-                                }
-                            }
-                        )
                     )
-                    .toggleStyle(SwitchToggleStyle(tint: AppTheme.Accent.primary))
-                    .labelsHidden()
-                }
-            }
-            .padding(.vertical, 12)
-            .padding(.horizontal, 14)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(AppMaterialCardBackground.fill)
-
-            Divider()
-
-            HStack(spacing: 8) {
-                let modelMetadata = transcriptionModelMetadata
-                HStack(spacing: 4) {
-                    Image(systemName: "waveform")
-                        .font(.system(size: 10))
-                    Text(modelMetadata.label)
-                        .font(.caption)
-                }
-                .foregroundStyle(modelMetadata.isWarning ? Color.white : Color.primary)
-                .padding(.horizontal, 6)
-                .padding(.vertical, 2)
-                .background(
-                    Capsule()
-                        .fill(
-                            modelMetadata.isWarning
-                                ? Color.red.opacity(0.80) : AppTheme.Surface.control)
                 )
-                .overlay(
-                    Capsule()
-                        .stroke(
-                            modelMetadata.isWarning
-                                ? Color.red.opacity(0.80) : AppTheme.Border.control,
-                            lineWidth: 0.5
-                        )
-                )
-
-                if let language = selectedLanguage, language != "Default" {
-                    HStack(spacing: 4) {
-                        Image(systemName: "globe")
-                            .font(.system(size: 10))
-                        Text(language)
-                            .font(.caption)
-                    }
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(
-                        Capsule()
-                            .fill(AppTheme.Surface.control)
-                    )
-                    .overlay(
-                        Capsule()
-                            .stroke(AppTheme.Border.control, lineWidth: 0.5)
-                    )
-                }
-
-                if config.isAIEnhancementEnabled,
-                    config.selectedAIProvider != AIProvider.localCLI.rawValue,
-                    let modelName = config.selectedAIModel,
-                    !modelName.isEmpty
-                {
-                    HStack(spacing: 4) {
-                        Image(systemName: "cpu")
-                            .font(.system(size: 10))
-                        Text(modelName.count > 20 ? String(modelName.prefix(18)) + "..." : modelName)
-                            .font(.caption)
-                    }
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(
-                        Capsule()
-                            .fill(AppTheme.Surface.control)
-                    )
-                    .overlay(
-                        Capsule()
-                            .stroke(AppTheme.Border.control, lineWidth: 0.5)
-                    )
-                }
-
-                if config.outputMode != .paste {
-                    HStack(spacing: 4) {
-                        Image(systemName: config.outputMode.iconName)
-                            .font(.system(size: 10))
-                        Text(config.outputMode.displayName)
-                            .font(.caption)
-                    }
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(
-                        Capsule()
-                            .fill(AppTheme.Surface.control)
-                    )
-                    .overlay(
-                        Capsule()
-                            .stroke(AppTheme.Border.control, lineWidth: 0.5)
-                    )
-                }
-
-                if config.outputMode == .paste && config.autoSendKey.isEnabled {
-                    HStack(spacing: 4) {
-                        Image(systemName: "keyboard")
-                            .font(.system(size: 10))
-                        Text(config.autoSendKey.displayName)
-                            .font(.caption)
-                    }
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(
-                        Capsule()
-                            .fill(AppTheme.Surface.control)
-                    )
-                    .overlay(
-                        Capsule()
-                            .stroke(AppTheme.Border.control, lineWidth: 0.5)
-                    )
-                }
-                if config.isAIEnhancementEnabled {
-                    HStack(spacing: 4) {
-                        Image(systemName: "sparkles")
-                            .font(.system(size: 10))
-                        Text(
-                            config.selectedAIProvider == AIProvider.voiceInkRefine.rawValue
-                                ? VoiceInkRefineService.providerName
-                                : selectedPrompt?.title ?? "AI"
-                        )
-                            .font(.caption)
-                    }
-                    .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
-                    .background(
-                        Capsule()
-                            .fill(AppTheme.Surface.control)
-                    )
-                    .overlay(
-                        Capsule()
-                            .stroke(AppTheme.Border.control, lineWidth: 0.5)
-                    )
-                }
-
-                Spacer()
-
-                if isHovering {
-                    editModeButton
-                        .transition(.opacity)
-                }
+                .labelsHidden()
             }
-            .contentShape(Rectangle())
-            .onTapGesture {
-                onEditConfig(config)
-            }
-            .padding(.vertical, 6)
-            .padding(.horizontal, 16)
-            .background(AppTheme.Surface.card)
         }
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-        .overlay {
-            RoundedRectangle(cornerRadius: 16)
-                .stroke(
-                    AppMaterialCardBackground.border(for: isEditing),
-                    lineWidth: AppMaterialCardBackground.lineWidth(for: isEditing)
-                )
-        }
+        .contentShape(Rectangle())
+        .onTapGesture { onEditConfig(config) }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
         .opacity(config.isEnabled ? 1.0 : 0.70)
-        .onHover { hovering in
-            withAnimation(.easeInOut(duration: 0.12)) {
-                isHovering = hovering
-            }
-        }
     }
 
 }

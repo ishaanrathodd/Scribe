@@ -57,6 +57,14 @@ class MenuBarManager: ObservableObject {
         let applyPolicy = { [weak self] in
             guard let self else { return }
 
+            // A normal Dock app starts as `.regular`. Calling
+            // setActivationPolicy(.regular) again during launch forces an
+            // unnecessary AppKit activation pass, which redraws the freshly
+            // created source-list symbols. Only change policy when it truly
+            // differs (the legacy menu-bar-only setting).
+            guard NSApplication.shared.activationPolicy() != self.configuredActivationPolicy else {
+                return
+            }
             NSApplication.shared.setActivationPolicy(self.configuredActivationPolicy)
 
             if self.isMenuBarOnly {

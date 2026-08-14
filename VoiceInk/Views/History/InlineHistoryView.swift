@@ -148,34 +148,21 @@ struct InlineHistoryView: View {
 
     private var topBar: some View {
         HStack(spacing: 10) {
-            HStack(spacing: 6) {
-                Image(systemName: "magnifyingglass")
-                    .foregroundColor(.secondary)
-                    .font(.system(size: 12))
-                TextField("Search transcriptions...", text: $searchText)
-                    .textFieldStyle(.plain)
-                    .font(.system(size: 13))
-            }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 6)
-            .background(
-                Capsule()
-                    .fill(AppTheme.Surface.card)
-            )
+            NativeSearchField("Search transcriptions...", text: $searchText)
             .frame(maxWidth: .infinity)
 
             AppIconButton(
                 systemName: "gearshape",
                 help: "History settings",
-                size: 30,
-                iconSize: 13,
+                size: 36,
+                iconSize: 15,
                 cornerRadius: AppTheme.Radius.pill
             ) {
                 openPanel(mode: .historySettings)
             }
         }
         .padding(.horizontal, 24)
-        .padding(.vertical, 10)
+        .padding(.vertical, 6)
     }
 
     private var selectionBar: some View {
