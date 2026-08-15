@@ -11,6 +11,7 @@ class CursorPaster {
     enum PasteResult: Equatable {
         case commandPosted
         case commandNotPosted
+        case copiedToClipboard
 
         var didPostPasteCommand: Bool {
             self == .commandPosted
@@ -45,6 +46,19 @@ class CursorPaster {
 
     @MainActor
     private static func performPasteSession(_ text: String) async -> PasteResult {
+        // Do not fire Cmd-V into an arbitrary focused control. When there is
+        // no editable target, preserve the transcription for a manual paste.
+        guard hasFocusedEditableTextInput() else {
+            let copied = ClipboardManager.copyToClipboard(text)
+            if copied {
+                logger.notice("No focused editable input; copied transcription to clipboard")
+                return .copiedToClipboard
+            }
+
+            logger.error("No focused editable input and failed to copy transcription to clipboard")
+            return .commandNotPosted
+        }
+
         let pasteboard = NSPasteboard.general
         let shouldRestoreClipboard = UserDefaults.standard.bool(forKey: "restoreClipboardAfterPaste")
         let savedContents = shouldRestoreClipboard ? snapshotClipboard(from: pasteboard) : []
@@ -64,13 +78,18 @@ class CursorPaster {
         await wait(prePasteDelay)
 
         let pasteResult = await postPasteCommand()
-        if shouldRestoreClipboard {
+        if shouldRestoreClipboard, pasteResult.didPostPasteCommand {
             scheduleClipboardRestore(
                 savedContents,
                 expectedText: text,
                 sessionID: sessionID,
                 on: pasteboard
             )
+        } else if !pasteResult.didPostPasteCommand {
+            // A simulated paste can fail after the clipboard has been staged
+            // (for example, if accessibility access was revoked). Keep the
+            // text available rather than restoring the old clipboard.
+            _ = ClipboardManager.copyToClipboard(text)
         }
 
         return pasteResult
@@ -137,6 +156,67 @@ class CursorPaster {
             }
             return item
         }
+    }
+
+    @MainActor
+    private static func hasFocusedEditableTextInput() -> Bool {
+        guard AXIsProcessTrusted() else { return false }
+
+        let systemWideElement = AXUIElementCreateSystemWide()
+        var value: CFTypeRef?
+        guard
+            AXUIElementCopyAttributeValue(
+                systemWideElement,
+                kAXFocusedUIElementAttribute as CFString,
+                &value
+            ) == .success,
+            let value,
+            CFGetTypeID(value) == AXUIElementGetTypeID()
+        else {
+            return false
+        }
+
+        let focusedElement = value as! AXUIElement
+
+        var roleValue: CFTypeRef?
+        guard AXUIElementCopyAttributeValue(
+            focusedElement,
+            kAXRoleAttribute as CFString,
+            &roleValue
+        ) == .success,
+            let role = roleValue as? String
+        else {
+            return false
+        }
+
+        let textInputRoles = [
+            kAXTextFieldRole,
+            kAXTextAreaRole,
+            kAXComboBoxRole,
+        ]
+
+        if textInputRoles.contains(role) {
+            return true
+        }
+
+        // Browsers expose rich text editors as AXWebArea. A plain web page
+        // has the same role, so only treat it as a paste target when macOS
+        // explicitly marks that particular web area editable.
+        guard role == "AXWebArea" else { return false }
+
+        var editableValue: CFTypeRef?
+        guard
+            AXUIElementCopyAttributeValue(
+                focusedElement,
+                "AXEditable" as CFString,
+                &editableValue
+            ) == .success,
+            let editable = editableValue as? Bool
+        else {
+            return false
+        }
+
+        return editable
     }
 
     // MARK: - AppleScript paste

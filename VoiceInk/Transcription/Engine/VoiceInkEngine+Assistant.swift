@@ -14,7 +14,33 @@ extension VoiceInkEngine {
         let modelName = assistantSession.modelName
         let systemPrompt = assistantSession.systemPrompt
         let isWebSearchEnabled = assistantSession.isWebSearchEnabled
-        let userMessage = assistantSession.beginFollowUp(trimmed)
+        var textForAssistant = trimmed
+
+        if let preprocessing = assistantSession.turnPreprocessing,
+            let enhancementService
+        {
+            let cleanupConfiguration = preprocessing.runtimeConfiguration(
+                provider: provider,
+                modelName: modelName
+            )
+            if enhancementService.isConfigured(for: cleanupConfiguration) {
+                do {
+                    let cleanupResult = try await enhancementService.enhance(
+                        trimmed,
+                        configuration: cleanupConfiguration,
+                        contextSnapshot: activeRecordingContextStore?.snapshot,
+                        onPartial: nil
+                    )
+                    if !cleanupResult.text.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).isEmpty {
+                        textForAssistant = cleanupResult.text
+                    }
+                } catch {
+                    logger.warning("Ask Mode follow-up preprocessing failed; sending the original text: \(error.localizedDescription, privacy: .public)")
+                }
+            }
+        }
+
+        let userMessage = assistantSession.beginFollowUp(textForAssistant)
         AskHistoryStore.shared.save(session: assistantSession)
 
         do {

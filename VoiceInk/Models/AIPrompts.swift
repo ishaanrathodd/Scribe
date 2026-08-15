@@ -18,4 +18,22 @@ enum AIPrompts {
 
         Return only the final text.
         """
+
+    /// Wraps prompt-specific instructions for modes that should answer the
+    /// dictated message rather than rewrite it. This deliberately does not
+    /// inherit any transcript-cleanup rules from `enhancementSystemTemplate`.
+    static let responseSystemTemplate = """
+        # Role
+        You are a conversational assistant. The user's messages are questions, requests, or follow-up clarifications that require an answer.
+
+        # Rules
+        - Answer the user's message; never merely transcribe, polish, rephrase, or quote it back unless they explicitly ask you to do that.
+        - Treat short messages such as "yes", "no", or a place name as follow-ups to the preceding conversation.
+        - Be direct and useful. Do not restate the question before answering.
+        %@
+        - Follow the mode-specific instructions below only when they do not conflict with answering the user.
+
+        # Mode-Specific Instructions
+        %@
+        """
 }

@@ -77,6 +77,7 @@ struct ReferenceRecorderPill: View {
     let onClose: () -> Void
 
     private var isRecording: Bool { recordingState == .recording }
+    private var isStarting: Bool { recordingState == .starting }
     private var isProcessing: Bool {
         recordingState == .transcribing || recordingState == .enhancing || recordingState == .busy
     }
@@ -105,10 +106,15 @@ struct ReferenceRecorderPill: View {
                 }
                 .padding(.horizontal, 6)
             } else {
-                ReferencePillWaveform(
-                    audioMeterProvider: audioMeterProvider,
-                    activity: isProcessing ? .processing : .idle
-                )
+                // Starting is a real recorder state, but it has not received
+                // microphone samples yet. Showing the idle artwork for that
+                // one frame is the static-waveform flash seen at invocation.
+                if !isStarting {
+                    ReferencePillWaveform(
+                        audioMeterProvider: audioMeterProvider,
+                        activity: isProcessing ? .processing : .idle
+                    )
+                }
             }
         }
         .frame(height: 72)
@@ -167,6 +173,7 @@ private struct ReferencePillWaveform: View {
     let activity: Activity
     private let idleHeights: [CGFloat] = [2, 3, 4, 5, 7, 11, 17, 23, 31, 38, 32, 25, 19, 14, 9, 6, 4, 3, 2]
     @State private var recordedLevels = Array(repeating: CGFloat(3), count: 19)
+    @State private var hasReceivedLiveAudio = false
 
     private var isRecording: Bool { activity == .recording }
 
@@ -180,11 +187,22 @@ private struct ReferencePillWaveform: View {
                         .frame(width: 3.0, height: height(for: index, at: context.date))
                 }
             }
+            // The first draw happens before Core Audio has provided its first
+            // level. Do not flash the placeholder flat line in that frame.
+            .opacity(!isRecording || hasReceivedLiveAudio ? 1 : 0)
             .onChange(of: context.date) { _, _ in
                 record(audioMeter)
             }
         }
         .frame(width: 148, height: 42)
+        .onChange(of: isRecording) { _, recording in
+            // A recorder window is reused between sessions. Do not carry the
+            // prior session's last bars into the first frame of the next one.
+            if recording {
+                recordedLevels = Array(repeating: CGFloat(3), count: idleHeights.count)
+                hasReceivedLiveAudio = false
+            }
+        }
         .accessibilityHidden(true)
     }
 
@@ -193,6 +211,9 @@ private struct ReferencePillWaveform: View {
         // Each bar is an actual recent microphone-power sample. There is no
         // synthetic sine-wave animation while the recorder is running.
         let power = max(0, min(1, meter.averagePower * 0.7 + meter.peakPower * 0.3))
+        if power > 0.001 {
+            hasReceivedLiveAudio = true
+        }
         let level = max(3, min(38, 3 + CGFloat(power) * 35))
         recordedLevels.removeFirst()
         recordedLevels.append(level)

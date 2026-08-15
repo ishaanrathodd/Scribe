@@ -1,6 +1,11 @@
 import SwiftUI
 
 struct PromptEditorView: View {
+    private enum FocusTarget: Hashable {
+        case title
+        case instructions
+    }
+
     enum Mode {
         case add
         case edit(CustomPrompt)
@@ -26,6 +31,7 @@ struct PromptEditorView: View {
     @State private var promptText: String
     @State private var useSystemInstructions: Bool
     @State private var showDeleteConfirmation = false
+    @FocusState private var focusedField: FocusTarget?
 
     private var saveButtonTitle: LocalizedStringKey {
         mode == .add ? "Create & Select" : "Save & Select"
@@ -106,6 +112,16 @@ struct PromptEditorView: View {
                     format: String(localized: "Are you sure you want to delete '%@'? This action cannot be undone."),
                     title))
         }
+        .onAppear {
+            // The editor replaces the full mode form. On newer macOS releases
+            // the titlebar can otherwise keep first-responder status, leaving
+            // the name field looking inert until a keyboard navigation event.
+            // Deferring one turn gives AppKit time to install the TextField.
+            guard case .add = mode else { return }
+            DispatchQueue.main.async {
+                focusedField = .title
+            }
+        }
     }
 
     private var header: some View {
@@ -127,6 +143,7 @@ struct PromptEditorView: View {
             TextField("Prompt name", text: $title)
                 .textFieldStyle(.plain)
                 .font(.system(size: 16, weight: .semibold))
+                .focused($focusedField, equals: .title)
 
             Spacer()
         }
@@ -181,6 +198,7 @@ struct PromptEditorView: View {
                 .padding(8)
                 .background(AppCardBackground(cornerRadius: 8))
                 .clipShape(RoundedRectangle(cornerRadius: 8))
+                .focused($focusedField, equals: .instructions)
 
             if promptText.isEmpty {
                 Text("Write prompt instructions")

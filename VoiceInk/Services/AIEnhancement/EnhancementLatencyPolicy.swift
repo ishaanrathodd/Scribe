@@ -19,11 +19,23 @@ enum EnhancementLatencyPolicy {
     /// self-hosted compatible servers. GPT-5/o-series use the modern field;
     /// the rest of the compatible ecosystem uses `max_tokens`.
     static func openAICompatibleBody(
+        provider: AIProvider? = nil,
         modelName: String,
         maximumCompletionTokens: Int,
         existing: [String: Any]? = nil
     ) -> [String: Any] {
         var body = existing ?? [:]
+
+        // A router or custom endpoint can select a reasoning-capable model whose
+        // hidden reasoning is billed against `max_tokens`.  Applying a cleanup
+        // sized cap in that situation can leave the model with no budget for the
+        // final answer at all (DeepSeek V4 Flash is one example).  We cannot
+        // reliably disable or budget that reasoning for an arbitrary routed
+        // model, so leave the provider's normal completion budget intact.
+        guard provider != .openRouter, provider != .custom else {
+            return body
+        }
+
         let normalizedModelName = modelName.lowercased()
         let usesModernCompletionLimit =
             normalizedModelName.hasPrefix("gpt-5")

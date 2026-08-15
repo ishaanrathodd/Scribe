@@ -46,6 +46,18 @@ struct CustomPrompt: Identifiable, Codable, Equatable {
             return self.promptText
         }
     }
+
+    func responsePromptText(webSearchInstruction: String) -> String {
+        guard useSystemInstructions else {
+            return promptText
+        }
+
+        return String(
+            format: AIPrompts.responseSystemTemplate,
+            webSearchInstruction,
+            promptText
+        )
+    }
 }
 
 // MARK: - UI Extensions

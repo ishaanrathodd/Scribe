@@ -229,7 +229,12 @@ struct VoiceInkApp: App {
         )
 
         let dictionarySchema = Schema([VocabularyWord.self, WordReplacement.self])
-        #if LOCAL_BUILD
+        // A locally signed Debug build does not carry the original distribution
+        // team's CloudKit provisioning profile. Enabling mirroring in that case
+        // causes Core Data to abort while creating its CloudKit container at
+        // launch. Keep the dictionary local for Debug/local builds; the normal
+        // provisioned Release configuration can continue to opt into sync.
+        #if DEBUG || LOCAL_BUILD
             let dictionaryCloudKit: ModelConfiguration.CloudKitDatabase = .none
         #else
             let dictionaryCloudKit: ModelConfiguration.CloudKitDatabase = .private(

@@ -181,13 +181,36 @@ class TranscriptionPipeline {
                     }
 
                     onStateChange(.enhancing)
-                    let textForAI = text
+                    let contextSnapshot = await recordingContextSnapshot()
+                    var textForAI = text
+                    var preprocessingDuration: TimeInterval = 0
+
+                    // Ask Mode normally sends the transcript directly to the
+                    // response prompt. First run the ordinary enhancement pass
+                    // so the user's question (and its history title) contains
+                    // the cleaned version rather than raw speech recognition.
                     if shouldRespondInRecorder {
+                        let cleanupConfiguration = resolvedEnhancementConfiguration.cleanupRequestConfiguration()
+                        do {
+                            let cleanupResult = try await enhancementService.enhance(
+                                textForAI,
+                                configuration: cleanupConfiguration,
+                                contextSnapshot: contextSnapshot,
+                                onPartial: nil
+                            )
+                            if !cleanupResult.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                                textForAI = cleanupResult.text
+                            }
+                            preprocessingDuration = cleanupResult.duration
+                        } catch {
+                            // Answering the user's question is still more useful
+                            // than dropping it if the optional cleanup pass fails.
+                            logger.warning("Ask Mode preprocessing failed; sending the original transcript: \(error.localizedDescription, privacy: .public)")
+                        }
                         await assistant.startResponse(textForAI, resolvedEnhancementConfiguration)
                     }
 
                     do {
-                        let contextSnapshot = await recordingContextSnapshot()
                         let enhancementResult = try await enhancementService.enhance(
                             textForAI,
                             configuration: resolvedEnhancementConfiguration,
@@ -202,7 +225,7 @@ class TranscriptionPipeline {
                             resolvedEnhancementConfiguration.modelName
                             ?? resolvedEnhancementConfiguration.provider?.defaultModel
                         transcription.promptName = enhancementResult.promptName
-                        transcription.enhancementDuration = enhancementResult.duration
+                        transcription.enhancementDuration = preprocessingDuration + enhancementResult.duration
                         transcription.aiRequestSystemMessage = enhancementResult.systemMessage
                         transcription.aiRequestUserMessage = enhancementResult.userMessage
                         finalText = enhancementResult.text

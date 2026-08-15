@@ -185,20 +185,9 @@ class AIEnhancementService: ObservableObject {
                     """
             }
 
-            baseInstructions = """
-                # Role
-                You are a conversational assistant. The user's messages are questions, requests, or follow-up clarifications that require an answer.
-
-                # Rules
-                - Answer the user's message; never merely transcribe, polish, rephrase, or quote it back unless they explicitly ask you to do that.
-                - Treat short messages such as "yes", "no", or a place name as follow-ups to the preceding conversation.
-                - Be direct and useful. Do not restate the question before answering.
-                \(webSearchInstruction)
-                - Follow the mode-specific instructions below only when they do not conflict with answering the user.
-
-                # Mode-Specific Instructions
-                \(prompt.promptText)
-                """
+            baseInstructions = prompt.responsePromptText(
+                webSearchInstruction: webSearchInstruction
+            )
         } else {
             baseInstructions = prompt.finalPromptText
         }
@@ -212,7 +201,8 @@ class AIEnhancementService: ObservableObject {
         text: String,
         configuration: EnhancementRuntimeConfiguration,
         contextSnapshot: RecordingContextSnapshot?,
-        onPartial: ((String) -> Void)?
+        onPartial: ((String) -> Void)?,
+        additionalSystemInstruction: String? = nil
     ) async throws -> (text: String, systemMessage: String?, userMessage: String?) {
         guard isConfigured(for: configuration) else {
             throw EnhancementError.notConfigured
@@ -260,11 +250,15 @@ class AIEnhancementService: ObservableObject {
             isAssistantMode
             ? (configuration.isWebSearchEnabled ? max(assistantTimeout, 90) : assistantTimeout)
             : baseTimeout
-        let systemMessage = await getSystemMessage(
+        let baseSystemMessage = await getSystemMessage(
             prompt: prompt,
             configuration: configuration,
             contextSnapshot: contextSnapshot
         )
+        let systemMessage = [baseSystemMessage, additionalSystemInstruction]
+            .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+            .joined(separator: "\n\n")
 
         if provider == .ollama {
             do {
@@ -317,13 +311,13 @@ class AIEnhancementService: ObservableObject {
             let result: String
             switch provider {
             case .gemini:
-                result = try await GeminiLLMClient.chatCompletion(
+                result = try await GeminiInteractionsClient.chatCompletion(
                     apiKey: try apiKey(for: provider, modelName: modelName),
                     model: modelName,
                     messages: [.user(requestText)],
                     systemPrompt: systemMessage,
                     thinkingLevel: ReasoningConfig.geminiThinkingLevel(for: modelName),
-                    store: false,
+                    maximumOutputTokens: maximumCompletionTokens,
                     timeout: requestTimeout
                 )
             case .anthropic:
@@ -343,6 +337,7 @@ class AIEnhancementService: ObservableObject {
                     throw EnhancementError.notConfigured
                 }
                 let extraBody = EnhancementLatencyPolicy.openAICompatibleBody(
+                    provider: .custom,
                     modelName: customConfiguration.modelName,
                     maximumCompletionTokens: maximumCompletionTokens
                 )
@@ -384,6 +379,7 @@ class AIEnhancementService: ObservableObject {
                     modelName: modelName
                 )
                 let extraBody = EnhancementLatencyPolicy.openAICompatibleBody(
+                    provider: provider,
                     modelName: modelName,
                     maximumCompletionTokens: maximumCompletionTokens,
                     existing: ReasoningConfig.getExtraBodyParameters(
@@ -481,6 +477,7 @@ class AIEnhancementService: ObservableObject {
         configuration: EnhancementRuntimeConfiguration,
         contextSnapshot: RecordingContextSnapshot?,
         onPartial: ((String) -> Void)?,
+        additionalSystemInstruction: String? = nil,
         maxRetries: Int = 3,
         initialDelay: TimeInterval = 1.0
     ) async throws -> (text: String, systemMessage: String?, userMessage: String?) {
@@ -493,7 +490,8 @@ class AIEnhancementService: ObservableObject {
                     text: text,
                     configuration: configuration,
                     contextSnapshot: contextSnapshot,
-                    onPartial: onPartial
+                    onPartial: onPartial,
+                    additionalSystemInstruction: additionalSystemInstruction
                 )
             } catch let error as EnhancementError {
                 switch error {
@@ -563,12 +561,49 @@ class AIEnhancementService: ObservableObject {
         let promptName = configuration.prompt?.title
 
         do {
-            let requestResult = try await makeRequestWithRetry(
+            var requestResult = try await makeRequestWithRetry(
                 text: text,
                 configuration: configuration,
                 contextSnapshot: contextSnapshot,
                 onPartial: onPartial
             )
+            if requiresCompletionRetry(
+                input: text,
+                output: requestResult.text,
+                configuration: configuration
+            ) {
+                logger.warning(
+                    "Enhancement output appears incomplete; retrying with a lossless completion requirement."
+                )
+                do {
+                    requestResult = try await makeRequestWithRetry(
+                        text: text,
+                        configuration: configuration,
+                        contextSnapshot: contextSnapshot,
+                        onPartial: onPartial,
+                        additionalSystemInstruction: """
+                        # Completion Requirement
+                        Return the complete cleaned transcript. Do not summarize, omit, or stop before every substantive part of the dictated text has been handled. This is a lossless cleanup task unless the mode-specific instructions explicitly request a summary.
+                        """,
+                        maxRetries: 1
+                    )
+                    if requiresCompletionRetry(
+                        input: text,
+                        output: requestResult.text,
+                        configuration: configuration
+                    ) {
+                        logger.error(
+                            "Enhancement retry remained incomplete; preserving the original transcript instead of a fragment."
+                        )
+                        requestResult = (text, requestResult.systemMessage, requestResult.userMessage)
+                    }
+                } catch {
+                    logger.error(
+                        "Completion retry failed; preserving the original transcript instead of a fragment: \(error.localizedDescription, privacy: .public)"
+                    )
+                    requestResult = (text, requestResult.systemMessage, requestResult.userMessage)
+                }
+            }
             let endTime = Date()
             let duration = endTime.timeIntervalSince(startTime)
             let providerName = configuration.provider?.rawValue ?? "Unconfigured"
@@ -593,6 +628,27 @@ class AIEnhancementService: ObservableObject {
             )
             throw error
         }
+    }
+
+    /// A cleanup result that stops after only a few words without ending a
+    /// sentence is almost certainly a provider-side cut-off, not intentional
+    /// editing. Keep this deliberately conservative so prompts that genuinely
+    /// request a short result retain their behavior.
+    private func requiresCompletionRetry(
+        input: String,
+        output: String,
+        configuration: EnhancementRuntimeConfiguration
+    ) -> Bool {
+        guard configuration.mode?.outputMode != .respond else { return false }
+
+        let inputWords = input.split { $0.isWhitespace || $0.isNewline }.count
+        let outputWords = output.split { $0.isWhitespace || $0.isNewline }.count
+        guard inputWords >= 12, outputWords <= max(3, inputWords / 4) else { return false }
+
+        guard let lastCharacter = output.trimmingCharacters(in: .whitespacesAndNewlines).last else {
+            return true
+        }
+        return !".!?…:;)]}\"'”.".contains(lastCharacter)
     }
 
     func captureScreenContext() async {

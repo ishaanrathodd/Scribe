@@ -52,6 +52,8 @@ enum ConfigurationType {
 }
 
 struct ModeView: View {
+    private static let editorPanelWidth: CGFloat = 400
+
     @StateObject private var modeManager = ModeManager.shared
     @StateObject private var modeWarmupStore = ModeFormWarmupStore.shared
     @EnvironmentObject private var enhancementService: AIEnhancementService
@@ -70,7 +72,7 @@ struct ModeView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
+        GeometryReader { proxy in
             Group {
                 if modeManager.configurations.isEmpty {
                     ContentUnavailableView(
@@ -93,13 +95,19 @@ struct ModeView: View {
                     .scrollContentBackground(.hidden)
                 }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            // The editor is an overlay. Reserve its width while it is open so
+            // the list remains centered in the visible middle column, not
+            // beneath the inspector.
+            .frame(
+                width: max(0, proxy.size.width - (isPanelOpen ? Self.editorPanelWidth : 0)),
+                height: proxy.size.height
+            )
         }
         .sidePanel(
             isPresented: .init(
                 get: { isPanelOpen },
                 set: { if !$0 { closePanel() } }
-            ), dismissOnExitCommand: false
+            ), width: Self.editorPanelWidth, dismissOnExitCommand: false
         ) {
             switch activePanel {
             case .configuration(let mode)?:

@@ -20,6 +20,7 @@ struct AskConversation: Codable, Identifiable, Equatable {
     let promptName: String?
     let systemPrompt: String?
     let isWebSearchEnabled: Bool
+    let turnPreprocessing: AssistantTurnPreprocessing?
     let messages: [Message]
 }
 
@@ -60,6 +61,7 @@ final class AskHistoryStore: ObservableObject {
             promptName: session.promptName,
             systemPrompt: session.systemPrompt,
             isWebSearchEnabled: session.isWebSearchEnabled,
+            turnPreprocessing: session.turnPreprocessing,
             messages: session.messages.map {
                 AskConversation.Message(id: $0.id, role: $0.role, content: $0.content, createdAt: $0.createdAt)
             }

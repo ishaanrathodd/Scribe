@@ -33,10 +33,15 @@ final class TranscriptionDelivery {
             return
         }
 
-        if request.output.outputMode == .respond,
-            request.responseConfig != nil || request.responseError != nil
-        {
-            await deliverResponse(request, actions: actions)
+        if request.output.outputMode == .respond {
+            // Respond is never a paste mode. If the assistant could not be
+            // configured, surface that failure in the chat rather than pasting
+            // the preprocessed question into the frontmost app.
+            if request.responseConfig != nil || request.responseError != nil {
+                await deliverResponse(request, actions: actions)
+            } else {
+                await actions.failResponse("Ask Mode could not be configured for the selected AI provider.")
+            }
             return
         }
 
@@ -165,7 +170,11 @@ final class TranscriptionDelivery {
 
         let autoSendKey = output.outputMode == .paste ? output.autoSendKey : .none
         Task { @MainActor in
-            _ = await pasteTask.value
+            let pasteResult = await pasteTask.value
+
+            // Never send an empty message when delivery fell back to the
+            // clipboard because no editable field was focused.
+            guard pasteResult.didPostPasteCommand else { return }
 
             if autoSendKey.isEnabled {
                 try? await Task.sleep(nanoseconds: 500_000_000)

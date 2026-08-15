@@ -103,7 +103,11 @@ class VoiceInkEngine: NSObject, ObservableObject {
     private var canceledPipelineTranscriptionIDs = Set<UUID>()
     private var activeRecordingUseCase: RecordingUseCase = .newSession
     private var activePipelineUseCase: RecordingUseCase = .newSession
-    private var activeRecordingContextStore: RecordingContextSnapshotStore?
+    // Active-window rules can change the effective mode while transcription is
+    // still running. Preserve the mode that began this recording so Respond
+    // delivery cannot fall through to Paste.
+    private var activeRecordingMode: ModeConfig?
+    var activeRecordingContextStore: RecordingContextSnapshotStore?
     private var activeRecordingContextTasks: [Task<Void, Never>] = []
     private var voiceInkRefinePreparationTask: Task<Void, Never>?
 
@@ -234,7 +238,13 @@ class VoiceInkEngine: NSObject, ObservableObject {
             shouldCancelRecording = false
             partialTranscript = ""
             activeRecordingUseCase = recordingUseCase
+            activeRecordingMode = nil
             clearActiveRecordingContext()
+
+            // The floating pill is already on screen by this point. Move into
+            // `.starting` before the asynchronous permission/preflight work so
+            // SwiftUI never renders the idle waveform for a single frame.
+            recordingState = .starting
 
             if !recordingUseCase.isAssistantFollowUp {
                 assistantSession.reset()
@@ -291,9 +301,14 @@ class VoiceInkEngine: NSObject, ObservableObject {
 
                             await activeModeTask.value
 
+                            // Freeze the app-specific mode selection before
+                            // starting the pipeline. Focus changes after this
+                            // point must not alter the selected output mode.
+                            self.activeRecordingMode = ModeManager.shared.currentEffectiveConfiguration
+
                             self.activeOutputMode = canContinueAssistantSession
                                 ? .respond
-                                : ModeRuntimeResolver.outputConfiguration().outputMode
+                                : ModeRuntimeResolver.outputConfiguration(mode: self.activeRecordingMode).outputMode
 
                             guard self.recordingState == .recording,
                                 self.activeRecordingStartID == startID,
@@ -305,6 +320,7 @@ class VoiceInkEngine: NSObject, ObservableObject {
                             self.startRecordingContextCapture()
 
                             let modelResolution = ModeRuntimeResolver.transcriptionModelResolution(
+                                mode: self.activeRecordingMode,
                                 transcriptionModelManager: self.transcriptionModelManager
                             )
                             guard
@@ -434,6 +450,9 @@ class VoiceInkEngine: NSObject, ObservableObject {
                     }
                 } else {
                     logger.error("Recording permission denied")
+                    Task { @MainActor [weak self] in
+                        self?.recordingState = .idle
+                    }
                 }
             }
         }
@@ -540,9 +559,17 @@ class VoiceInkEngine: NSObject, ObservableObject {
         audioURL: URL,
         contextStore: RecordingContextSnapshotStore?
     ) async {
+        // Keep every phase of this run tied to the mode that invoked it.
+        // `currentEffectiveConfiguration` is intentionally dynamic for
+        // frontmost-app switching, so reading it again here could turn an Ask
+        // mode into a normal Paste mode after recording stops.
+        let recordingMode = activeRecordingMode
         guard
             let transcriptionConfiguration = currentSessionTranscriptionConfiguration
-                ?? ModeRuntimeResolver.transcriptionConfiguration(transcriptionModelManager: transcriptionModelManager)
+                ?? ModeRuntimeResolver.transcriptionConfiguration(
+                    mode: recordingMode,
+                    transcriptionModelManager: transcriptionModelManager
+                )
         else {
             transcription.text = String(localized: "Transcription Failed: No model selected")
             transcription.transcriptionStatus = TranscriptionStatus.failed.rawValue
@@ -561,7 +588,7 @@ class VoiceInkEngine: NSObject, ObservableObject {
             audioURL: audioURL,
             transcriptionConfiguration: transcriptionConfiguration,
             formattingConfiguration: {
-                ModeRuntimeResolver.transcriptionFormattingConfiguration()
+                ModeRuntimeResolver.transcriptionFormattingConfiguration(mode: recordingMode)
             },
             session: session,
             triggerWordModeSelection: { [weak self] text in
@@ -575,6 +602,7 @@ class VoiceInkEngine: NSObject, ObservableObject {
                     return nil
                 }
                 return ModeRuntimeResolver.currentEnhancementConfiguration(
+                    mode: recordingMode,
                     enhancementService: enhancementService,
                     aiService: aiService
                 )
@@ -585,7 +613,7 @@ class VoiceInkEngine: NSObject, ObservableObject {
                 }
             },
             outputConfiguration: {
-                ModeRuntimeResolver.outputConfiguration()
+                ModeRuntimeResolver.outputConfiguration(mode: recordingMode)
             },
             onStateChange: { [weak self] state in
                 guard let self, self.activePipelineTranscriptionID == transcriptionID else { return }
@@ -626,7 +654,8 @@ class VoiceInkEngine: NSObject, ObservableObject {
                         modeName: configuration.mode?.name,
                         modeEmoji: configuration.mode?.icon.value,
                         promptName: configuration.prompt?.title,
-                        isWebSearchEnabled: configuration.isWebSearchEnabled
+                        isWebSearchEnabled: configuration.isWebSearchEnabled,
+                        turnPreprocessing: AssistantTurnPreprocessing(configuration: configuration)
                     )
                     AskHistoryStore.shared.save(session: self.assistantSession)
                 },

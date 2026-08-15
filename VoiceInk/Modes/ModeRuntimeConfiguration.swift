@@ -37,6 +37,24 @@ struct EnhancementRuntimeConfiguration {
     let useSelectedTextContext: Bool
     let useScreenCaptureContext: Bool
 
+    /// A Respond mode uses the configured prompt as an assistant instruction.
+    /// This variant deliberately removes that mode marker so the same prompt is
+    /// used for its normal transcript-cleanup instruction before a question is
+    /// handed to the assistant.
+    func cleanupRequestConfiguration() -> EnhancementRuntimeConfiguration {
+        EnhancementRuntimeConfiguration(
+            mode: nil,
+            isEnabled: isEnabled,
+            prompt: prompt,
+            provider: provider,
+            modelName: modelName,
+            isWebSearchEnabled: false,
+            useClipboardContext: useClipboardContext,
+            useSelectedTextContext: useSelectedTextContext,
+            useScreenCaptureContext: useScreenCaptureContext
+        )
+    }
+
     func replacingPrompt(_ prompt: CustomPrompt) -> EnhancementRuntimeConfiguration {
         EnhancementRuntimeConfiguration(
             mode: mode,
@@ -209,10 +227,11 @@ enum ModeRuntimeResolver {
         aiService: AIService
     ) -> AIProvider? {
         if let providerName {
-            guard let provider = AIProvider(rawValue: providerName) else {
-                return nil
-            }
-            return aiService.connectedProviders.contains(provider) ? provider : nil
+            // A mode's saved provider is its runtime choice. `connectedProviders`
+            // drives the settings UI and can briefly be empty while Keychain/API-key
+            // state is refreshing at launch; using it here made Ask Mode appear
+            // unconfigured even though the selected provider was valid.
+            return AIProvider(rawValue: providerName)
         }
 
         return aiService.connectedProviders.first

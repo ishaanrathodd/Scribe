@@ -21,6 +21,38 @@ enum AssistantPhase: Equatable {
     case failed(String)
 }
 
+/// A snapshot of the normal enhancement settings used to prepare Ask Mode
+/// turns. Keeping it with the conversation means later follow-ups keep the
+/// same cleanup behavior even if the active mode is edited afterwards.
+struct AssistantTurnPreprocessing: Codable, Equatable {
+    let prompt: CustomPrompt
+    let useClipboardContext: Bool
+    let useSelectedTextContext: Bool
+    let useScreenCaptureContext: Bool
+
+    init?(configuration: EnhancementRuntimeConfiguration) {
+        guard let prompt = configuration.prompt else { return nil }
+        self.prompt = prompt
+        useClipboardContext = configuration.useClipboardContext
+        useSelectedTextContext = configuration.useSelectedTextContext
+        useScreenCaptureContext = configuration.useScreenCaptureContext
+    }
+
+    func runtimeConfiguration(provider: AIProvider, modelName: String?) -> EnhancementRuntimeConfiguration {
+        EnhancementRuntimeConfiguration(
+            mode: nil,
+            isEnabled: true,
+            prompt: prompt,
+            provider: provider,
+            modelName: modelName,
+            isWebSearchEnabled: false,
+            useClipboardContext: useClipboardContext,
+            useSelectedTextContext: useSelectedTextContext,
+            useScreenCaptureContext: useScreenCaptureContext
+        )
+    }
+}
+
 @MainActor
 final class AssistantSession: ObservableObject {
     @Published private(set) var phase: AssistantPhase = .inactive
@@ -33,6 +65,7 @@ final class AssistantSession: ObservableObject {
     private(set) var promptName: String?
     private(set) var systemPrompt: String?
     private(set) var isWebSearchEnabled = false
+    private(set) var turnPreprocessing: AssistantTurnPreprocessing?
     private(set) var conversationID: UUID?
 
     var isVisible: Bool {
@@ -54,7 +87,8 @@ final class AssistantSession: ObservableObject {
         modeName: String?,
         modeEmoji: String?,
         promptName: String?,
-        isWebSearchEnabled: Bool
+        isWebSearchEnabled: Bool,
+        turnPreprocessing: AssistantTurnPreprocessing?
     ) {
         conversationID = UUID()
         self.provider = provider
@@ -63,6 +97,7 @@ final class AssistantSession: ObservableObject {
         self.modeEmoji = modeEmoji
         self.promptName = promptName
         self.isWebSearchEnabled = isWebSearchEnabled
+        self.turnPreprocessing = turnPreprocessing
         messages = []
 
         let trimmedTranscript = transcript.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -142,6 +177,7 @@ final class AssistantSession: ObservableObject {
         promptName = nil
         systemPrompt = nil
         isWebSearchEnabled = false
+        turnPreprocessing = nil
     }
 
     func restore(_ conversation: AskConversation) {
@@ -153,6 +189,7 @@ final class AssistantSession: ObservableObject {
         promptName = conversation.promptName
         systemPrompt = conversation.systemPrompt
         isWebSearchEnabled = conversation.isWebSearchEnabled
+        turnPreprocessing = conversation.turnPreprocessing
         messages = conversation.messages.map {
             AssistantDisplayMessage(id: $0.id, role: $0.role, content: $0.content, createdAt: $0.createdAt)
         }

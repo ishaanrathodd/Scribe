@@ -133,22 +133,7 @@ struct ModeConfigFormView: View {
     }
 
     private var formContent: some View {
-        Form {
-            ModeTriggerSection(
-                appConfigs: $draft.appConfigs,
-                websiteConfigs: $draft.websiteConfigs,
-                triggerGroups: $draft.triggerGroups,
-                triggerWords: $draft.triggerWords,
-                modeId: draft.id,
-                cleanURL: modeManager.cleanURL
-            )
-            transcriptionSection
-            aiEnhancementSection
-            advancedSection
-        }
-        .formStyle(.grouped)
-        .scrollContentBackground(.hidden)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        settingsForm
         .confirmationDialog(
             "Delete Mode?",
             isPresented: $isShowingDeleteConfirmation,
@@ -186,6 +171,32 @@ struct ModeConfigFormView: View {
             }
         )
         .modeValidationAlert(errors: validationErrors, isPresented: $showValidationAlert)
+    }
+
+    private var settingsForm: some View {
+        Form {
+            ModeTriggerSection(
+                appConfigs: $draft.appConfigs,
+                websiteConfigs: $draft.websiteConfigs,
+                triggerGroups: $draft.triggerGroups,
+                triggerWords: $draft.triggerWords,
+                modeId: draft.id,
+                cleanURL: modeManager.cleanURL
+            )
+            // Keep the inspector's grouped surfaces inside a real, native
+            // content gutter.  This has to live on the rows themselves: a
+            // Form ignores ordinary outer padding when it sizes its list.
+            .listRowInsets(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
+            transcriptionSection
+                .listRowInsets(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
+            aiEnhancementSection
+                .listRowInsets(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
+            advancedSection
+                .listRowInsets(EdgeInsets(top: 0, leading: 20, bottom: 0, trailing: 20))
+        }
+        .formStyle(.grouped)
+        .scrollContentBackground(.hidden)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private var transcriptionSection: some View {
@@ -453,11 +464,8 @@ struct ModeConfigFormView: View {
                     }
                 )
 
-                Picker("AI Model", selection: modelBinding) {
-                    ForEach(models, id: \.self) { model in
-                        Text(model).tag(model)
-                    }
-                }
+                SearchableModelPicker(selection: modelBinding, models: models)
+                    .frame(maxWidth: .infinity)
 
                 if provider == .openRouter {
                     Button("Refresh Models") {
