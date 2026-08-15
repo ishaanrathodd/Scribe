@@ -15,7 +15,6 @@ struct DashboardContent: View {
     private static let automaticStatsRefreshMetricLimit = 2_000
     private static let statsRefreshDebounceNanoseconds: UInt64 = 750_000_000
     let modelContext: ModelContext
-    private let startsInInsights: Bool
 
     @State private var statsSummary: DashboardStatsSummary = .empty
     @State private var hasLoadedStatsSnapshot: Bool = false
@@ -25,7 +24,6 @@ struct DashboardContent: View {
     @State private var dashboardStatsLoadGeneration = 0
     @State private var isModelPerformancePanelPresented = false
     @State private var isModelUsagePanelPresented = false
-    @State private var isInsightsViewPresented = false
     @State private var selectedInsightPeriod: DashboardInsightPeriod = .allTime
     @State private var isAccessibilityEnabled = AXIsProcessTrusted()
     @EnvironmentObject private var updaterViewModel: UpdaterViewModel
@@ -36,26 +34,14 @@ struct DashboardContent: View {
     @State private var displayNameDraft = ""
     @AppStorage("dashboardDisplayName") private var dashboardDisplayName: String = ""
     @FocusState private var isNameFieldFocused: Bool
-    @Query(Self.recentTranscriptionsDescriptor()) private var recentTranscriptionCandidates: [Transcription]
-
-    private static func recentTranscriptionsDescriptor() -> FetchDescriptor<Transcription> {
-        var descriptor = FetchDescriptor<Transcription>(
-            sortBy: [SortDescriptor(\Transcription.timestamp, order: .reverse)]
-        )
-        descriptor.fetchLimit = 25
-        return descriptor
-    }
-
-    init(modelContext: ModelContext, startsInInsights: Bool = false) {
+    init(modelContext: ModelContext) {
         self.modelContext = modelContext
-        self.startsInInsights = startsInInsights
 
         let cachedSummary = DashboardStatsCache.shared.currentSummary()
         let cachedMetadata = DashboardStatsCache.shared.currentMetadata()
         _statsSummary = State(initialValue: cachedSummary ?? .empty)
         _hasLoadedStatsSnapshot = State(initialValue: cachedSummary != nil)
         _statsSnapshotGeneratedAt = State(initialValue: cachedMetadata?.generatedAt)
-        _isInsightsViewPresented = State(initialValue: startsInInsights)
     }
 
     var body: some View {
@@ -66,13 +52,7 @@ struct DashboardContent: View {
                 DashboardAmbientBackground()
 
                 ScrollView {
-                    Group {
-                        if isInsightsViewPresented {
-                            dashboardInsightsView
-                        } else {
-                            dashboardMainContent(availableWidth: contentWidth)
-                        }
-                    }
+                    dashboardMainContent(availableWidth: contentWidth)
                     .frame(width: contentWidth, alignment: .top)
                     .frame(
                         minHeight: max(0, geometry.size.height - DashboardLayout.contentBottomOffset),
@@ -134,6 +114,8 @@ struct DashboardContent: View {
                 heroSection
             }
 
+            dashboardInlineInsights
+
             if !isAccessibilityEnabled {
                 nameEditorDismissArea {
                     accessibilityReminder
@@ -143,12 +125,6 @@ struct DashboardContent: View {
             if !modeManager.hasEnabledConfiguration {
                 nameEditorDismissArea {
                     DashboardNoModesReminder(onOpenModes: ModeSetupNavigator.openModesSettings)
-                }
-            }
-
-            if !recentDashboardTranscriptions.isEmpty {
-                nameEditorDismissArea {
-                    DashboardTranscriptCards(transcriptions: recentDashboardTranscriptions)
                 }
             }
 
@@ -163,31 +139,6 @@ struct DashboardContent: View {
             }
         }
         .frame(width: availableWidth, alignment: .topLeading)
-    }
-
-    private var recentDashboardTranscriptions: [Transcription] {
-        Array(
-            recentTranscriptionCandidates
-                .filter { transcription in
-                    isRecentDashboardTranscription(transcription)
-                }
-                .prefix(5)
-        )
-    }
-
-    private func isRecentDashboardTranscription(_ transcription: Transcription) -> Bool {
-        let text = transcription.text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !text.isEmpty else {
-            return false
-        }
-
-        if transcription.transcriptionStatus == TranscriptionStatus.failed.rawValue
-            || transcription.transcriptionStatus == TranscriptionStatus.canceled.rawValue
-        {
-            return false
-        }
-
-        return text.range(of: "Transcription Failed:", options: [.caseInsensitive, .anchored]) == nil
     }
 
     private var selectedProductivityPoints: [DashboardProductivityPoint] {
@@ -229,22 +180,6 @@ struct DashboardContent: View {
 
     private var shouldRefreshStatsAfterMetricChange: Bool {
         !hasLoadedStatsSnapshot || statsSummary.totalCount < Self.automaticStatsRefreshMetricLimit
-    }
-
-    private var insightsActionTitle: LocalizedStringKey {
-        "View Insights"
-    }
-
-    private var insightsActionIcon: String {
-        "chart.line.uptrend.xyaxis"
-    }
-
-    private var insightsActionHelp: String {
-        String(localized: "View dashboard insights")
-    }
-
-    private var insightsActionAccessibilityLabel: String {
-        "View insights"
     }
 
     private var accessibilityReminder: some View {
@@ -343,10 +278,6 @@ struct DashboardContent: View {
         if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
             NSWorkspace.shared.open(url)
         }
-    }
-
-    private func openInsights() {
-        isInsightsViewPresented = true
     }
 
     private func openModelPerformancePanel() {
@@ -453,7 +384,7 @@ struct DashboardContent: View {
 
     // MARK: - Sections
 
-    private var dashboardInsightsView: some View {
+    private var dashboardInlineInsights: some View {
         DashboardInsightsView(
             selectedPeriod: $selectedInsightPeriod,
             productivityPoints: selectedProductivityPoints,
@@ -463,19 +394,16 @@ struct DashboardContent: View {
             timeSavedSummary: selectedTimeSavedSummary,
             updatedAtText: statsUpdatedAtText,
             isRefreshingStats: isDashboardStatsRefreshing,
-            onRefreshStats: refreshDashboardStats
+            onRefreshStats: refreshDashboardStats,
+            showsHeader: false,
+            showsProductivitySummary: false
         )
     }
 
     private var heroSection: some View {
         DashboardHeroCard(
             headline: momentumHeadline,
-            subtext: momentumSubtext,
-            actionTitle: insightsActionTitle,
-            actionIcon: insightsActionIcon,
-            actionHelp: insightsActionHelp,
-            actionAccessibilityLabel: insightsActionAccessibilityLabel,
-            onViewInsights: openInsights
+            subtext: momentumSubtext
         )
     }
 

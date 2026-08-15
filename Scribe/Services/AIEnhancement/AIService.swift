@@ -485,9 +485,15 @@ class AIService: ObservableObject {
             guard let self = self else { return }
             DispatchQueue.main.async {
                 if isValid {
+                    let saved = APIKeyManager.shared.saveAPIKey(key, forProvider: self.selectedProvider.rawValue)
+                    guard saved, APIKeyManager.shared.hasAPIKey(forProvider: self.selectedProvider.rawValue) else {
+                        self.isAPIKeyValid = false
+                        completion(false, String(localized: "The key worked, but Scribe could not save it securely."))
+                        return
+                    }
+
                     self.apiKey = key
                     self.isAPIKeyValid = true
-                    APIKeyManager.shared.saveAPIKey(key, forProvider: self.selectedProvider.rawValue)
                     NotificationCenter.default.post(name: .aiProviderKeyChanged, object: nil)
                 } else {
                     self.isAPIKeyValid = false

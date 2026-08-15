@@ -200,10 +200,10 @@ final class KeychainService {
             kSecAttrAccount as String: key,
         ]
 
-        #if !LOCAL_BUILD
-            query[kSecUseDataProtectionKeychain as String] = true
-        #endif
-
+        // Scribe is distributed as a non-sandboxed macOS app. Use the standard
+        // macOS Keychain instead of the Data Protection Keychain, which requires
+        // a sandboxed entitlement profile and otherwise rejects writes from an
+        // installed development build.
         #if !LOCAL_BUILD
         if syncable {
             query[kSecAttrSynchronizable as String] = kCFBooleanTrue

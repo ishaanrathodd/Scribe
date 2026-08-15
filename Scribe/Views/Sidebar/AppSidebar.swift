@@ -22,14 +22,13 @@ struct AppSidebar: View {
 
 private extension ViewType {
     static let primaryItems: [ViewType] = [
-        .dashboard, .insights, .modes, .transcribeAudio, .history, .askHistory, .dictionary, .models, .audio,
+        .insights, .modes, .transcribeAudio, .history, .askHistory, .dictionary, .models, .audio,
     ]
 
     static let secondaryItems: [ViewType] = [.settings]
 
     var icon: String {
         switch self {
-        case .dashboard: return "gauge.medium"
         case .insights: return "chart.line.uptrend.xyaxis"
         case .transcribeAudio: return "waveform.path"
         case .history: return "doc.text.fill"

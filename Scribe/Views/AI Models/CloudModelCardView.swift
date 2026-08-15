@@ -244,11 +244,21 @@ struct CloudModelCardView: View {
             await MainActor.run {
                 isVerifying = false
                 if result.isValid {
+                    guard APIKeyManager.shared.saveAPIKey(key, forProvider: providerKey),
+                        APIKeyManager.shared.hasAPIKey(forProvider: providerKey)
+                    else {
+                        verificationStatus = .failure
+                        verificationError = String(localized: "The key worked, but Scribe could not save it securely.")
+                        verificationErrorDetail = String(
+                            localized: "Quit and reopen Scribe, then try adding the key again.")
+                        return
+                    }
+
                     verificationStatus = .success
                     verificationError = nil
                     verificationErrorDetail = nil
-                    APIKeyManager.shared.saveAPIKey(key, forProvider: providerKey)
                     transcriptionModelManager.refreshAllAvailableModels()
+                    NotificationCenter.default.post(name: .aiProviderKeyChanged, object: nil)
                     withAnimation(.easeInOut(duration: 0.3)) {
                         isExpanded = false
                     }

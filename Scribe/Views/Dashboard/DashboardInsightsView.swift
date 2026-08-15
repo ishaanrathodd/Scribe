@@ -10,14 +10,20 @@ struct DashboardInsightsView: View {
     let updatedAtText: String
     let isRefreshingStats: Bool
     let onRefreshStats: () -> Void
+    let showsHeader: Bool
+    let showsProductivitySummary: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 22) {
-            header
+            if showsHeader {
+                header
+            }
 
-            DashboardProductivitySummaryStrip(
-                totals: totals
-            )
+            if showsProductivitySummary {
+                DashboardProductivitySummaryStrip(
+                    totals: totals
+                )
+            }
 
             DashboardProductivityCard(
                 period: $selectedPeriod,

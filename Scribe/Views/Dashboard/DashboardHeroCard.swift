@@ -13,30 +13,11 @@ struct DashboardHeroCard: View {
 
     let headline: DashboardHeroHeadline
     let subtext: String
-    let actionTitle: LocalizedStringKey
-    let actionIcon: String
-    let actionHelp: String
-    let actionAccessibilityLabel: String
-    let onViewInsights: () -> Void
 
     var body: some View {
         HStack(alignment: .center, spacing: 24) {
             VStack(alignment: .leading, spacing: 10) {
                 heroCopy
-
-                HStack(spacing: 12) {
-                    Button(action: onViewInsights) {
-                        DashboardMomentumActionLabel(
-                            title: actionTitle,
-                            icon: actionIcon,
-                            isPrimary: true
-                        )
-                    }
-                    .buttonStyle(.plain)
-                    .help(actionHelp)
-                    .accessibilityLabel(Text(actionAccessibilityLabel))
-                }
-                .padding(.top, 8)
             }
 
             Spacer(minLength: 24)
@@ -102,63 +83,6 @@ struct DashboardHeroCard: View {
 
 }
 
-private struct DashboardMomentumActionLabel: View {
-    private static let cornerRadius: CGFloat = 10
-
-    let title: LocalizedStringKey
-    let icon: String
-    let isPrimary: Bool
-
-    var body: some View {
-        HStack(spacing: 9) {
-            Text(title)
-                .lineLimit(2)
-
-            Image(systemName: icon)
-                .font(.system(size: 13, weight: .semibold))
-        }
-        .font(.system(size: 15, weight: .semibold))
-        .foregroundStyle(foregroundColor)
-        .padding(.horizontal, 20)
-        .frame(minHeight: 44)
-        .background(backgroundColor)
-        .clipShape(RoundedRectangle(cornerRadius: Self.cornerRadius, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: Self.cornerRadius, style: .continuous)
-                .stroke(borderColor, lineWidth: 1)
-        )
-        .shadow(color: shadowColor, radius: 5, y: 2)
-    }
-
-    private var foregroundColor: Color {
-        if isPrimary {
-            return DashboardMomentumBackground.actionForeground
-        }
-
-        return AppTheme.Text.primary
-    }
-
-    private var backgroundColor: Color {
-        if isPrimary {
-            return DashboardMomentumBackground.actionBackground
-        }
-
-        return Color.white.opacity(0.82)
-    }
-
-    private var borderColor: Color {
-        if isPrimary {
-            return Color.clear
-        }
-
-        return Color.black.opacity(0.08)
-    }
-
-    private var shadowColor: Color {
-        isPrimary ? Color.black.opacity(0.20) : Color.black.opacity(0.06)
-    }
-}
-
 private struct DashboardImpactBackground: View {
     var body: some View {
         ZStack {
@@ -188,6 +112,4 @@ private struct DashboardMomentumBackground {
     static let accent = Color.white
     static let headline = Color.white
     static let subtext = Color.white.opacity(0.86)
-    static let actionBackground = Color(red: 0.92, green: 0.90, blue: 0.84)
-    static let actionForeground = Color(red: 0.16, green: 0.16, blue: 0.17)
 }

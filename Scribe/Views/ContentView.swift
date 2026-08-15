@@ -2,7 +2,6 @@ import OSLog
 import SwiftUI
 
 enum ViewType: String, CaseIterable, Identifiable, Hashable {
-    case dashboard = "Dashboard"
     case insights = "Insights"
     case modes = "Modes"
     case models = "AI Models"
@@ -23,7 +22,7 @@ enum ViewType: String, CaseIterable, Identifiable, Hashable {
 final class MainWindowNavigation: ObservableObject {
     static let shared = MainWindowNavigation()
 
-    @Published var selectedView: ViewType = .dashboard
+    @Published var selectedView: ViewType = .insights
 
     private init() {}
 
@@ -78,10 +77,8 @@ struct ContentView: View {
     @ViewBuilder
     private func detailView(for viewType: ViewType) -> some View {
         switch viewType {
-        case .dashboard:
-            DashboardView()
         case .insights:
-            DashboardView(startsInInsights: true)
+            DashboardView()
         case .models:
             ModelManagementView()
         case .transcribeAudio:

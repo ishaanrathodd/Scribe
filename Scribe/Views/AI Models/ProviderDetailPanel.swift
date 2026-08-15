@@ -14,11 +14,12 @@ struct ProviderDetailPanel: View {
     @State private var verificationMessage: String?
     @State private var verificationDetailMessage: String?
     @State private var verificationSucceeded = false
+    @State private var isKeyConfigured = false
     @State private var isShowingRemoveAPIKeyConfirmation = false
     @State private var activeDescriptorID = ""
 
     private var isConfigured: Bool {
-        APIKeyManager.shared.hasAPIKey(forProvider: descriptor.providerKey)
+        isKeyConfigured
     }
 
     private var iconName: String {
@@ -425,7 +426,8 @@ struct ProviderDetailPanel: View {
 
     private func resetProviderState() {
         activeDescriptorID = descriptor.id
-        verificationSucceeded = isConfigured
+        isKeyConfigured = APIKeyManager.shared.hasAPIKey(forProvider: descriptor.providerKey)
+        verificationSucceeded = isKeyConfigured
         apiKey = ""
         isVerifying = false
         isRefreshingOpenRouterModels = false
@@ -475,13 +477,24 @@ struct ProviderDetailPanel: View {
                 verificationSucceeded = result.isValid
 
                 if result.isValid {
-                    APIKeyManager.shared.saveAPIKey(trimmedKey, forProvider: descriptor.providerKey)
+                    guard APIKeyManager.shared.saveAPIKey(trimmedKey, forProvider: descriptor.providerKey),
+                        APIKeyManager.shared.hasAPIKey(forProvider: descriptor.providerKey)
+                    else {
+                        verificationSucceeded = false
+                        verificationMessage = String(
+                            localized: "The key worked, but Scribe could not save it securely.")
+                        verificationDetailMessage = String(
+                            localized: "Quit and reopen Scribe, then try adding the key again.")
+                        return
+                    }
+
+                    isKeyConfigured = true
                     if let provider = descriptor.aiProvider, aiService.selectedProvider == provider {
                         aiService.apiKey = trimmedKey
                         aiService.isAPIKeyValid = true
                     }
                     apiKey = ""
-                    verificationMessage = nil
+                    verificationMessage = String(localized: "API key saved securely.")
                     verificationDetailMessage = nil
                     transcriptionModelManager.refreshAllAvailableModels()
                     NotificationCenter.default.post(name: .aiProviderKeyChanged, object: nil)
@@ -497,6 +510,7 @@ struct ProviderDetailPanel: View {
     private func removeAPIKey() {
         APIKeyManager.shared.deleteAPIKey(forProvider: descriptor.providerKey)
         apiKey = ""
+        isKeyConfigured = false
         verificationSucceeded = false
         verificationMessage = nil
         verificationDetailMessage = nil
