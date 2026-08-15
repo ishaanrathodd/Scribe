@@ -11,7 +11,7 @@
 
 Scribe is a native macOS application that transcribes what you say to text almost instantly.
 
-![Scribe Mac App](https://github.com/user-attachments/assets/12367379-83e7-48a6-b52c-4488a6a04bba)
+![Scribe Mac App](<img width="1398" height="948" alt="image" src="https://github.com/user-attachments/assets/350015ca-cf6e-414b-9cfc-58ff4da382f8" />)
 
 This community edition is fully functional: no license key, trial, activation, or paid tier is required.
 
