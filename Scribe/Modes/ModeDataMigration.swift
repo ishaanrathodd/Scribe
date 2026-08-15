@@ -60,7 +60,28 @@ extension ModeManager {
             saveConfigurations()
         }
 
+        enableWebSearchForBuiltInAskModeIfNeeded()
         migrateLegacyShortcutStorageIfNeeded()
+    }
+
+    /// Ask Mode benefits from current information by default. Apply this once
+    /// to the bundled Ask Mode for people who installed it before that default
+    /// was introduced, while leaving any subsequently chosen preference alone.
+    private func enableWebSearchForBuiltInAskModeIfNeeded() {
+        let defaults = UserDefaults.standard
+        let migrationKey = "didEnableWebSearchForBuiltInAskMode"
+        guard !defaults.bool(forKey: migrationKey) else { return }
+
+        defer { defaults.set(true, forKey: migrationKey) }
+
+        guard let askTemplate = StarterModeCatalog.templates.first(where: { $0.kind == .assistant }),
+            let askIndex = configurations.firstIndex(where: { $0.id == askTemplate.id })
+        else {
+            return
+        }
+
+        configurations[askIndex].isWebSearchEnabled = true
+        saveConfigurations()
     }
     private func migrateLegacyShortcutStorageIfNeeded() {
         let defaults = UserDefaults.standard

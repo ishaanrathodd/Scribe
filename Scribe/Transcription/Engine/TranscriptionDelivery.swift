@@ -33,11 +33,21 @@ final class TranscriptionDelivery {
             return
         }
 
+        // The pipeline may have captured an Ask response configuration just
+        // before an active-window rule changes the selected mode. That turn
+        // still belongs exclusively in the assistant panel; never let the
+        // subsequently resolved paste mode duplicate its answer in the
+        // frontmost application's text field.
+        if request.responseConfig != nil {
+            await deliverResponse(request, actions: actions)
+            return
+        }
+
         if request.output.outputMode == .respond {
             // Respond is never a paste mode. If the assistant could not be
             // configured, surface that failure in the chat rather than pasting
             // the preprocessed question into the frontmost app.
-            if request.responseConfig != nil || request.responseError != nil {
+            if request.responseError != nil {
                 await deliverResponse(request, actions: actions)
             } else {
                 await actions.failResponse("Ask Mode could not be configured for the selected AI provider.")

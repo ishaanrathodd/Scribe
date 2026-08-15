@@ -201,8 +201,15 @@ class CursorPaster {
 
         // Browsers expose rich text editors as AXWebArea. A plain web page
         // has the same role, so only treat it as a paste target when macOS
-        // explicitly marks that particular web area editable.
-        guard role == "AXWebArea" else { return false }
+        // explicitly marks that particular web area editable. Apple Mail's
+        // compose body is also an AXWebArea, but it does not publish the
+        // AXEditable attribute even though it is an editable HTML content
+        // view. Accept that one known editor explicitly.
+        guard role == "AXWebArea" || role == "AXHTMLContent" else { return false }
+
+        if NSWorkspace.shared.frontmostApplication?.bundleIdentifier == "com.apple.mail" {
+            return true
+        }
 
         var editableValue: CFTypeRef?
         guard

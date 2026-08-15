@@ -655,7 +655,7 @@ class ScribeEngine: NSObject, ObservableObject {
                         modeEmoji: configuration.mode?.icon.value,
                         promptName: configuration.prompt?.title,
                         isWebSearchEnabled: configuration.isWebSearchEnabled,
-                        turnPreprocessing: AssistantTurnPreprocessing(configuration: configuration)
+                        turnPreprocessing: nil
                     )
                     AskHistoryStore.shared.save(session: self.assistantSession)
                 },

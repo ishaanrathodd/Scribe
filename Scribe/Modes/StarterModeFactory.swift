@@ -138,6 +138,7 @@ enum StarterModeFactory {
             selectedAIProvider: aiProvider?.rawValue,
             selectedAIModel: aiModel,
             outputMode: template.outputMode,
+            isWebSearchEnabled: isAssistant,
             autoSendKey: .none,
             isEnabled: true,
             isDefault: template.isDefault
