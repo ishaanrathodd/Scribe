@@ -17,14 +17,14 @@ This community edition is fully functional: no license key, trial, activation, o
 
 ## Features
 
-- 🎙️ **Accurate Transcription**: Local AI models that transcribe your voice to text with 99% accuracy, almost instantly
-- 🔒 **Privacy First**: 100% offline processing ensures your data never leaves your device
-- ⚡ **Modes**: Intelligent app detection automatically applies your perfect pre-configured settings based on the app/ URL you're on
-- 🧠 **Context Aware**: Smart AI that understands your screen content and adapts to the context
-- 🎯 **Global Shortcuts**: Configurable keyboard shortcuts for quick recording and push-to-talk functionality
-- 📝 **Personal Dictionary**: Train the AI to understand your unique terminology with custom words, industry terms, and smart text replacements
-- 🔄 **Smart Modes**: Instantly switch between AI-powered modes optimized for different writing styles and contexts
-- 🤖 **AI Assistant**: Built-in voice assistant mode for a quick chatGPT like conversational assistant
+- **Accurate Transcription**: Local AI models that transcribe your voice to text with 99% accuracy, almost instantly
+- **Privacy First**: 100% offline processing ensures your data never leaves your device
+- **Modes**: Intelligent app detection automatically applies your perfect pre-configured settings based on the app/ URL you're on
+- **Context Aware**: Smart AI that understands your screen content and adapts to the context
+- **Global Shortcuts**: Configurable keyboard shortcuts for quick recording and push-to-talk functionality
+- **Personal Dictionary**: Train the AI to understand your unique terminology with custom words, industry terms, and smart text replacements
+- **Smart Modes**: Instantly switch between AI-powered modes optimized for different writing styles and contexts
+- **AI Assistant**: Built-in voice assistant mode for a quick chatGPT like conversational assistant (enhanced in Scribe with a dedicated Ask History tab so you can get back to your past conversations again. The follow ups have also been optimised.)
 
 ## Get Started
 
@@ -63,10 +63,12 @@ If you encounter any issues or have questions, please:
 
 ## Acknowledgments
 
+### Credits
+This project is built on top of [VoiceInk](https://github.com/Beingpax/VoiceInk) by [Pax](https://github.com/Beingpax). Thank you for the amazing work!
+
 ### Core Technology
 - [whisper.cpp](https://github.com/ggerganov/whisper.cpp) - High-performance inference of OpenAI's Whisper model
 - [FluidAudio](https://github.com/FluidInference/FluidAudio) - Used for Parakeet model implementation
-- [TranscribeCpp for Swift](https://github.com/Beingpax/Transcribe-cpp-swift) - SwiftPM distribution of [transcribe.cpp](https://github.com/handy-computer/transcribe.cpp), used for Cohere Transcribe
 
 ### Essential Dependencies
 - [Sparkle](https://github.com/sparkle-project/Sparkle) - Keeping Scribe up to date
@@ -76,7 +78,6 @@ If you encounter any issues or have questions, please:
 - [Zip](https://github.com/marmelroy/Zip) - File compression and decompression utilities
 - [SelectedTextKit](https://github.com/tisfeng/SelectedTextKit) - A modern macOS library for getting selected text
 - [Swift Atomics](https://github.com/apple/swift-atomics) - Low-level atomic operations for thread-safe concurrent programming
-
 
 ---
 
