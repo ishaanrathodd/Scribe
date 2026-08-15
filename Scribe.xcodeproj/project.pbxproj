@@ -20,9 +20,9 @@
 		E1F350112F1D10D600790A2C /* whisper.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = E1A0BD052EB1E7B800266859 /* whisper.xcframework */; };
 		E1F350122F1D10D600790A2C /* whisper.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E1A0BD052EB1E7B800266859 /* whisper.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E1F511012FA3B47000F00001 /* SelectedTextKit in Frameworks */ = {isa = PBXBuildFile; productRef = E1F511032FA3B47000F00001 /* SelectedTextKit */; };
-		E1FA00062FA7000000000001 /* VoiceInkRefineXPCProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1FA00052FA7000000000001 /* VoiceInkRefineXPCProtocol.swift */; };
-		E1FA00072FA7000000000001 /* VoiceInkRefineXPCProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1FA00052FA7000000000001 /* VoiceInkRefineXPCProtocol.swift */; };
-		E1FA00082FA7000000000001 /* VoiceInkRefineXPC.xpc in Embed XPC Services */ = {isa = PBXBuildFile; fileRef = E1FA00012FA7000000000001 /* VoiceInkRefineXPC.xpc */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		E1FA00062FA7000000000001 /* ScribeRefineXPCProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1FA00052FA7000000000001 /* ScribeRefineXPCProtocol.swift */; };
+		E1FA00072FA7000000000001 /* ScribeRefineXPCProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1FA00052FA7000000000001 /* ScribeRefineXPCProtocol.swift */; };
+		E1FA00082FA7000000000001 /* ScribeRefineXPC.xpc in Embed XPC Services */ = {isa = PBXBuildFile; fileRef = E1FA00012FA7000000000001 /* ScribeRefineXPC.xpc */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E1FA00132FA7000000000001 /* MLXLLM in Frameworks */ = {isa = PBXBuildFile; productRef = E1F900102FA6000000000001 /* MLXLLM */; };
 		E1FA00142FA7000000000001 /* MLXLMCommon in Frameworks */ = {isa = PBXBuildFile; productRef = E1F900112FA6000000000001 /* MLXLMCommon */; };
 		E1FA00152FA7000000000001 /* MLXHuggingFace in Frameworks */ = {isa = PBXBuildFile; productRef = E1F900122FA6000000000001 /* MLXHuggingFace */; };
@@ -36,21 +36,21 @@
 			containerPortal = E11473A82CBE0F0A00318EE4 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = E11473AF2CBE0F0A00318EE4;
-			remoteInfo = VoiceInk;
+			remoteInfo = Scribe;
 		};
 		E11473CE2CBE0F0B00318EE4 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = E11473A82CBE0F0A00318EE4 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = E11473AF2CBE0F0A00318EE4;
-			remoteInfo = VoiceInk;
+			remoteInfo = Scribe;
 		};
 		E1FA00122FA7000000000001 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = E11473A82CBE0F0A00318EE4 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = E1FA000D2FA7000000000001;
-			remoteInfo = VoiceInkRefineXPC;
+			remoteInfo = ScribeRefineXPC;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -73,7 +73,7 @@
 			dstPath = "$(CONTENTS_FOLDER_PATH)/XPCServices";
 			dstSubfolderSpec = 16;
 			files = (
-				E1FA00082FA7000000000001 /* VoiceInkRefineXPC.xpc in Embed XPC Services */,
+				E1FA00082FA7000000000001 /* ScribeRefineXPC.xpc in Embed XPC Services */,
 			);
 			name = "Embed XPC Services";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -81,59 +81,59 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		E11473B02CBE0F0A00318EE4 /* VoiceInk.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VoiceInk.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		E11473C32CBE0F0B00318EE4 /* VoiceInkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VoiceInkTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		E11473CD2CBE0F0B00318EE4 /* VoiceInkUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VoiceInkUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E11473B02CBE0F0A00318EE4 /* Scribe.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Scribe.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E11473C32CBE0F0B00318EE4 /* ScribeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ScribeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		E11473CD2CBE0F0B00318EE4 /* ScribeUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ScribeUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		E161D4A02F41ECB90086F83D /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
-		E1A0BD052EB1E7B800266859 /* whisper.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = whisper.xcframework; path = "$(SRCROOT)/../voiceink-dependencies/whisper.cpp/build-apple/whisper.xcframework"; sourceTree = "<group>"; };
+		E1A0BD052EB1E7B800266859 /* whisper.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = whisper.xcframework; path = "$(SRCROOT)/../scribe-dependencies/whisper.cpp/build-apple/whisper.xcframework"; sourceTree = "<group>"; };
 		E1B2DCAA2E3DE70A008DFD68 /* whisper.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = whisper.xcframework; path = "../whisper.cpp/build-apple/whisper.xcframework"; sourceTree = "<group>"; };
 		E1CE28772E4336150082B758 /* whisper.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = whisper.xcframework; path = "../build-apple/whisper.xcframework"; sourceTree = "<group>"; };
-		E1FA00012FA7000000000001 /* VoiceInkRefineXPC.xpc */ = {isa = PBXFileReference; explicitFileType = "wrapper.xpc-service"; includeInIndex = 0; path = VoiceInkRefineXPC.xpc; sourceTree = BUILT_PRODUCTS_DIR; };
-		E1FA00052FA7000000000001 /* VoiceInkRefineXPCProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceInkRefineXPCProtocol.swift; sourceTree = "<group>"; };
+		E1FA00012FA7000000000001 /* ScribeRefineXPC.xpc */ = {isa = PBXFileReference; explicitFileType = "wrapper.xpc-service"; includeInIndex = 0; path = ScribeRefineXPC.xpc; sourceTree = BUILT_PRODUCTS_DIR; };
+		E1FA00052FA7000000000001 /* ScribeRefineXPCProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScribeRefineXPCProtocol.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		E1D83DDD2FE7892500FCFC07 /* Exceptions for "VoiceInk" folder in "VoiceInk" target */ = {
+		E1D83DDD2FE7892500FCFC07 /* Exceptions for "Scribe" folder in "Scribe" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = E11473AF2CBE0F0A00318EE4 /* VoiceInk */;
+			target = E11473AF2CBE0F0A00318EE4 /* Scribe */;
 		};
-		E1FA00032FA7000000000001 /* Exceptions for "VoiceInkRefineXPC" folder in "VoiceInkRefineXPC" target */ = {
+		E1FA00032FA7000000000001 /* Exceptions for "ScribeRefineXPC" folder in "ScribeRefineXPC" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = E1FA000D2FA7000000000001 /* VoiceInkRefineXPC */;
+			target = E1FA000D2FA7000000000001 /* ScribeRefineXPC */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		E11473B22CBE0F0A00318EE4 /* VoiceInk */ = {
+		E11473B22CBE0F0A00318EE4 /* Scribe */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				E1D83DDD2FE7892500FCFC07 /* Exceptions for "VoiceInk" folder in "VoiceInk" target */,
+				E1D83DDD2FE7892500FCFC07 /* Exceptions for "Scribe" folder in "Scribe" target */,
 			);
-			path = VoiceInk;
+			path = Scribe;
 			sourceTree = "<group>";
 		};
-		E11473C62CBE0F0B00318EE4 /* VoiceInkTests */ = {
+		E11473C62CBE0F0B00318EE4 /* ScribeTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = VoiceInkTests;
+			path = ScribeTests;
 			sourceTree = "<group>";
 		};
-		E11473D02CBE0F0B00318EE4 /* VoiceInkUITests */ = {
+		E11473D02CBE0F0B00318EE4 /* ScribeUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = VoiceInkUITests;
+			path = ScribeUITests;
 			sourceTree = "<group>";
 		};
-		E1FA00022FA7000000000001 /* VoiceInkRefineXPC */ = {
+		E1FA00022FA7000000000001 /* ScribeRefineXPC */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				E1FA00032FA7000000000001 /* Exceptions for "VoiceInkRefineXPC" folder in "VoiceInkRefineXPC" target */,
+				E1FA00032FA7000000000001 /* Exceptions for "ScribeRefineXPC" folder in "ScribeRefineXPC" target */,
 			);
-			path = VoiceInkRefineXPC;
+			path = ScribeRefineXPC;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -189,11 +189,11 @@
 		E11473A72CBE0F0A00318EE4 = {
 			isa = PBXGroup;
 			children = (
-				E11473B22CBE0F0A00318EE4 /* VoiceInk */,
-				E1FA00022FA7000000000001 /* VoiceInkRefineXPC */,
+				E11473B22CBE0F0A00318EE4 /* Scribe */,
+				E1FA00022FA7000000000001 /* ScribeRefineXPC */,
 				E1FA00042FA7000000000001 /* Shared */,
-				E11473C62CBE0F0B00318EE4 /* VoiceInkTests */,
-				E11473D02CBE0F0B00318EE4 /* VoiceInkUITests */,
+				E11473C62CBE0F0B00318EE4 /* ScribeTests */,
+				E11473D02CBE0F0B00318EE4 /* ScribeUITests */,
 				E114741C2CBE1DE200318EE4 /* Frameworks */,
 				E11473B12CBE0F0A00318EE4 /* Products */,
 			);
@@ -202,10 +202,10 @@
 		E11473B12CBE0F0A00318EE4 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				E11473B02CBE0F0A00318EE4 /* VoiceInk.app */,
-				E11473C32CBE0F0B00318EE4 /* VoiceInkTests.xctest */,
-				E11473CD2CBE0F0B00318EE4 /* VoiceInkUITests.xctest */,
-				E1FA00012FA7000000000001 /* VoiceInkRefineXPC.xpc */,
+				E11473B02CBE0F0A00318EE4 /* Scribe.app */,
+				E11473C32CBE0F0B00318EE4 /* ScribeTests.xctest */,
+				E11473CD2CBE0F0B00318EE4 /* ScribeUITests.xctest */,
+				E1FA00012FA7000000000001 /* ScribeRefineXPC.xpc */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -224,7 +224,7 @@
 		E1FA00042FA7000000000001 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
-				E1FA00052FA7000000000001 /* VoiceInkRefineXPCProtocol.swift */,
+				E1FA00052FA7000000000001 /* ScribeRefineXPCProtocol.swift */,
 			);
 			path = Shared;
 			sourceTree = "<group>";
@@ -232,9 +232,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		E11473AF2CBE0F0A00318EE4 /* VoiceInk */ = {
+		E11473AF2CBE0F0A00318EE4 /* Scribe */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = E11473D72CBE0F0B00318EE4 /* Build configuration list for PBXNativeTarget "VoiceInk" */;
+			buildConfigurationList = E11473D72CBE0F0B00318EE4 /* Build configuration list for PBXNativeTarget "Scribe" */;
 			buildPhases = (
 				E11473AC2CBE0F0A00318EE4 /* Sources */,
 				E11473AD2CBE0F0A00318EE4 /* Frameworks */,
@@ -248,9 +248,9 @@
 				E1FA00112FA7000000000001 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				E11473B22CBE0F0A00318EE4 /* VoiceInk */,
+				E11473B22CBE0F0A00318EE4 /* Scribe */,
 			);
-			name = VoiceInk;
+			name = Scribe;
 			packageProductDependencies = (
 				E1ADD45E2CC544F100303ECB /* Sparkle */,
 				E1D7EF982E35E16C00640029 /* MediaRemoteAdapter */,
@@ -262,13 +262,13 @@
 				E1F511032FA3B47000F00001 /* SelectedTextKit */,
 				E13461EC2FD1CCCD005B6A81 /* MarkdownUI */,
 			);
-			productName = VoiceInk;
-			productReference = E11473B02CBE0F0A00318EE4 /* VoiceInk.app */;
+			productName = Scribe;
+			productReference = E11473B02CBE0F0A00318EE4 /* Scribe.app */;
 			productType = "com.apple.product-type.application";
 		};
-		E11473C22CBE0F0B00318EE4 /* VoiceInkTests */ = {
+		E11473C22CBE0F0B00318EE4 /* ScribeTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = E11473DA2CBE0F0B00318EE4 /* Build configuration list for PBXNativeTarget "VoiceInkTests" */;
+			buildConfigurationList = E11473DA2CBE0F0B00318EE4 /* Build configuration list for PBXNativeTarget "ScribeTests" */;
 			buildPhases = (
 				E11473BF2CBE0F0B00318EE4 /* Sources */,
 				E11473C02CBE0F0B00318EE4 /* Frameworks */,
@@ -280,18 +280,18 @@
 				E11473C52CBE0F0B00318EE4 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				E11473C62CBE0F0B00318EE4 /* VoiceInkTests */,
+				E11473C62CBE0F0B00318EE4 /* ScribeTests */,
 			);
-			name = VoiceInkTests;
+			name = ScribeTests;
 			packageProductDependencies = (
 			);
-			productName = VoiceInkTests;
-			productReference = E11473C32CBE0F0B00318EE4 /* VoiceInkTests.xctest */;
+			productName = ScribeTests;
+			productReference = E11473C32CBE0F0B00318EE4 /* ScribeTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		E11473CC2CBE0F0B00318EE4 /* VoiceInkUITests */ = {
+		E11473CC2CBE0F0B00318EE4 /* ScribeUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = E11473DD2CBE0F0B00318EE4 /* Build configuration list for PBXNativeTarget "VoiceInkUITests" */;
+			buildConfigurationList = E11473DD2CBE0F0B00318EE4 /* Build configuration list for PBXNativeTarget "ScribeUITests" */;
 			buildPhases = (
 				E11473C92CBE0F0B00318EE4 /* Sources */,
 				E11473CA2CBE0F0B00318EE4 /* Frameworks */,
@@ -303,18 +303,18 @@
 				E11473CF2CBE0F0B00318EE4 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				E11473D02CBE0F0B00318EE4 /* VoiceInkUITests */,
+				E11473D02CBE0F0B00318EE4 /* ScribeUITests */,
 			);
-			name = VoiceInkUITests;
+			name = ScribeUITests;
 			packageProductDependencies = (
 			);
-			productName = VoiceInkUITests;
-			productReference = E11473CD2CBE0F0B00318EE4 /* VoiceInkUITests.xctest */;
+			productName = ScribeUITests;
+			productReference = E11473CD2CBE0F0B00318EE4 /* ScribeUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
-		E1FA000D2FA7000000000001 /* VoiceInkRefineXPC */ = {
+		E1FA000D2FA7000000000001 /* ScribeRefineXPC */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = E1FA00102FA7000000000001 /* Build configuration list for PBXNativeTarget "VoiceInkRefineXPC" */;
+			buildConfigurationList = E1FA00102FA7000000000001 /* Build configuration list for PBXNativeTarget "ScribeRefineXPC" */;
 			buildPhases = (
 				E1FA00092FA7000000000001 /* Sources */,
 				E1FA000A2FA7000000000001 /* Frameworks */,
@@ -325,9 +325,9 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				E1FA00022FA7000000000001 /* VoiceInkRefineXPC */,
+				E1FA00022FA7000000000001 /* ScribeRefineXPC */,
 			);
-			name = VoiceInkRefineXPC;
+			name = ScribeRefineXPC;
 			packageProductDependencies = (
 				E1F900102FA6000000000001 /* MLXLLM */,
 				E1F900112FA6000000000001 /* MLXLMCommon */,
@@ -335,8 +335,8 @@
 				E1F900132FA6000000000001 /* HuggingFace */,
 				E1F900142FA6000000000001 /* Tokenizers */,
 			);
-			productName = VoiceInkRefineXPC;
-			productReference = E1FA00012FA7000000000001 /* VoiceInkRefineXPC.xpc */;
+			productName = ScribeRefineXPC;
+			productReference = E1FA00012FA7000000000001 /* ScribeRefineXPC.xpc */;
 			productType = "com.apple.product-type.xpc-service";
 		};
 /* End PBXNativeTarget section */
@@ -365,7 +365,7 @@
 					};
 				};
 			};
-			buildConfigurationList = E11473AB2CBE0F0A00318EE4 /* Build configuration list for PBXProject "VoiceInk" */;
+			buildConfigurationList = E11473AB2CBE0F0A00318EE4 /* Build configuration list for PBXProject "Scribe" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -395,10 +395,10 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				E11473AF2CBE0F0A00318EE4 /* VoiceInk */,
-				E11473C22CBE0F0B00318EE4 /* VoiceInkTests */,
-				E11473CC2CBE0F0B00318EE4 /* VoiceInkUITests */,
-				E1FA000D2FA7000000000001 /* VoiceInkRefineXPC */,
+				E11473AF2CBE0F0A00318EE4 /* Scribe */,
+				E11473C22CBE0F0B00318EE4 /* ScribeTests */,
+				E11473CC2CBE0F0B00318EE4 /* ScribeUITests */,
+				E1FA000D2FA7000000000001 /* ScribeRefineXPC */,
 			);
 		};
 /* End PBXProject section */
@@ -439,7 +439,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E1FA00062FA7000000000001 /* VoiceInkRefineXPCProtocol.swift in Sources */,
+				E1FA00062FA7000000000001 /* ScribeRefineXPCProtocol.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -461,7 +461,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E1FA00072FA7000000000001 /* VoiceInkRefineXPCProtocol.swift in Sources */,
+				E1FA00072FA7000000000001 /* ScribeRefineXPCProtocol.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -470,17 +470,17 @@
 /* Begin PBXTargetDependency section */
 		E11473C52CBE0F0B00318EE4 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = E11473AF2CBE0F0A00318EE4 /* VoiceInk */;
+			target = E11473AF2CBE0F0A00318EE4 /* Scribe */;
 			targetProxy = E11473C42CBE0F0B00318EE4 /* PBXContainerItemProxy */;
 		};
 		E11473CF2CBE0F0B00318EE4 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = E11473AF2CBE0F0A00318EE4 /* VoiceInk */;
+			target = E11473AF2CBE0F0A00318EE4 /* Scribe */;
 			targetProxy = E11473CE2CBE0F0B00318EE4 /* PBXContainerItemProxy */;
 		};
 		E1FA00112FA7000000000001 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = E1FA000D2FA7000000000001 /* VoiceInkRefineXPC */;
+			target = E1FA000D2FA7000000000001 /* ScribeRefineXPC */;
 			targetProxy = E1FA00122FA7000000000001 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -523,7 +523,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = V6J6A3VWY2;
+				DEVELOPMENT_TEAM = RGRXBP328X;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -590,7 +590,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = V6J6A3VWY2;
+				DEVELOPMENT_TEAM = RGRXBP328X;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -619,18 +619,18 @@
 				ARCHS = "$(ARCHS_STANDARD)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = VoiceInk/VoiceInk.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Scribe/Scribe.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 211;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_ASSET_PATHS = "\"VoiceInk/Preview Content\"";
-				DEVELOPMENT_TEAM = V6J6A3VWY2;
+				DEVELOPMENT_ASSET_PATHS = "\"Scribe/Preview Content\"";
+				DEVELOPMENT_TEAM = RGRXBP328X;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = VoiceInk/Info.plist;
+				INFOPLIST_FILE = Scribe/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Scribe;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -640,7 +640,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.4;
 				MARKETING_VERSION = 2.11;
-				PRODUCT_BUNDLE_IDENTIFIER = com.prakashjoshipax.VoiceInk;
+				PRODUCT_BUNDLE_IDENTIFIER = com.prakashjoshipax.Scribe;
 				PRODUCT_NAME = Scribe;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG ENABLE_NATIVE_SPEECH_ANALYZER $(inherited)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -654,18 +654,18 @@
 				ARCHS = "$(ARCHS_STANDARD)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = VoiceInk/VoiceInk.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Scribe/Scribe.entitlements;
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 211;
 				DEAD_CODE_STRIPPING = YES;
-				DEVELOPMENT_ASSET_PATHS = "\"VoiceInk/Preview Content\"";
-				DEVELOPMENT_TEAM = V6J6A3VWY2;
+				DEVELOPMENT_ASSET_PATHS = "\"Scribe/Preview Content\"";
+				DEVELOPMENT_TEAM = RGRXBP328X;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = VoiceInk/Info.plist;
+				INFOPLIST_FILE = Scribe/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Scribe;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -675,7 +675,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.4;
 				MARKETING_VERSION = 2.11;
-				PRODUCT_BUNDLE_IDENTIFIER = com.prakashjoshipax.VoiceInk;
+				PRODUCT_BUNDLE_IDENTIFIER = com.prakashjoshipax.Scribe;
 				PRODUCT_NAME = Scribe;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "ENABLE_NATIVE_SPEECH_ANALYZER $(inherited)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -693,11 +693,11 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.4;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.prakashjoshipax.VoiceInkTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.prakashjoshipax.ScribeTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VoiceInk.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/VoiceInk";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Scribe.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Scribe";
 			};
 			name = Debug;
 		};
@@ -711,11 +711,11 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 14.4;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.prakashjoshipax.VoiceInkTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.prakashjoshipax.ScribeTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/VoiceInk.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/VoiceInk";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Scribe.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Scribe";
 			};
 			name = Release;
 		};
@@ -727,11 +727,11 @@
 				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.prakashjoshipax.VoiceInkUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.prakashjoshipax.ScribeUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TEST_TARGET_NAME = VoiceInk;
+				TEST_TARGET_NAME = Scribe;
 			};
 			name = Debug;
 		};
@@ -743,11 +743,11 @@
 				DEAD_CODE_STRIPPING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.prakashjoshipax.VoiceInkUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.prakashjoshipax.ScribeUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TEST_TARGET_NAME = VoiceInk;
+				TEST_TARGET_NAME = Scribe;
 			};
 			name = Release;
 		};
@@ -762,15 +762,15 @@
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = VoiceInkRefineXPC/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = VoiceInkRefineXPC;
+				INFOPLIST_FILE = ScribeRefineXPC/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ScribeRefineXPC;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.4;
 				MARKETING_VERSION = 2.11;
-				PRODUCT_BUNDLE_IDENTIFIER = com.prakashjoshipax.VoiceInk.RefineXPC;
+				PRODUCT_BUNDLE_IDENTIFIER = com.prakashjoshipax.Scribe.RefineXPC;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
@@ -790,15 +790,15 @@
 				ENABLE_APP_SANDBOX = NO;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = VoiceInkRefineXPC/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = VoiceInkRefineXPC;
+				INFOPLIST_FILE = ScribeRefineXPC/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ScribeRefineXPC;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.4;
 				MARKETING_VERSION = 2.11;
-				PRODUCT_BUNDLE_IDENTIFIER = com.prakashjoshipax.VoiceInk.RefineXPC;
+				PRODUCT_BUNDLE_IDENTIFIER = com.prakashjoshipax.Scribe.RefineXPC;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -809,7 +809,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		E11473AB2CBE0F0A00318EE4 /* Build configuration list for PBXProject "VoiceInk" */ = {
+		E11473AB2CBE0F0A00318EE4 /* Build configuration list for PBXProject "Scribe" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				E11473D52CBE0F0B00318EE4 /* Debug */,
@@ -818,7 +818,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		E11473D72CBE0F0B00318EE4 /* Build configuration list for PBXNativeTarget "VoiceInk" */ = {
+		E11473D72CBE0F0B00318EE4 /* Build configuration list for PBXNativeTarget "Scribe" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				E11473D82CBE0F0B00318EE4 /* Debug */,
@@ -827,7 +827,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		E11473DA2CBE0F0B00318EE4 /* Build configuration list for PBXNativeTarget "VoiceInkTests" */ = {
+		E11473DA2CBE0F0B00318EE4 /* Build configuration list for PBXNativeTarget "ScribeTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				E11473DB2CBE0F0B00318EE4 /* Debug */,
@@ -836,7 +836,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		E11473DD2CBE0F0B00318EE4 /* Build configuration list for PBXNativeTarget "VoiceInkUITests" */ = {
+		E11473DD2CBE0F0B00318EE4 /* Build configuration list for PBXNativeTarget "ScribeUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				E11473DE2CBE0F0B00318EE4 /* Debug */,
@@ -845,7 +845,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		E1FA00102FA7000000000001 /* Build configuration list for PBXNativeTarget "VoiceInkRefineXPC" */ = {
+		E1FA00102FA7000000000001 /* Build configuration list for PBXNativeTarget "ScribeRefineXPC" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				E1FA000E2FA7000000000001 /* Debug */,

@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-PROFILE_NAME="${VOICEINK_NOTARY_PROFILE:-VoiceInk-Notarization}"
+PROFILE_NAME="${SCRIBE_NOTARY_PROFILE:-Scribe-Notarization}"
 TEAM_ID="V6J6A3VWY2"
 
 printf 'Apple Developer Apple ID: '

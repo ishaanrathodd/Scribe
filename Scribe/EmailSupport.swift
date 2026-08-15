@@ -4,7 +4,7 @@ import SwiftUI
 
 @MainActor
 struct EmailSupport {
-    private static let supportEmailAddress = "support@tryvoiceink.com"
+    private static let supportEmailAddress = "support@tryscribe.com"
     private static let supportEmailSubject = "Scribe Support Request"
 
     static func generateSupportEmailBody() -> String {
@@ -24,7 +24,7 @@ struct EmailSupport {
 
 
             ## 📋 COMMON ISSUES:
-            Check out our Common Issues page before sending an email: https://tryvoiceink.com/common-issues
+            Check out our Common Issues page before sending an email: https://tryscribe.com/common-issues
             ------------------------
 
             System Information:

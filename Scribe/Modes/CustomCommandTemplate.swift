@@ -28,7 +28,7 @@ enum CustomCommandTemplate: String, CaseIterable, Identifiable {
         switch self {
         case .pasteAndPressTab:
             return """
-                printf "%s" "$VOICEINK_TRANSCRIPT" | pbcopy
+                printf "%s" "$SCRIBE_TRANSCRIPT" | pbcopy
                 osascript <<'APPLESCRIPT'
                 tell application "System Events"
                     keystroke "v" using command down
@@ -39,7 +39,7 @@ enum CustomCommandTemplate: String, CaseIterable, Identifiable {
                 """
         case .lowercaseAndPaste:
             return """
-                printf "%s" "$VOICEINK_TRANSCRIPT" | tr '[:upper:]' '[:lower:]' | pbcopy
+                printf "%s" "$SCRIBE_TRANSCRIPT" | tr '[:upper:]' '[:lower:]' | pbcopy
                 osascript <<'APPLESCRIPT'
                 tell application "System Events"
                     keystroke "v" using command down
@@ -48,7 +48,7 @@ enum CustomCommandTemplate: String, CaseIterable, Identifiable {
                 """
         case .removeTrailingPeriodAndPaste:
             return """
-                printf "%s" "$VOICEINK_TRANSCRIPT" | perl -CS -pe 's/(?<!\\.)\\.(\\s*)$/$1/' | pbcopy
+                printf "%s" "$SCRIBE_TRANSCRIPT" | perl -CS -pe 's/(?<!\\.)\\.(\\s*)$/$1/' | pbcopy
                 osascript <<'APPLESCRIPT'
                 tell application "System Events"
                     keystroke "v" using command down
@@ -60,11 +60,11 @@ enum CustomCommandTemplate: String, CaseIterable, Identifiable {
                 mkdir -p "$HOME/Documents/Scribe"
                 journal="$HOME/Documents/Scribe/journal.md"
                 timestamp=$(date "+%Y-%m-%d %H:%M")
-                printf -- "- **%s** %s\\n" "$timestamp" "$VOICEINK_TRANSCRIPT" >> "$journal"
+                printf -- "- **%s** %s\\n" "$timestamp" "$SCRIBE_TRANSCRIPT" >> "$journal"
                 """
         case .searchWeb:
             return """
-                query=$(printf "%s" "$VOICEINK_TRANSCRIPT" | LC_ALL=C od -An -tx1 -v | tr -d ' \\n' | sed 's/../%&/g')
+                query=$(printf "%s" "$SCRIBE_TRANSCRIPT" | LC_ALL=C od -An -tx1 -v | tr -d ' \\n' | sed 's/../%&/g')
                 open "https://www.google.com/search?q=$query"
                 """
         }

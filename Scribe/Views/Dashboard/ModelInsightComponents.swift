@@ -80,7 +80,7 @@ struct InsightPeriodPicker: View {
 
 enum ModelLinks {
     static func openRecommendedModels() {
-        if let url = URL(string: "https://tryvoiceink.com/docs/recommended-models") {
+        if let url = URL(string: "https://tryscribe.com/docs/recommended-models") {
             NSWorkspace.shared.open(url)
         }
     }
@@ -481,7 +481,7 @@ private struct ModelProviderIdentity {
         let fallbackSystemImage: String
 
         switch provider {
-        case .voiceInkRefine:
+        case .scribeRefine:
             fallbackSystemImage = "sparkles"
         case .ollama:
             fallbackSystemImage = "server.rack"

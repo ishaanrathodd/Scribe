@@ -41,7 +41,7 @@ class RecordingShortcutManager: ObservableObject {
         }
     }
 
-    private var engine: VoiceInkEngine
+    private var engine: ScribeEngine
     private var recorderUIManager: RecorderUIManager
     private var recorderPanelShortcutManager: RecorderPanelShortcutManager
     private let modeShortcutManager: ModeShortcutManager
@@ -89,7 +89,7 @@ class RecordingShortcutManager: ObservableObject {
         recordingState != .transcribing && recordingState != .enhancing && recordingState != .busy
     }
 
-    init(engine: VoiceInkEngine, recorderUIManager: RecorderUIManager) {
+    init(engine: ScribeEngine, recorderUIManager: RecorderUIManager) {
         ShortcutMigration.migrateLegacyShortcutsIfNeeded()
 
         self.primaryRecordingShortcut = ShortcutMigration.migrateShortcutSelection(

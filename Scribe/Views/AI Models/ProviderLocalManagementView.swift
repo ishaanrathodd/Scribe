@@ -207,7 +207,7 @@ struct LocalEnhancementServiceManagementView: View {
                 }
             }
 
-            Text("Variables: VOICEINK_SYSTEM_PROMPT, VOICEINK_USER_PROMPT, VOICEINK_FULL_PROMPT")
+            Text("Variables: SCRIBE_SYSTEM_PROMPT, SCRIBE_USER_PROMPT, SCRIBE_FULL_PROMPT")
                 .font(.system(size: 11, design: .monospaced))
                 .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)

@@ -189,7 +189,7 @@ class CustomSoundManager: ObservableObject {
         else {
             return nil
         }
-        return appSupport.appendingPathComponent("VoiceInk/CustomSounds")
+        return appSupport.appendingPathComponent("Scribe/CustomSounds")
     }
 
     private func createCustomSoundsDirectoryIfNeeded() {

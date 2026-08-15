@@ -1,6 +1,6 @@
 <div align="center">
-  <img src="VoiceInk/Assets.xcassets/AppIcon.appiconset/256-mac.png" width="180" height="180" />
-  <h1>VoiceInk</h1>
+  <img src="Scribe/Assets.xcassets/AppIcon.appiconset/256-mac.png" width="180" height="180" />
+  <h1>Scribe</h1>
   <p>Voice to text app for macOS to transcribe what you say to text almost instantly</p>
 
   [![License](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
@@ -9,9 +9,9 @@
 
 ---
 
-VoiceInk is a native macOS application that transcribes what you say to text almost instantly.
+Scribe is a native macOS application that transcribes what you say to text almost instantly.
 
-![VoiceInk Mac App](https://github.com/user-attachments/assets/12367379-83e7-48a6-b52c-4488a6a04bba)
+![Scribe Mac App](https://github.com/user-attachments/assets/12367379-83e7-48a6-b52c-4488a6a04bba)
 
 This community edition is fully functional: no license key, trial, activation, or paid tier is required.
 
@@ -38,12 +38,12 @@ Build and run the complete app locally by following [BUILDING.md](BUILDING.md).
 ## Documentation
 
 - [Building from Source](BUILDING.md) - Detailed instructions for building the project
-- [Contributing Guidelines](CONTRIBUTING.md) - How to contribute to VoiceInk
+- [Contributing Guidelines](CONTRIBUTING.md) - How to contribute to Scribe
 - [Code of Conduct](CODE_OF_CONDUCT.md) - Our community standards
 
 ## Contributing
 
-This project is **not accepting pull requests** at this time. You're welcome to fork and modify VoiceInk for your own use.
+This project is **not accepting pull requests** at this time. You're welcome to fork and modify Scribe for your own use.
 
 You can still contribute by:
 - Suggesting features or enhancements
@@ -69,7 +69,7 @@ If you encounter any issues or have questions, please:
 - [TranscribeCpp for Swift](https://github.com/Beingpax/Transcribe-cpp-swift) - SwiftPM distribution of [transcribe.cpp](https://github.com/handy-computer/transcribe.cpp), used for Cohere Transcribe
 
 ### Essential Dependencies
-- [Sparkle](https://github.com/sparkle-project/Sparkle) - Keeping VoiceInk up to date
+- [Sparkle](https://github.com/sparkle-project/Sparkle) - Keeping Scribe up to date
 - [KeyboardShortcuts](https://github.com/sindresorhus/KeyboardShortcuts) - User-customizable keyboard shortcuts
 - [LaunchAtLogin](https://github.com/sindresorhus/LaunchAtLogin) - Launch at login functionality
 - [MediaRemoteAdapter](https://github.com/ejbills/mediaremote-adapter) - Media playback control during recording

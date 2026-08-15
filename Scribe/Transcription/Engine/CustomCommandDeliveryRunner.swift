@@ -11,7 +11,7 @@ struct CustomCommandDeliveryContext {
 
     var environment: [String: String] {
         [
-            "VOICEINK_TRANSCRIPT": transcript
+            "SCRIBE_TRANSCRIPT": transcript
         ]
     }
 }
@@ -53,7 +53,7 @@ enum CustomCommandDeliveryError: Error, LocalizedError {
 
 enum CustomCommandDeliveryRunner {
     private static let logger = Logger(
-        subsystem: "com.prakashjoshipax.voiceink", category: "CustomCommandDeliveryRunner")
+        subsystem: "com.prakashjoshipax.scribe", category: "CustomCommandDeliveryRunner")
 
     static func run(
         command: String,

@@ -1,7 +1,7 @@
 import Foundation
 
-final class VoiceInkRefineXPCService: NSObject, VoiceInkRefineXPCProtocol {
-    private let engine = VoiceInkRefineInferenceEngine()
+final class ScribeRefineXPCService: NSObject, ScribeRefineXPCProtocol {
+    private let engine = ScribeRefineInferenceEngine()
     private let taskLock = NSLock()
     private var activeTasks: [UUID: Task<Void, Never>] = [:]
     private var shutdownTask: Task<Void, Never>?
@@ -11,15 +11,15 @@ final class VoiceInkRefineXPCService: NSObject, VoiceInkRefineXPCProtocol {
         _ requestData: NSData,
         withReply reply: @escaping (NSError?) -> Void
     ) {
-        let request: VoiceInkRefinePrepareRequest
+        let request: ScribeRefinePrepareRequest
         do {
             request = try JSONDecoder().decode(
-                VoiceInkRefinePrepareRequest.self,
+                ScribeRefinePrepareRequest.self,
                 from: requestData as Data
             )
         } catch {
             reply(
-                makeVoiceInkRefineXPCError(
+                makeScribeRefineXPCError(
                     .invalidRequest,
                     description: "Sotto Cleanup received an invalid prepare request."
                 )
@@ -37,7 +37,7 @@ final class VoiceInkRefineXPCService: NSObject, VoiceInkRefineXPCProtocol {
                 reply(nil)
             } catch {
                 reply(
-                    makeVoiceInkRefineXPCError(
+                    makeScribeRefineXPCError(
                         .inferenceFailed,
                         description: error.localizedDescription
                     )
@@ -46,7 +46,7 @@ final class VoiceInkRefineXPCService: NSObject, VoiceInkRefineXPCProtocol {
         }
         guard didStart else {
             reply(
-                makeVoiceInkRefineXPCError(
+                makeScribeRefineXPCError(
                     .connectionFailed,
                     description: "Sotto Cleanup is shutting down."
                 )
@@ -59,16 +59,16 @@ final class VoiceInkRefineXPCService: NSObject, VoiceInkRefineXPCProtocol {
         _ requestData: NSData,
         withReply reply: @escaping (NSData?, NSError?) -> Void
     ) {
-        let request: VoiceInkRefineEnhanceRequest
+        let request: ScribeRefineEnhanceRequest
         do {
             request = try JSONDecoder().decode(
-                VoiceInkRefineEnhanceRequest.self,
+                ScribeRefineEnhanceRequest.self,
                 from: requestData as Data
             )
         } catch {
             reply(
                 nil,
-                makeVoiceInkRefineXPCError(
+                makeScribeRefineXPCError(
                     .invalidRequest,
                     description: "Sotto Cleanup received an invalid enhancement request."
                 )
@@ -84,7 +84,7 @@ final class VoiceInkRefineXPCService: NSObject, VoiceInkRefineXPCProtocol {
                     modelDirectory: URL(fileURLWithPath: request.modelDirectoryPath),
                     systemPrompt: request.systemPrompt
                 )
-                let response = VoiceInkRefineEnhanceResponse(
+                let response = ScribeRefineEnhanceResponse(
                     requestID: request.requestID,
                     output: output
                 )
@@ -93,7 +93,7 @@ final class VoiceInkRefineXPCService: NSObject, VoiceInkRefineXPCProtocol {
             } catch {
                 reply(
                     nil,
-                    makeVoiceInkRefineXPCError(
+                    makeScribeRefineXPCError(
                         .inferenceFailed,
                         description: error.localizedDescription
                     )
@@ -103,7 +103,7 @@ final class VoiceInkRefineXPCService: NSObject, VoiceInkRefineXPCProtocol {
         guard didStart else {
             reply(
                 nil,
-                makeVoiceInkRefineXPCError(
+                makeScribeRefineXPCError(
                     .connectionFailed,
                     description: "Sotto Cleanup is shutting down."
                 )

@@ -48,7 +48,7 @@ extension AIService {
                 temperature: 0.3,
                 timeout: timeout
             )
-        case .voiceInkRefine:
+        case .scribeRefine:
             throw EnhancementError.customError(
                 String(localized: "Sotto Cleanup only supports transcript cleanup.")
             )

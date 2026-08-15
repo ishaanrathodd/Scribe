@@ -29,7 +29,7 @@ struct ModelManagementView: View {
     @StateObject private var customModelManager = CustomCloudModelManager.shared
     @StateObject private var customAIProviderManager = CustomAIProviderManager.shared
     @ObservedObject private var warmupCoordinator = WhisperModelWarmupCoordinator.shared
-    @ObservedObject private var voiceInkRefineService = VoiceInkRefineService.shared
+    @ObservedObject private var scribeRefineService = ScribeRefineService.shared
 
     @State private var selectedFilter: ModelFilter = .local
     @State private var activePanel: ModelManagementPanel?
@@ -282,9 +282,9 @@ struct ModelManagementView: View {
             }
 
             Section {
-                VoiceInkRefineModelCardView(
-                    service: voiceInkRefineService,
-                    deleteAction: confirmDeleteVoiceInkRefineModel
+                ScribeRefineModelCardView(
+                    service: scribeRefineService,
+                    deleteAction: confirmDeleteScribeRefineModel
                 )
 
                 ForEach(appleSpeechModels, id: \.id) { model in
@@ -334,7 +334,7 @@ struct ModelManagementView: View {
                 .buttonStyle(.bordered)
             InfoTip(
                 "Add a custom fine-tuned whisper model to use with Scribe. Select the downloaded .bin file.",
-                learnMoreURL: "https://tryvoiceink.com/docs/custom-local-whisper-models"
+                learnMoreURL: "https://tryscribe.com/docs/custom-local-whisper-models"
             )
             .help("Read more about custom local models")
             Spacer()
@@ -427,14 +427,14 @@ struct ModelManagementView: View {
         isShowingDeleteAlert = true
     }
 
-    private func confirmDeleteVoiceInkRefineModel() {
+    private func confirmDeleteScribeRefineModel() {
         alertTitle = String(localized: "Delete Sotto Cleanup?")
         alertMessage = String(
             localized: "The model will need to be downloaded again before a Mode can use it."
         )
         deleteActionClosure = {
             Task {
-                await voiceInkRefineService.deleteModel()
+                await scribeRefineService.deleteModel()
             }
         }
         isShowingDeleteAlert = true

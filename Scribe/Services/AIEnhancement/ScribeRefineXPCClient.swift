@@ -1,7 +1,7 @@
 import Foundation
 import OSLog
 
-private final class VoiceInkRefineXPCReply<Value>: @unchecked Sendable {
+private final class ScribeRefineXPCReply<Value>: @unchecked Sendable {
     private let lock = NSLock()
     private var continuation: CheckedContinuation<Value, Error>?
 
@@ -19,7 +19,7 @@ private final class VoiceInkRefineXPCReply<Value>: @unchecked Sendable {
     }
 }
 
-private final class VoiceInkRefineXPCCancellationHandle: @unchecked Sendable {
+private final class ScribeRefineXPCCancellationHandle: @unchecked Sendable {
     private let connection: NSXPCConnection
 
     init(_ connection: NSXPCConnection) {
@@ -31,12 +31,12 @@ private final class VoiceInkRefineXPCCancellationHandle: @unchecked Sendable {
     }
 }
 
-private enum VoiceInkRefineXPCOperation {
+private enum ScribeRefineXPCOperation {
     case prepare
     case enhance
 }
 
-private enum VoiceInkRefineXPCOperationWaiter {
+private enum ScribeRefineXPCOperationWaiter {
     case standard(CheckedContinuation<Void, Never>)
     case cancellable(id: UUID, continuation: CheckedContinuation<Void, Error>)
 
@@ -60,18 +60,18 @@ private enum VoiceInkRefineXPCOperationWaiter {
     }
 }
 
-actor VoiceInkRefineXPCClient {
+actor ScribeRefineXPCClient {
     private static let warmGracePeriod: Duration = .seconds(10)
 
     private let logger = Logger(
-        subsystem: "com.prakashjoshipax.voiceink",
-        category: "VoiceInkRefineXPCClient"
+        subsystem: "com.prakashjoshipax.scribe",
+        category: "ScribeRefineXPCClient"
     )
 
     private var connection: NSXPCConnection?
     private var connectionID: UUID?
     private var operationIsActive = false
-    private var operationWaiters: [VoiceInkRefineXPCOperationWaiter] = []
+    private var operationWaiters: [ScribeRefineXPCOperationWaiter] = []
     private var idleShutdownTask: Task<Void, Never>?
     private var idleShutdownToken: UUID?
 
@@ -82,28 +82,28 @@ actor VoiceInkRefineXPCClient {
         try Task.checkCancellation()
         cancelIdleShutdown()
 
-        let request = VoiceInkRefinePrepareRequest(
+        let request = ScribeRefinePrepareRequest(
             requestID: UUID(),
             modelDirectoryPath: modelDirectory.path,
             systemPrompt: systemPrompt
         )
         let requestData = try JSONEncoder().encode(request)
         let activeConnection = connectionForRequest()
-        let cancellationHandle = VoiceInkRefineXPCCancellationHandle(activeConnection)
+        let cancellationHandle = ScribeRefineXPCCancellationHandle(activeConnection)
 
         do {
             try await withTaskCancellationHandler {
                 try await withCheckedThrowingContinuation { continuation in
-                    let reply = VoiceInkRefineXPCReply<Void>(continuation)
+                    let reply = ScribeRefineXPCReply<Void>(continuation)
                     guard
                         let proxy = activeConnection.remoteObjectProxyWithErrorHandler({
                             error in
                             reply.resolve(.failure(error))
-                        }) as? VoiceInkRefineXPCProtocol
+                        }) as? ScribeRefineXPCProtocol
                     else {
                         reply.resolve(
                             .failure(
-                                makeVoiceInkRefineXPCError(
+                                makeScribeRefineXPCError(
                                     .connectionFailed,
                                     description: "Could not create the Sotto Cleanup XPC proxy."
                                 )
@@ -145,7 +145,7 @@ actor VoiceInkRefineXPCClient {
         try Task.checkCancellation()
         cancelIdleShutdown()
 
-        let request = VoiceInkRefineEnhanceRequest(
+        let request = ScribeRefineEnhanceRequest(
             requestID: UUID(),
             modelDirectoryPath: modelDirectory.path,
             systemPrompt: systemPrompt,
@@ -153,21 +153,21 @@ actor VoiceInkRefineXPCClient {
         )
         let requestData = try JSONEncoder().encode(request)
         let activeConnection = connectionForRequest()
-        let cancellationHandle = VoiceInkRefineXPCCancellationHandle(activeConnection)
+        let cancellationHandle = ScribeRefineXPCCancellationHandle(activeConnection)
 
         do {
             let responseData: Data = try await withTaskCancellationHandler {
                 try await withCheckedThrowingContinuation { continuation in
-                    let reply = VoiceInkRefineXPCReply<Data>(continuation)
+                    let reply = ScribeRefineXPCReply<Data>(continuation)
                     guard
                         let proxy = activeConnection.remoteObjectProxyWithErrorHandler({
                             error in
                             reply.resolve(.failure(error))
-                        }) as? VoiceInkRefineXPCProtocol
+                        }) as? ScribeRefineXPCProtocol
                     else {
                         reply.resolve(
                             .failure(
-                                makeVoiceInkRefineXPCError(
+                                makeScribeRefineXPCError(
                                     .connectionFailed,
                                     description: "Could not create the Sotto Cleanup XPC proxy."
                                 )
@@ -184,7 +184,7 @@ actor VoiceInkRefineXPCClient {
                         } else {
                             reply.resolve(
                                 .failure(
-                                    makeVoiceInkRefineXPCError(
+                                    makeScribeRefineXPCError(
                                         .invalidResponse,
                                         description:
                                             "Sotto Cleanup returned an empty response."
@@ -200,11 +200,11 @@ actor VoiceInkRefineXPCClient {
             try Task.checkCancellation()
 
             let response = try JSONDecoder().decode(
-                VoiceInkRefineEnhanceResponse.self,
+                ScribeRefineEnhanceResponse.self,
                 from: responseData
             )
             guard response.requestID == request.requestID else {
-                throw makeVoiceInkRefineXPCError(
+                throw makeScribeRefineXPCError(
                     .invalidResponse,
                     description: "Sotto Cleanup returned a mismatched response."
                 )
@@ -258,9 +258,9 @@ actor VoiceInkRefineXPCClient {
         }
 
         let identifier = UUID()
-        let connection = NSXPCConnection(serviceName: voiceInkRefineXPCServiceName)
+        let connection = NSXPCConnection(serviceName: scribeRefineXPCServiceName)
         connection.remoteObjectInterface = NSXPCInterface(
-            with: VoiceInkRefineXPCProtocol.self
+            with: ScribeRefineXPCProtocol.self
         )
         connection.interruptionHandler = { [weak self, weak connection] in
             guard let self, let connection else { return }
@@ -388,13 +388,13 @@ actor VoiceInkRefineXPCClient {
 
     private func requestShutdown(of activeConnection: NSXPCConnection) async {
         _ = try? await withCheckedThrowingContinuation { continuation in
-            let reply = VoiceInkRefineXPCReply<Void>(continuation)
+            let reply = ScribeRefineXPCReply<Void>(continuation)
             guard
                 let proxy = activeConnection.remoteObjectProxyWithErrorHandler({
                     _ in
                     reply.resolve(.success(()))
                     activeConnection.invalidate()
-                }) as? VoiceInkRefineXPCProtocol
+                }) as? ScribeRefineXPCProtocol
             else {
                 activeConnection.invalidate()
                 reply.resolve(.success(()))
@@ -419,11 +419,11 @@ actor VoiceInkRefineXPCClient {
 
     private func localizedError(
         _ error: Error,
-        operation: VoiceInkRefineXPCOperation
+        operation: ScribeRefineXPCOperation
     ) -> Error {
         let nsError = error as NSError
-        guard nsError.domain == voiceInkRefineXPCErrorDomain,
-            let code = VoiceInkRefineXPCErrorCode(rawValue: nsError.code)
+        guard nsError.domain == scribeRefineXPCErrorDomain,
+            let code = ScribeRefineXPCErrorCode(rawValue: nsError.code)
         else {
             return error
         }
@@ -447,12 +447,12 @@ actor VoiceInkRefineXPCClient {
             description = String(localized: "Could not communicate with Sotto Cleanup.")
         }
 
-        return makeVoiceInkRefineXPCError(code, description: description)
+        return makeScribeRefineXPCError(code, description: description)
     }
 
     private func logFailure(
         _ error: Error,
-        operation: VoiceInkRefineXPCOperation
+        operation: ScribeRefineXPCOperation
     ) {
         let nsError = error as NSError
         let operationName: String

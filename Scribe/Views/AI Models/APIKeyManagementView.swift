@@ -22,7 +22,7 @@ struct APIKeyManagementView: View {
     private var providerOptions: [AIProvider] {
         AIProvider.allCases.filter { provider in
             guard provider.supportsEnhancement else { return false }
-            guard provider != .voiceInkRefine else { return false }
+            guard provider != .scribeRefine else { return false }
             if provider == .custom {
                 return customAIProviderManager.hasConfiguredModels
             }
@@ -239,7 +239,7 @@ struct APIKeyManagementView: View {
                     }
 
                     Text(
-                        "Environment variables available: VOICEINK_SYSTEM_PROMPT, VOICEINK_USER_PROMPT, VOICEINK_FULL_PROMPT. Scribe also writes VOICEINK_FULL_PROMPT to stdin for every command."
+                        "Environment variables available: SCRIBE_SYSTEM_PROMPT, SCRIBE_USER_PROMPT, SCRIBE_FULL_PROMPT. Scribe also writes SCRIBE_FULL_PROMPT to stdin for every command."
                     )
                     .font(.caption)
                     .foregroundColor(.secondary)

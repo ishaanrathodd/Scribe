@@ -173,7 +173,7 @@ enum ModeRuntimeResolver {
             aiService: aiService
         )
         let prompt =
-            provider == .voiceInkRefine
+            provider == .scribeRefine
             ? nil
             : resolvedPrompt(
                 promptId: mode?.selectedPrompt,
@@ -192,9 +192,9 @@ enum ModeRuntimeResolver {
             provider: provider,
             modelName: modelName,
             isWebSearchEnabled: provider == .openRouter && (mode?.isWebSearchEnabled ?? false),
-            useClipboardContext: provider == .voiceInkRefine ? false : mode?.useClipboardContext ?? false,
-            useSelectedTextContext: provider == .voiceInkRefine ? false : mode?.useSelectedTextContext ?? true,
-            useScreenCaptureContext: provider == .voiceInkRefine ? false : mode?.useScreenCapture ?? false
+            useClipboardContext: provider == .scribeRefine ? false : mode?.useClipboardContext ?? false,
+            useSelectedTextContext: provider == .scribeRefine ? false : mode?.useSelectedTextContext ?? true,
+            useScreenCaptureContext: provider == .scribeRefine ? false : mode?.useScreenCapture ?? false
         )
     }
 
@@ -248,7 +248,7 @@ enum ModeRuntimeResolver {
             return nil
         }
 
-        if provider == .voiceInkRefine {
+        if provider == .scribeRefine {
             return provider.defaultModel
         }
 

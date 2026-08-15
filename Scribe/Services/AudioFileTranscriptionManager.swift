@@ -19,7 +19,7 @@ class AudioTranscriptionManager: ObservableObject {
     private var processingTask: Task<Void, Never>?
     private var processingGeneration: UInt64 = 0
     private let audioProcessor = AudioProcessor()
-    private let logger = Logger(subsystem: "com.prakashjoshipax.voiceink", category: "AudioTranscriptionManager")
+    private let logger = Logger(subsystem: "com.prakashjoshipax.scribe", category: "AudioTranscriptionManager")
 
     private init() {}
 
@@ -70,7 +70,7 @@ class AudioTranscriptionManager: ObservableObject {
     }
 
     /// Start processing pending items in the queue sequentially.
-    func startProcessing(modelContext: ModelContext, engine: VoiceInkEngine, mode: ModeConfig) {
+    func startProcessing(modelContext: ModelContext, engine: ScribeEngine, mode: ModeConfig) {
         guard !isProcessingQueue else { return }
         isProcessingQueue = true
         processingGeneration &+= 1
@@ -120,7 +120,7 @@ class AudioTranscriptionManager: ObservableObject {
     }
 
     private func processItem(
-        _ item: AudioFileQueueItem, modelContext: ModelContext, engine: VoiceInkEngine, mode: ModeConfig
+        _ item: AudioFileQueueItem, modelContext: ModelContext, engine: ScribeEngine, mode: ModeConfig
     ) async {
         let serviceRegistry = TranscriptionServiceRegistry(
             modelProvider: engine.whisperModelManager,
@@ -158,7 +158,7 @@ class AudioTranscriptionManager: ObservableObject {
             let recordingsDirectory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[
                 0
             ]
-            .appendingPathComponent("com.prakashjoshipax.VoiceInk")
+            .appendingPathComponent("com.prakashjoshipax.Scribe")
             .appendingPathComponent("Recordings")
 
             let fileName = "transcribed_\(UUID().uuidString).wav"

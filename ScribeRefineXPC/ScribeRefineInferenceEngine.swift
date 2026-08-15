@@ -8,7 +8,7 @@ import Foundation
     import Tokenizers
 #endif
 
-enum VoiceInkRefineInferenceError: LocalizedError {
+enum ScribeRefineInferenceError: LocalizedError {
     case unavailable
     case modelNotLoaded
     case emptyOutput
@@ -25,7 +25,7 @@ enum VoiceInkRefineInferenceError: LocalizedError {
     }
 }
 
-actor VoiceInkRefineInferenceEngine {
+actor ScribeRefineInferenceEngine {
     #if arch(arm64)
         private struct PreparationIdentity: Equatable {
             let modelDirectoryPath: String
@@ -84,7 +84,7 @@ actor VoiceInkRefineInferenceEngine {
                 throw error
             }
         #else
-            throw VoiceInkRefineInferenceError.unavailable
+            throw ScribeRefineInferenceError.unavailable
         #endif
     }
 
@@ -104,7 +104,7 @@ actor VoiceInkRefineInferenceEngine {
             )
 
             guard let modelContainer else {
-                throw VoiceInkRefineInferenceError.modelNotLoaded
+                throw ScribeRefineInferenceError.modelNotLoaded
             }
 
             let prompt = completionPrompt(for: transcript)
@@ -143,12 +143,12 @@ actor VoiceInkRefineInferenceEngine {
 
             let cleanedOutput = cleanCompletionOutput(output)
             guard !cleanedOutput.isEmpty else {
-                throw VoiceInkRefineInferenceError.emptyOutput
+                throw ScribeRefineInferenceError.emptyOutput
             }
 
             return cleanedOutput
         #else
-            throw VoiceInkRefineInferenceError.unavailable
+            throw ScribeRefineInferenceError.unavailable
         #endif
     }
 

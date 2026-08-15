@@ -23,8 +23,8 @@ final class KeychainService {
         case unavailable(OSStatus)
     }
 
-    private let logger = Logger(subsystem: "com.prakashjoshipax.voiceink", category: "KeychainService")
-    private let service = "com.prakashjoshipax.VoiceInk"
+    private let logger = Logger(subsystem: "com.prakashjoshipax.scribe", category: "KeychainService")
+    private let service = "com.prakashjoshipax.Scribe"
 
     private init() {}
 

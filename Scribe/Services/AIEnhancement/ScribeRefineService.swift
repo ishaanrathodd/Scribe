@@ -2,13 +2,13 @@ import Combine
 import Foundation
 import OSLog
 
-enum VoiceInkRefineAvailability: Equatable {
+enum ScribeRefineAvailability: Equatable {
     case available
     case unsupportedIntel
     case insufficientMemory
 }
 
-enum VoiceInkRefineError: LocalizedError {
+enum ScribeRefineError: LocalizedError {
     case unavailable
     case modelNotDownloaded
 
@@ -22,8 +22,8 @@ enum VoiceInkRefineError: LocalizedError {
     }
 }
 
-final class VoiceInkRefineService: ObservableObject {
-    static let shared = VoiceInkRefineService()
+final class ScribeRefineService: ObservableObject {
+    static let shared = ScribeRefineService()
 
     static let providerName = "Sotto Cleanup"
     static let modelName = "Sotto Cleanup"
@@ -35,7 +35,7 @@ final class VoiceInkRefineService: ObservableObject {
     static let minimumMemoryBytes: UInt64 = 8 * 1_024 * 1_024 * 1_024
     static var downloadSizeDescription: String {
         ByteCountFormatter.string(
-            fromByteCount: VoiceInkRefineModelDownloader.totalBytes,
+            fromByteCount: ScribeRefineModelDownloader.totalBytes,
             countStyle: .file
         )
     }
@@ -44,11 +44,11 @@ final class VoiceInkRefineService: ObservableObject {
     @Published private(set) var isDownloading = false
     @Published private(set) var downloadProgress = 0.0
     private(set) var downloadedBytes: Int64 = 0
-    private(set) var totalDownloadBytes = VoiceInkRefineModelDownloader.totalBytes
+    private(set) var totalDownloadBytes = ScribeRefineModelDownloader.totalBytes
     private(set) var isFinalizingDownload = false
     @Published private(set) var downloadError: String?
 
-    let availability: VoiceInkRefineAvailability
+    let availability: ScribeRefineAvailability
 
     var isAvailableInModes: Bool {
         availability == .available && isDownloaded
@@ -70,11 +70,11 @@ final class VoiceInkRefineService: ObservableObject {
     }
 
     private let logger = Logger(
-        subsystem: "com.prakashjoshipax.voiceink",
-        category: "VoiceInkRefineService"
+        subsystem: "com.prakashjoshipax.scribe",
+        category: "ScribeRefineService"
     )
     private let modelRootDirectory: URL
-    private let inferenceClient = VoiceInkRefineXPCClient()
+    private let inferenceClient = ScribeRefineXPCClient()
     private var downloadTask: Task<Void, Never>?
 
     private init(
@@ -94,8 +94,8 @@ final class VoiceInkRefineService: ObservableObject {
             in: .userDomainMask
         )[0]
         modelRootDirectory = appSupportDirectory
-            .appendingPathComponent("com.prakashjoshipax.VoiceInk")
-            .appendingPathComponent("VoiceInkRefine")
+            .appendingPathComponent("com.prakashjoshipax.Scribe")
+            .appendingPathComponent("ScribeRefine")
 
         refreshDownloadedState()
     }
@@ -139,10 +139,10 @@ final class VoiceInkRefineService: ObservableObject {
 
     func enhance(transcript: String) async throws -> String {
         guard availability == .available else {
-            throw VoiceInkRefineError.unavailable
+            throw ScribeRefineError.unavailable
         }
         guard isDownloaded, let snapshotURL else {
-            throw VoiceInkRefineError.modelNotDownloaded
+            throw ScribeRefineError.modelNotDownloaded
         }
 
         return try await inferenceClient.enhance(
@@ -182,7 +182,7 @@ final class VoiceInkRefineService: ObservableObject {
     private func downloadModel() async {
         downloadProgress = 0
         downloadedBytes = 0
-        totalDownloadBytes = VoiceInkRefineModelDownloader.totalBytes
+        totalDownloadBytes = ScribeRefineModelDownloader.totalBytes
         isFinalizingDownload = false
         downloadError = nil
         isDownloading = true
@@ -194,7 +194,7 @@ final class VoiceInkRefineService: ObservableObject {
         }
 
         #if arch(arm64)
-            let downloader = VoiceInkRefineModelDownloader(
+            let downloader = ScribeRefineModelDownloader(
                 repositoryID: Self.repositoryID,
                 revision: Self.pinnedRevision,
                 modelRootDirectory: modelRootDirectory
@@ -234,13 +234,13 @@ final class VoiceInkRefineService: ObservableObject {
                 logger.error("Failed to download Sotto Cleanup: \(error.localizedDescription, privacy: .public)")
             }
         #else
-            downloadError = VoiceInkRefineError.unavailable.localizedDescription
+            downloadError = ScribeRefineError.unavailable.localizedDescription
         #endif
     }
 
     private var snapshotURL: URL? {
         #if arch(arm64)
-            return VoiceInkRefineModelDownloader.snapshotDirectory(
+            return ScribeRefineModelDownloader.snapshotDirectory(
                 in: modelRootDirectory,
                 repositoryID: Self.repositoryID,
                 revision: Self.pinnedRevision
@@ -256,14 +256,14 @@ final class VoiceInkRefineService: ObservableObject {
             return
         }
 
-        isDownloaded = VoiceInkRefineModelDownloader.isSnapshotComplete(
+        isDownloaded = ScribeRefineModelDownloader.isSnapshotComplete(
             at: snapshotURL
         )
     }
 
     @MainActor
     private func applyDownloadProgress(
-        _ progress: VoiceInkRefineDownloadProgress
+        _ progress: ScribeRefineDownloadProgress
     ) {
         downloadedBytes = progress.downloadedBytes
         totalDownloadBytes = progress.totalBytes

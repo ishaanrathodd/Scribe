@@ -6,11 +6,11 @@ import SwiftData
 import SwiftUI
 
 @main
-struct VoiceInkApp: App {
+struct ScribeApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     let container: ModelContainer
 
-    @StateObject private var engine: VoiceInkEngine
+    @StateObject private var engine: ScribeEngine
     @StateObject private var whisperModelManager: WhisperModelManager
     @StateObject private var fluidAudioModelManager: FluidAudioModelManager
     @StateObject private var transcriptionModelManager: TranscriptionModelManager
@@ -35,6 +35,8 @@ struct VoiceInkApp: App {
     @StateObject private var prewarmService: ModelPrewarmService
 
     init() {
+        LegacyStorageMigration.migrateIfNeeded()
+
         // Disable HTTP response caching — prevents API responses from being stored in Cache.db
         URLCache.shared = URLCache(memoryCapacity: 0, diskCapacity: 0)
 
@@ -43,7 +45,7 @@ struct VoiceInkApp: App {
         AppAppearancePreference.applyStored()
         OnboardingV2Migration.prepareIfNeeded()
 
-        let logger = Logger(subsystem: "com.prakashjoshipax.voiceink", category: "Initialization")
+        let logger = Logger(subsystem: "com.prakashjoshipax.scribe", category: "Initialization")
         // Keep existing model order stable; append new models after synced entities.
         let schema = Schema([
             Transcription.self,
@@ -101,7 +103,7 @@ struct VoiceInkApp: App {
 
         // 1. Create modelsDirectory URL
         let appSupportDirectory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("com.prakashjoshipax.VoiceInk")
+            .appendingPathComponent("com.prakashjoshipax.Scribe")
         let modelsDirectory = appSupportDirectory.appendingPathComponent("WhisperModels")
 
         // 2. Create model managers
@@ -116,7 +118,7 @@ struct VoiceInkApp: App {
         let recorderUIManager = RecorderUIManager()
 
         // 4. Create engine
-        let engine = VoiceInkEngine(
+        let engine = ScribeEngine(
             modelContext: resolvedContainer.mainContext,
             whisperModelManager: whisperModelManager,
             transcriptionModelManager: transcriptionModelManager,
@@ -145,7 +147,7 @@ struct VoiceInkApp: App {
         let recordingShortcutManager = RecordingShortcutManager(engine: engine, recorderUIManager: recorderUIManager)
         _recordingShortcutManager = StateObject(wrappedValue: recordingShortcutManager)
 
-        // VoiceInk is a normal Dock application; it no longer has a status-bar
+        // Scribe is a normal Dock application; it no longer has a status-bar
         // entry, so never leave it in the old menu-bar-only presentation mode.
         UserDefaults.standard.set(false, forKey: "IsMenuBarOnly")
         let menuBarManager = MenuBarManager()
@@ -212,7 +214,7 @@ struct VoiceInkApp: App {
 
     private static func createPersistentContainer(schema: Schema, logger: Logger) throws -> ModelContainer {
         let appSupportURL = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("com.prakashjoshipax.VoiceInk", isDirectory: true)
+            .appendingPathComponent("com.prakashjoshipax.Scribe", isDirectory: true)
 
         try? FileManager.default.createDirectory(at: appSupportURL, withIntermediateDirectories: true)
 
@@ -238,7 +240,7 @@ struct VoiceInkApp: App {
             let dictionaryCloudKit: ModelConfiguration.CloudKitDatabase = .none
         #else
             let dictionaryCloudKit: ModelConfiguration.CloudKitDatabase = .private(
-                "iCloud.com.prakashjoshipax.VoiceInk")
+                "iCloud.com.prakashjoshipax.Scribe")
         #endif
         let dictionaryConfig = ModelConfiguration(
             "dictionary",

@@ -357,7 +357,7 @@ struct AudioPlayerView: View {
     @State private var operationFeedback: OperationFeedback?
     @State private var showModePopover = false
     @State private var showPromptPopover = false
-    @EnvironmentObject private var engine: VoiceInkEngine
+    @EnvironmentObject private var engine: ScribeEngine
     @EnvironmentObject private var enhancementService: AIEnhancementService
     @ObservedObject private var modeManager = ModeManager.shared
     @Environment(\.modelContext) private var modelContext
@@ -536,7 +536,7 @@ struct AudioPlayerView: View {
             ScrollView {
                 let prompts = enhancementService.allPrompts
                 let customPromptsUnavailable =
-                    currentEnhancementConfiguration?.provider == .voiceInkRefine
+                    currentEnhancementConfiguration?.provider == .scribeRefine
                 VStack(alignment: .leading, spacing: 4) {
                     if customPromptsUnavailable {
                         Text(

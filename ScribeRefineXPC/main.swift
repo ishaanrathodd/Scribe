@@ -1,7 +1,7 @@
 import Darwin
 import Foundation
 
-final class VoiceInkRefineXPCProcessLifecycle: @unchecked Sendable {
+final class ScribeRefineXPCProcessLifecycle: @unchecked Sendable {
     private let lock = NSLock()
     private var activeConnectionIDs: Set<UUID> = []
 
@@ -25,17 +25,17 @@ final class VoiceInkRefineXPCProcessLifecycle: @unchecked Sendable {
     }
 }
 
-final class VoiceInkRefineXPCListenerDelegate: NSObject, NSXPCListenerDelegate {
-    private let processLifecycle = VoiceInkRefineXPCProcessLifecycle()
+final class ScribeRefineXPCListenerDelegate: NSObject, NSXPCListenerDelegate {
+    private let processLifecycle = ScribeRefineXPCProcessLifecycle()
 
     func listener(
         _ listener: NSXPCListener,
         shouldAcceptNewConnection newConnection: NSXPCConnection
     ) -> Bool {
         let connectionID = processLifecycle.registerConnection()
-        let service = VoiceInkRefineXPCService()
+        let service = ScribeRefineXPCService()
         newConnection.exportedInterface = NSXPCInterface(
-            with: VoiceInkRefineXPCProtocol.self
+            with: ScribeRefineXPCProtocol.self
         )
         newConnection.exportedObject = service
         newConnection.invalidationHandler = { [processLifecycle] in
@@ -49,7 +49,7 @@ final class VoiceInkRefineXPCListenerDelegate: NSObject, NSXPCListenerDelegate {
     }
 }
 
-let delegate = VoiceInkRefineXPCListenerDelegate()
+let delegate = ScribeRefineXPCListenerDelegate()
 let listener = NSXPCListener.service()
 listener.delegate = delegate
 listener.resume()

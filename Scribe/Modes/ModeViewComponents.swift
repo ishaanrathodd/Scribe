@@ -1,6 +1,6 @@
 import SwiftUI
 
-struct VoiceInkButton: View {
+struct ScribeButton: View {
     let title: LocalizedStringKey
     let action: () -> Void
     var isDisabled: Bool = false
@@ -39,7 +39,7 @@ struct ModeEmptyStateView: View {
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)
 
-            VoiceInkButton(
+            ScribeButton(
                 title: "Add New Mode",
                 action: action
             )

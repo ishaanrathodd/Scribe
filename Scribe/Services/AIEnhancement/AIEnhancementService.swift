@@ -14,7 +14,7 @@ struct AIEnhancementResult: Sendable {
 
 @MainActor
 class AIEnhancementService: ObservableObject {
-    private let logger = Logger(subsystem: "com.prakashjoshipax.voiceink", category: "AIEnhancementService")
+    private let logger = Logger(subsystem: "com.prakashjoshipax.scribe", category: "AIEnhancementService")
 
     @Published var customPrompts: [CustomPrompt] {
         didSet {
@@ -82,8 +82,8 @@ class AIEnhancementService: ObservableObject {
     func isConfigured(for configuration: EnhancementRuntimeConfiguration) -> Bool {
         guard let provider = configuration.provider else { return false }
 
-        if provider == .voiceInkRefine {
-            return aiService.voiceInkRefineService.isAvailableInModes
+        if provider == .scribeRefine {
+            return aiService.scribeRefineService.isAvailableInModes
         }
 
         guard configuration.prompt != nil else { return false }
@@ -216,9 +216,9 @@ class AIEnhancementService: ObservableObject {
             return ("", nil, nil)
         }
 
-        if provider == .voiceInkRefine {
+        if provider == .scribeRefine {
             do {
-                let result = try await aiService.enhanceWithVoiceInkRefine(transcript: text)
+                let result = try await aiService.enhanceWithScribeRefine(transcript: text)
                 let filteredResult = AIEnhancementOutputFilter.filter(
                     result.trimmingCharacters(in: .whitespacesAndNewlines)
                 )
@@ -707,12 +707,12 @@ class AIEnhancementService: ObservableObject {
 
         for index in updatedConfigurations.indices {
             if updatedConfigurations[index].selectedAIProvider
-                .flatMap(AIProvider.init(persistedValue:)) == .voiceInkRefine
+                .flatMap(AIProvider.init(persistedValue:)) == .scribeRefine
             {
-                updatedConfigurations[index].selectedAIProvider = AIProvider.voiceInkRefine.rawValue
+                updatedConfigurations[index].selectedAIProvider = AIProvider.scribeRefine.rawValue
                 didUpdateModes = true
-                if updatedConfigurations[index].selectedAIModel != VoiceInkRefineService.modelName {
-                    updatedConfigurations[index].selectedAIModel = VoiceInkRefineService.modelName
+                if updatedConfigurations[index].selectedAIModel != ScribeRefineService.modelName {
+                    updatedConfigurations[index].selectedAIModel = ScribeRefineService.modelName
                     didUpdateModes = true
                 }
             }

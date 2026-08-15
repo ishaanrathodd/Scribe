@@ -1,5 +1,5 @@
 enum AIPrompts {
-    /// Wraps prompt-specific instructions with VoiceInk's transcription-editing rules.
+    /// Wraps prompt-specific instructions with Scribe's transcription-editing rules.
     static let enhancementSystemTemplate = """
         Transform the raw dictated speech in <TRANSCRIPT> according to <TASK_INSTRUCTIONS>.
 

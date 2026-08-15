@@ -107,7 +107,7 @@ struct ModeConfigDraft {
             return
         }
 
-        if provider == .voiceInkRefine {
+        if provider == .scribeRefine {
             selectedAIModel = provider.defaultModel
             return
         }
@@ -134,7 +134,7 @@ struct ModeConfigDraft {
     }
 
     mutating func ensurePromptSelection(firstPromptId: UUID?) {
-        guard selectedAIProvider.flatMap(AIProvider.init(persistedValue:)) != .voiceInkRefine else {
+        guard selectedAIProvider.flatMap(AIProvider.init(persistedValue:)) != .scribeRefine else {
             return
         }
 

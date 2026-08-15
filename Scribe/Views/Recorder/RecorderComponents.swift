@@ -65,7 +65,7 @@ extension View {
 // MARK: - Reference Recorder Pill
 
 /// A fixed, graphite recorder capsule. Unlike liquid glass it deliberately
-/// renders identically whether VoiceInk is the foreground app or not.
+/// renders identically whether Scribe is the foreground app or not.
 struct ReferenceRecorderPill: View {
     let recordingState: RecordingState
     let audioMeterProvider: () -> AudioMeter

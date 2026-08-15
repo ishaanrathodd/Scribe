@@ -1,13 +1,13 @@
 //
-//  VoiceInkUITestsLaunchTests.swift
-//  VoiceInkUITests
+//  ScribeUITestsLaunchTests.swift
+//  ScribeUITests
 //
 //  Created by Prakash Joshi on 15/10/2024.
 //
 
 import XCTest
 
-final class VoiceInkUITestsLaunchTests: XCTestCase {
+final class ScribeUITestsLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true

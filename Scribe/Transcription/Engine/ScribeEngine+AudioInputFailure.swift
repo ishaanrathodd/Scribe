@@ -24,7 +24,7 @@ struct AudioInputFailurePresentation {
     }
 }
 
-extension VoiceInkEngine {
+extension ScribeEngine {
     @MainActor
     func recordingAudioFailure(
         for error: Error

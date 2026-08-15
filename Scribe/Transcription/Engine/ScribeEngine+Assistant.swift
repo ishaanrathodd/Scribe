@@ -1,7 +1,7 @@
 import Foundation
 
 @MainActor
-extension VoiceInkEngine {
+extension ScribeEngine {
     func sendAssistantFollowUp(_ text: String, transcription _: Transcription? = nil) async {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty,

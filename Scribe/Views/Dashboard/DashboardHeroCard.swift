@@ -20,22 +20,35 @@ struct DashboardHeroCard: View {
     let onViewInsights: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            heroCopy
+        HStack(alignment: .center, spacing: 24) {
+            VStack(alignment: .leading, spacing: 10) {
+                heroCopy
 
-            HStack(spacing: 12) {
-                Button(action: onViewInsights) {
-                    DashboardMomentumActionLabel(
-                        title: actionTitle,
-                        icon: actionIcon,
-                        isPrimary: true
-                    )
+                HStack(spacing: 12) {
+                    Button(action: onViewInsights) {
+                        DashboardMomentumActionLabel(
+                            title: actionTitle,
+                            icon: actionIcon,
+                            isPrimary: true
+                        )
+                    }
+                    .buttonStyle(.plain)
+                    .help(actionHelp)
+                    .accessibilityLabel(Text(actionAccessibilityLabel))
                 }
-                .buttonStyle(.plain)
-                .help(actionHelp)
-                .accessibilityLabel(Text(actionAccessibilityLabel))
+                .padding(.top, 8)
             }
-            .padding(.top, 8)
+
+            Spacer(minLength: 24)
+
+            Image("scribe-hero-mark")
+                .resizable()
+                .renderingMode(.template)
+                .scaledToFit()
+                .foregroundStyle(Color.white.opacity(0.92))
+                .frame(width: 152, height: 152)
+                .padding(.trailing, 12)
+                .accessibilityHidden(true)
         }
         .padding(.horizontal, 36)
         .padding(.vertical, 24)

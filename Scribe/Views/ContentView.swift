@@ -41,7 +41,7 @@ final class MainWindowNavigation: ObservableObject {
 }
 
 struct ContentView: View {
-    private let logger = Logger(subsystem: "com.prakashjoshipax.voiceink", category: "ContentView")
+    private let logger = Logger(subsystem: "com.prakashjoshipax.scribe", category: "ContentView")
     @EnvironmentObject private var navigation: MainWindowNavigation
 
     var body: some View {

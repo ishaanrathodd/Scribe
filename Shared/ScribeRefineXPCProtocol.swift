@@ -1,34 +1,34 @@
 import Foundation
 
-let voiceInkRefineXPCServiceName = "com.prakashjoshipax.VoiceInk.RefineXPC"
-let voiceInkRefineXPCErrorDomain = "com.prakashjoshipax.VoiceInk.RefineXPC"
+let scribeRefineXPCServiceName = "com.prakashjoshipax.Scribe.RefineXPC"
+let scribeRefineXPCErrorDomain = "com.prakashjoshipax.Scribe.RefineXPC"
 
-struct VoiceInkRefinePrepareRequest: Codable, Sendable {
+struct ScribeRefinePrepareRequest: Codable, Sendable {
     let requestID: UUID
     let modelDirectoryPath: String
     let systemPrompt: String
 }
 
-struct VoiceInkRefineEnhanceRequest: Codable, Sendable {
+struct ScribeRefineEnhanceRequest: Codable, Sendable {
     let requestID: UUID
     let modelDirectoryPath: String
     let systemPrompt: String
     let transcript: String
 }
 
-struct VoiceInkRefineEnhanceResponse: Codable, Sendable {
+struct ScribeRefineEnhanceResponse: Codable, Sendable {
     let requestID: UUID
     let output: String
 }
 
-enum VoiceInkRefineXPCErrorCode: Int {
+enum ScribeRefineXPCErrorCode: Int {
     case invalidRequest = 1
     case inferenceFailed = 2
     case invalidResponse = 3
     case connectionFailed = 4
 }
 
-@objc protocol VoiceInkRefineXPCProtocol {
+@objc protocol ScribeRefineXPCProtocol {
     func prepare(
         _ requestData: NSData,
         withReply reply: @escaping (NSError?) -> Void
@@ -42,12 +42,12 @@ enum VoiceInkRefineXPCErrorCode: Int {
     func shutdown(withReply reply: @escaping () -> Void)
 }
 
-func makeVoiceInkRefineXPCError(
-    _ code: VoiceInkRefineXPCErrorCode,
+func makeScribeRefineXPCError(
+    _ code: ScribeRefineXPCErrorCode,
     description: String
 ) -> NSError {
     NSError(
-        domain: voiceInkRefineXPCErrorDomain,
+        domain: scribeRefineXPCErrorDomain,
         code: code.rawValue,
         userInfo: [NSLocalizedDescriptionKey: description]
     )

@@ -6713,18 +6713,18 @@
         }
       }
     },
-    "e.g. support@tryvoiceink.com" : {
+    "e.g. support@tryscribe.com" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "z. B. support@tryvoiceink.com"
+            "value" : "z. B. support@tryscribe.com"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "例如：support@tryvoiceink.com"
+            "value" : "例如：support@tryscribe.com"
           }
         }
       }
@@ -7383,18 +7383,18 @@
         }
       }
     },
-    "Environment variables available: VOICEINK_SYSTEM_PROMPT, VOICEINK_USER_PROMPT, VOICEINK_FULL_PROMPT. Scribe also writes VOICEINK_FULL_PROMPT to stdin for every command." : {
+    "Environment variables available: SCRIBE_SYSTEM_PROMPT, SCRIBE_USER_PROMPT, SCRIBE_FULL_PROMPT. Scribe also writes SCRIBE_FULL_PROMPT to stdin for every command." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Verfügbare Umgebungsvariablen: VOICEINK_SYSTEM_PROMPT, VOICEINK_USER_PROMPT, VOICEINK_FULL_PROMPT. Scribe schreibt außerdem VOICEINK_FULL_PROMPT für jeden Befehl nach stdin."
+            "value" : "Verfügbare Umgebungsvariablen: SCRIBE_SYSTEM_PROMPT, SCRIBE_USER_PROMPT, SCRIBE_FULL_PROMPT. Scribe schreibt außerdem SCRIBE_FULL_PROMPT für jeden Befehl nach stdin."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "可用的环境变量：VOICEINK_SYSTEM_PROMPT、VOICEINK_USER_PROMPT、VOICEINK_FULL_PROMPT。Scribe 还会在每次执行命令时将 VOICEINK_FULL_PROMPT 写入 stdin。"
+            "value" : "可用的环境变量：SCRIBE_SYSTEM_PROMPT、SCRIBE_USER_PROMPT、SCRIBE_FULL_PROMPT。Scribe 还会在每次执行命令时将 SCRIBE_FULL_PROMPT 写入 stdin。"
           }
         }
       }
@@ -14402,18 +14402,18 @@
         }
       }
     },
-    "Runs locally with your user permissions. The final transcript is sent on stdin and exposed as VOICEINK_TRANSCRIPT." : {
+    "Runs locally with your user permissions. The final transcript is sent on stdin and exposed as SCRIBE_TRANSCRIPT." : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Wird lokal mit deinen Benutzerberechtigungen ausgeführt. Das finale Transkript wird über stdin gesendet und als VOICEINK_TRANSCRIPT bereitgestellt."
+            "value" : "Wird lokal mit deinen Benutzerberechtigungen ausgeführt. Das finale Transkript wird über stdin gesendet und als SCRIBE_TRANSCRIPT bereitgestellt."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "以你的用户权限在本地运行。最终转写文本通过 stdin 传入，并以 VOICEINK_TRANSCRIPT 形式提供。"
+            "value" : "以你的用户权限在本地运行。最终转写文本通过 stdin 传入，并以 SCRIBE_TRANSCRIPT 形式提供。"
           }
         }
       }
@@ -18142,18 +18142,18 @@
         }
       }
     },
-    "Variables: VOICEINK_SYSTEM_PROMPT, VOICEINK_USER_PROMPT, VOICEINK_FULL_PROMPT" : {
+    "Variables: SCRIBE_SYSTEM_PROMPT, SCRIBE_USER_PROMPT, SCRIBE_FULL_PROMPT" : {
       "localizations" : {
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Variablen: VOICEINK_SYSTEM_PROMPT, VOICEINK_USER_PROMPT, VOICEINK_FULL_PROMPT"
+            "value" : "Variablen: SCRIBE_SYSTEM_PROMPT, SCRIBE_USER_PROMPT, SCRIBE_FULL_PROMPT"
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "变量：VOICEINK_SYSTEM_PROMPT、VOICEINK_USER_PROMPT、VOICEINK_FULL_PROMPT"
+            "value" : "变量：SCRIBE_SYSTEM_PROMPT、SCRIBE_USER_PROMPT、SCRIBE_FULL_PROMPT"
           }
         }
       }

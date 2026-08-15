@@ -2,7 +2,7 @@ import SwiftUI
 
 struct MenuBarView: View {
     @Environment(\.openWindow) private var openWindow
-    @EnvironmentObject var engine: VoiceInkEngine
+    @EnvironmentObject var engine: ScribeEngine
     @EnvironmentObject var recorderUIManager: RecorderUIManager
     @EnvironmentObject var transcriptionModelManager: TranscriptionModelManager
     @EnvironmentObject var whisperModelManager: WhisperModelManager

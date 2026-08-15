@@ -2,7 +2,7 @@ import AppKit
 import Foundation
 import SwiftData
 
-class VoiceInkCSVExportService {
+class ScribeCSVExportService {
 
     func exportTranscriptionsToCSV(transcriptions: [Transcription]) {
         let csvString = generateCSV(for: transcriptions)

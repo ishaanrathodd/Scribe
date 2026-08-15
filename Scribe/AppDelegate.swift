@@ -16,7 +16,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // VoiceInk now always starts as a normal Dock app. Re-applying its
+        // Scribe now always starts as a normal Dock app. Re-applying its
         // already-correct activation policy here causes a second launch-time
         // source-list redraw, so this is only meaningful for the legacy
         // menu-bar-only presentation mode.

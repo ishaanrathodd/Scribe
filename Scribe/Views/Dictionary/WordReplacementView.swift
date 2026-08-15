@@ -268,7 +268,7 @@ struct WordReplacementInfoPopover: View {
                         Text("Replacement:")
                             .font(.caption)
                             .foregroundColor(.secondary)
-                        Text(verbatim: "https://tryvoiceink.com")
+                        Text(verbatim: "https://tryscribe.com")
                             .font(.callout)
                     }
                 }

@@ -10,7 +10,7 @@ final class SystemInfoService {
 
     func getSystemInfoString() -> String {
         let info = """
-            === VOICEINK SYSTEM INFORMATION ===
+            === SCRIBE SYSTEM INFORMATION ===
             Generated: \(Self.englishTimestamp())
 
             APP INFORMATION:

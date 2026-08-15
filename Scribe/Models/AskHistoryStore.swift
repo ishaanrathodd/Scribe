@@ -37,7 +37,7 @@ final class AskHistoryStore: ObservableObject {
 
     private init() {
         let directory = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("com.prakashjoshipax.VoiceInk", isDirectory: true)
+            .appendingPathComponent("com.prakashjoshipax.Scribe", isDirectory: true)
         try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
         fileURL = directory.appendingPathComponent("ask-history.json")
         load()

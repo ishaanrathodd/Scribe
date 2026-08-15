@@ -1,8 +1,8 @@
 import AppKit
 import SwiftUI
 
-struct VoiceInkRefineModelCardView: View {
-    @ObservedObject var service: VoiceInkRefineService
+struct ScribeRefineModelCardView: View {
+    @ObservedObject var service: ScribeRefineService
     let deleteAction: () -> Void
 
     var body: some View {
@@ -23,7 +23,7 @@ struct VoiceInkRefineModelCardView: View {
 
     private var headerSection: some View {
         HStack(alignment: .firstTextBaseline) {
-            Text(VoiceInkRefineService.modelName)
+            Text(ScribeRefineService.modelName)
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundStyle(Color(.labelColor))
 
@@ -35,7 +35,7 @@ struct VoiceInkRefineModelCardView: View {
         HStack(spacing: 12) {
             Label("Enhancement Model", systemImage: "sparkles")
             Label {
-                Text(verbatim: VoiceInkRefineService.downloadSizeDescription)
+                Text(verbatim: ScribeRefineService.downloadSizeDescription)
             } icon: {
                 Image(systemName: "internaldrive")
             }

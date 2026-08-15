@@ -45,7 +45,7 @@ enum AppPresentationPolicy {
 class WindowManager: NSObject {
     static let shared = WindowManager()
 
-    private static let mainWindowIdentifier = NSUserInterfaceItemIdentifier("com.prakashjoshipax.voiceink.mainWindow")
+    private static let mainWindowIdentifier = NSUserInterfaceItemIdentifier("com.prakashjoshipax.scribe.mainWindow")
     private weak var mainWindow: NSWindow?
     // WindowAccessor can be evaluated more than once while SwiftUI settles the
     // initial scene. Window configuration must stay idempotent: mutating a

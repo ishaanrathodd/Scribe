@@ -5,7 +5,7 @@ import UniformTypeIdentifiers
 /// Ask Mode keeps its conversations separate from transcription history, but
 /// uses the same selection, export, deletion, and analysis workflow.
 struct AskHistoryView: View {
-    @EnvironmentObject private var engine: VoiceInkEngine
+    @EnvironmentObject private var engine: ScribeEngine
     @EnvironmentObject private var recorderUIManager: RecorderUIManager
     @ObservedObject private var store = AskHistoryStore.shared
 
