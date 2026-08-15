@@ -2,17 +2,13 @@
 
 First off, thank you for considering contributing to Scribe! It's people like you that make Scribe such a great tool.
 
-## ⚠️ Pull Requests Not Accepted
+**You can contribute by:**
+- **Creating a pull request** - You can create a pull request for any new feature additions or bug fixes.
+- **Reporting bugs** - Open an issue with detailed information
+- **Suggesting features** - Share your ideas via issues or discussions
+- **Forking the project** - Feel free to create your own version
+- **Improving documentation** - Suggest clarifications or corrections via issues
 
-**As of now, this project is not accepting pull requests.** Scribe is open source, and you're welcome to fork and modify it for your own use.
-
-**You can still contribute by:**
-- 🐛 **Reporting bugs** - Open an issue with detailed information
-- 💡 **Suggesting features** - Share your ideas via issues or discussions
-- 🍴 **Forking the project** - Feel free to create your own version
-- 📖 **Improving documentation** - Suggest clarifications or corrections via issues
-
-Thank you for understanding!
 
 ## Code of Conduct
 
@@ -75,4 +71,4 @@ If you have any questions or need clarification, feel free to:
 2. Start a discussion
 3. Reach out to the maintainers
 
-Thank you for contributing to Scribe! 🎉 
+Thank you for contributing to Scribe!
