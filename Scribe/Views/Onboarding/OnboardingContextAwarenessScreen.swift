@@ -35,10 +35,6 @@ private struct OnboardingContextAwarenessContent: View {
                     .font(.system(size: 24, weight: .semibold))
                     .foregroundColor(AppTheme.Text.primary)
                     .frame(width: 56, height: 56)
-                    .background(
-                        RoundedRectangle(cornerRadius: 16, style: .continuous)
-                            .fill(AppTheme.Surface.controlActive)
-                    )
 
                 VStack(spacing: 10) {
                     Text("Scribe is context-aware.")
@@ -158,11 +154,7 @@ private struct ContextAwarenessModePill: View {
         .frame(height: 42)
         .background(
             Capsule()
-                .fill(AppTheme.Surface.control.opacity(0.84))
-        )
-        .overlay(
-            Capsule()
-                .stroke(AppTheme.Border.subtle, lineWidth: 1)
+                .fill(OnboardingLayout.elevatedSurfaceFill)
         )
     }
 }

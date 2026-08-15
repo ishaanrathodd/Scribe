@@ -2,19 +2,23 @@ import SwiftUI
 
 struct OnboardingBackground: View {
     var body: some View {
-        VisualEffectView(
-            material: .sidebar,
-            blendingMode: .behindWindow
-        )
-        .ignoresSafeArea()
+        Color(nsColor: .windowBackgroundColor)
+            .ignoresSafeArea()
     }
 }
 
 enum OnboardingLayout {
     static let chromeMaxWidth: CGFloat = 560
     static let horizontalPadding: CGFloat = 48
-    static let headerTopPadding: CGFloat = 52
-    static let bottomPadding: CGFloat = 28
+    static let headerTopPadding: CGFloat = 38
+    static let navigationTopPadding: CGFloat = 24
+    // Native bordered buttons add their own horizontal chrome around the
+    // label. Keeping the label compact produces a balanced 96 pt capsule,
+    // rather than an oversized control.
+    static let navigationButtonLabelWidth: CGFloat = 64
+    static let cardCornerRadius: CGFloat = 14
+    static let elevatedSurfaceFill = Color.white.opacity(0.07)
+    static let elevatedSurfaceBorder = Color.white.opacity(0.07)
 }
 
 struct OnboardingHeroHeader: View {
@@ -23,27 +27,22 @@ struct OnboardingHeroHeader: View {
     let subtitle: String
 
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 10) {
             Image(systemName: systemImage)
-                .font(.system(size: 24, weight: .semibold))
-                .foregroundColor(AppTheme.Text.primary)
-                .frame(width: 56, height: 56)
-                .background(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(AppTheme.Surface.controlActive)
-                )
+                .font(.system(size: 36, weight: .medium))
+                .foregroundStyle(.secondary)
 
-            VStack(spacing: 8) {
+            VStack(spacing: 6) {
                 Text(LocalizedStringKey(title))
-                    .font(.system(size: 30, weight: .bold))
-                    .foregroundColor(AppTheme.Text.primary)
+                    .font(.title2.weight(.semibold))
+                    .foregroundStyle(.primary)
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
 
                 Text(LocalizedStringKey(subtitle))
-                    .font(.system(size: 14))
-                    .foregroundColor(AppTheme.Text.muted)
+                    .font(.body)
+                    .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                     .lineLimit(3)
                     .fixedSize(horizontal: false, vertical: true)
@@ -52,27 +51,19 @@ struct OnboardingHeroHeader: View {
     }
 }
 
-struct OnboardingProgressBadge: View {
-    let currentStep: Int
-    let totalSteps: Int
-
-    private var progress: Double {
-        guard totalSteps > 0 else { return 0 }
-        return Double(currentStep) / Double(totalSteps)
-    }
-
-    var body: some View {
-        SegmentedProgressRing(
-            totalSegments: totalSteps,
-            filledSegments: currentStep,
-            progress: progress
-        )
-    }
-}
-
 enum OnboardingBottomBarPlacement {
     case split
     case centered
+}
+
+struct OnboardingCardSurface: View {
+    var isSelected = false
+    var cornerRadius: CGFloat = OnboardingLayout.cardCornerRadius
+
+    var body: some View {
+        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+            .fill(isSelected ? AppTheme.Surface.controlActive : OnboardingLayout.elevatedSurfaceFill)
+    }
 }
 
 struct OnboardingBottomBar: View {
@@ -82,12 +73,6 @@ struct OnboardingBottomBar: View {
     var placement: OnboardingBottomBarPlacement = .split
     let onLeading: (() -> Void)?
     let onPrimary: () -> Void
-
-    private enum Metrics {
-        static let controlButtonWidth: CGFloat = 132
-        static let buttonHeight: CGFloat = 42
-        static let primaryButtonHorizontalPadding: CGFloat = 20
-    }
 
     @ViewBuilder
     var body: some View {
@@ -113,15 +98,14 @@ struct OnboardingBottomBar: View {
         if let leadingTitle, let onLeading {
             Button(action: onLeading) {
                 Text(LocalizedStringKey(leadingTitle))
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(AppTheme.Action.secondaryForeground)
-                    .frame(width: Metrics.controlButtonWidth, height: Metrics.buttonHeight)
-                    .background(AppMaterialCardBackground(cornerRadius: AppTheme.Radius.control))
+                    .frame(width: OnboardingLayout.navigationButtonLabelWidth)
             }
-            .buttonStyle(.plain)
+                .buttonStyle(.bordered)
+                .buttonBorderShape(.capsule)
+                .controlSize(.large)
         } else {
-            AppTheme.Surface.clear
-                .frame(width: Metrics.controlButtonWidth, height: Metrics.buttonHeight)
+            Color.clear
+                .frame(width: OnboardingLayout.navigationButtonLabelWidth, height: 28)
                 .accessibilityHidden(true)
         }
     }
@@ -129,18 +113,11 @@ struct OnboardingBottomBar: View {
     private var primaryButton: some View {
         Button(action: onPrimary) {
             Text(LocalizedStringKey(primaryTitle))
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundColor(
-                    isPrimaryEnabled ? AppTheme.Action.primaryForeground : AppTheme.Action.disabledForeground
-                )
-                .padding(.horizontal, Metrics.primaryButtonHorizontalPadding)
-                .frame(minWidth: Metrics.controlButtonWidth, minHeight: Metrics.buttonHeight)
-                .background(
-                    RoundedRectangle(cornerRadius: AppTheme.Radius.control, style: .continuous)
-                        .fill(isPrimaryEnabled ? AppTheme.Action.primaryFill : AppTheme.Action.disabledFill)
-                )
+                .frame(width: OnboardingLayout.navigationButtonLabelWidth)
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.borderedProminent)
+        .buttonBorderShape(.capsule)
+        .controlSize(.large)
         .disabled(!isPrimaryEnabled)
     }
 }
@@ -196,6 +173,10 @@ struct OnboardingStepScreen<Content: View, BottomBar: View>: View {
     var body: some View {
         if showsHeader {
             VStack(spacing: 0) {
+                bottomBar
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, OnboardingLayout.navigationTopPadding)
+
                 OnboardingHeroHeader(
                     systemImage: systemImage,
                     title: title,
@@ -211,10 +192,6 @@ struct OnboardingStepScreen<Content: View, BottomBar: View>: View {
                     .offset(y: contentYOffset)
 
                 Spacer(minLength: 0)
-
-                bottomBar
-                    .frame(maxWidth: OnboardingLayout.chromeMaxWidth)
-                    .padding(.bottom, OnboardingLayout.bottomPadding)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .padding(.horizontal, OnboardingLayout.horizontalPadding)
@@ -226,52 +203,14 @@ struct OnboardingStepScreen<Content: View, BottomBar: View>: View {
                     .offset(y: contentYOffset)
 
                 VStack(spacing: 0) {
-                    Spacer(minLength: 0)
-
                     bottomBar
-                        .frame(maxWidth: OnboardingLayout.chromeMaxWidth)
+                        .frame(maxWidth: .infinity)
+
+                    Spacer(minLength: 0)
                 }
-                .padding(.bottom, OnboardingLayout.bottomPadding)
+                .padding(.top, OnboardingLayout.navigationTopPadding)
             }
             .padding(.horizontal, OnboardingLayout.horizontalPadding)
         }
-    }
-}
-
-private struct SegmentedProgressRing: View {
-    let totalSegments: Int
-    let filledSegments: Int
-    let progress: Double
-
-    private let segmentGap: Double = 0.035
-    private let lineWidth: CGFloat = 4
-
-    var body: some View {
-        ZStack {
-            ForEach(0..<totalSegments, id: \.self) { index in
-                Circle()
-                    .trim(from: segmentStart(index), to: segmentEnd(index))
-                    .stroke(
-                        index < filledSegments ? AppTheme.Accent.primary : AppTheme.Surface.controlActive,
-                        style: StrokeStyle(lineWidth: lineWidth, lineCap: .round)
-                    )
-                    .rotationEffect(.degrees(-90))
-            }
-
-            Text(progress, format: .percent.precision(.fractionLength(0)))
-                .font(.system(size: 10, weight: .semibold))
-                .foregroundColor(AppTheme.Text.primary)
-        }
-        .frame(width: 46, height: 46)
-    }
-
-    private func segmentStart(_ index: Int) -> CGFloat {
-        guard totalSegments > 0 else { return 0 }
-        return CGFloat(Double(index) / Double(totalSegments) + segmentGap / 2)
-    }
-
-    private func segmentEnd(_ index: Int) -> CGFloat {
-        guard totalSegments > 0 else { return 0 }
-        return CGFloat(Double(index + 1) / Double(totalSegments) - segmentGap / 2)
     }
 }

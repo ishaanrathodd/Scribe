@@ -65,7 +65,7 @@ enum StarterModeCatalog {
         StarterModeTemplate(
             kind: .enhance,
             id: UUID(uuidString: "10000000-0000-0000-0000-000000000002")!,
-            name: "Enhancement",
+            name: "Enhancement Mode",
             icon: .symbol("sparkles"),
             description: "Clean up dictated text while preserving your meaning.",
             guidance:
@@ -80,7 +80,7 @@ enum StarterModeCatalog {
         StarterModeTemplate(
             kind: .email,
             id: UUID(uuidString: "10000000-0000-0000-0000-000000000003")!,
-            name: "Email",
+            name: "Email Mode",
             icon: .symbol("envelope.fill"),
             description: "Turn a rough thought into a clean email.",
             guidance:
@@ -110,7 +110,7 @@ enum StarterModeCatalog {
         StarterModeTemplate(
             kind: .assistant,
             id: UUID(uuidString: "10000000-0000-0000-0000-000000000005")!,
-            name: "Assistant",
+            name: "Ask Mode",
             icon: .symbol("bubble.left.and.bubble.right.fill"),
             description: "Ask a question and keep the answer in the recorder.",
             guidance:

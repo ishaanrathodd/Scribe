@@ -74,7 +74,7 @@ struct ModeConfig: Codable, Identifiable, Equatable {
     var isAIEnhancementEnabled: Bool
     var selectedPrompt: String?
     var selectedTranscriptionModelName: String?
-    var isRealtimeTranscriptionEnabled: Bool = true
+    var isRealtimeTranscriptionEnabled: Bool = false
     var selectedLanguage: String?
     var isTextFormattingEnabled: Bool = false
     var useClipboardContext: Bool
@@ -103,7 +103,7 @@ struct ModeConfig: Codable, Identifiable, Equatable {
         id: UUID = UUID(), name: String, icon: ModeIcon = .defaultIcon, appConfigs: [AppConfig]? = nil,
         urlConfigs: [URLConfig]? = nil, triggerGroups: [ModeTriggerGroup]? = nil, triggerWords: [String] = [],
         isAIEnhancementEnabled: Bool, selectedPrompt: String? = nil,
-        selectedTranscriptionModelName: String? = nil, isRealtimeTranscriptionEnabled: Bool = true,
+        selectedTranscriptionModelName: String? = nil, isRealtimeTranscriptionEnabled: Bool = false,
         selectedLanguage: String? = nil, useClipboardContext: Bool = false, useSelectedTextContext: Bool = true,
         useScreenCapture: Bool = false,
         isTextFormattingEnabled: Bool = false, selectedAIProvider: String? = nil, selectedAIModel: String? = nil,
@@ -169,7 +169,7 @@ struct ModeConfig: Codable, Identifiable, Equatable {
         isAIEnhancementEnabled = try container.decode(Bool.self, forKey: .isAIEnhancementEnabled)
         selectedPrompt = try container.decodeIfPresent(String.self, forKey: .selectedPrompt)
         isRealtimeTranscriptionEnabled =
-            try container.decodeIfPresent(Bool.self, forKey: .isRealtimeTranscriptionEnabled) ?? true
+            try container.decodeIfPresent(Bool.self, forKey: .isRealtimeTranscriptionEnabled) ?? false
         selectedLanguage = try container.decodeIfPresent(String.self, forKey: .selectedLanguage)
         isTextFormattingEnabled = try container.decodeIfPresent(Bool.self, forKey: .isTextFormattingEnabled) ?? false
         useClipboardContext =

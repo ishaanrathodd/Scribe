@@ -77,7 +77,7 @@ struct OnboardingTranscriptionSetupCard: View {
             setupChoice(.cloud, systemImage: "cloud.fill")
         }
         .padding(4)
-        .background(AppMaterialCardBackground(cornerRadius: 12))
+        .background(OnboardingCardSurface())
     }
 
     private func setupChoice(_ kind: OnboardingTranscriptionSetupKind, systemImage: String) -> some View {
@@ -135,7 +135,7 @@ struct OnboardingTranscriptionSetupCard: View {
             Spacer(minLength: 0)
         }
         .padding(16)
-        .background(AppMaterialCardBackground(cornerRadius: 12))
+        .background(OnboardingCardSurface())
     }
 
     private var cloudSetup: some View {
@@ -150,7 +150,7 @@ struct OnboardingTranscriptionSetupCard: View {
             }
         }
         .padding(16)
-        .background(AppMaterialCardBackground(cornerRadius: 12))
+        .background(OnboardingCardSurface())
     }
 
     private var providerSummary: some View {
@@ -443,7 +443,7 @@ private struct TranscriptionProviderSelectionCard: View {
             }
         }
         .padding(16)
-        .background(ProviderSurface(cornerRadius: 12))
+        .background(OnboardingCardSurface())
     }
 }
 
@@ -484,8 +484,8 @@ private struct TranscriptionProviderChoiceButton: View {
             }
             .padding(.horizontal, 10)
             .frame(height: 54)
-            .background(ProviderSurface(isActive: isSelected, cornerRadius: 10))
-            .contentShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .background(OnboardingCardSurface(isSelected: isSelected, cornerRadius: 12))
+            .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         }
         .buttonStyle(.plain)
         .help(provider.providerKey)

@@ -74,7 +74,7 @@ final class OnboardingCoordinator: ObservableObject {
         self.hasRequestedScreenRecording = defaults.bool(forKey: OnboardingStorageKeys.requestedScreenRecording)
         self.experienceStepIndex = defaults.integer(forKey: OnboardingStorageKeys.experienceIndex)
         self.storedOnboardingAIProvider =
-            defaults.string(forKey: OnboardingStorageKeys.aiProvider) ?? AIProvider.groq.rawValue
+            defaults.string(forKey: OnboardingStorageKeys.aiProvider) ?? AIProvider.openRouter.rawValue
         self.storedTranscriptionSetupKind =
             defaults.string(
                 forKey: OnboardingStorageKeys.transcriptionSetupKind
@@ -108,10 +108,6 @@ final class OnboardingCoordinator: ObservableObject {
 
     var requiredPermissionsGranted: Bool {
         OnboardingPermissionKind.required.allSatisfy { permissions.status(for: $0).isGranted }
-    }
-
-    var hasSelectedOnboardingMicrophone: Bool {
-        defaults.audioInputModeRawValue == AudioInputMode.custom.rawValue && defaults.selectedAudioDeviceUID != nil
     }
 
     var currentStepNumber: Int {
@@ -285,8 +281,10 @@ final class OnboardingCoordinator: ObservableObject {
     }
 
     var selectedOnboardingTranscriptionUsesRealtime: Bool {
-        guard let model = selectedOnboardingTranscriptionModel else { return true }
-        return TranscriptionRealtimeSupport.isEnabled(for: model)
+        // Streaming-capable models remain available, but a fresh install uses
+        // batch transcription until the person explicitly enables Real-time
+        // for a mode.
+        false
     }
 
     var selectedOnboardingTranscriptionLanguage: String {
@@ -342,17 +340,17 @@ final class OnboardingCoordinator: ObservableObject {
             return storedProvider
         }
 
-        if onboardingProviderOptions.contains(.groq) {
-            return .groq
+        if onboardingProviderOptions.contains(.openRouter) {
+            return .openRouter
         }
 
-        return onboardingProviderOptions.first ?? .groq
+        return onboardingProviderOptions.first ?? .openRouter
     }
 
     var requiredTranscriptionModel: FluidAudioModel? {
         TranscriptionModelRegistry.models
             .compactMap { $0 as? FluidAudioModel }
-            .first { $0.name == "parakeet-tdt-0.6b-v3" }
+            .first { $0.name == "parakeet-unified-0.6b" }
     }
 
     func selectedOnboardingTranscriptionProviderKeyBinding() -> Binding<String> {
@@ -373,7 +371,7 @@ final class OnboardingCoordinator: ObservableObject {
     func selectedOnboardingProviderBinding(aiService: AIService) -> Binding<AIProvider> {
         Binding(
             get: { [weak self] in
-                self?.selectedOnboardingProvider ?? .groq
+                self?.selectedOnboardingProvider ?? .openRouter
             },
             set: { [weak self] provider in
                 self?.flow.selectOnboardingProvider(provider, aiService: aiService)
@@ -397,7 +395,7 @@ final class OnboardingCoordinator: ObservableObject {
     }
 
     func isReadyForExperience(isTranscriptionSetupReady: Bool) -> Bool {
-        requiredPermissionsGranted && hasSelectedOnboardingMicrophone && isTranscriptionSetupReady
+        requiredPermissionsGranted && isTranscriptionSetupReady
             && (isSelectedAPIProviderVerified || hasSkippedAPISetup)
     }
 

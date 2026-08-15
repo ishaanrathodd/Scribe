@@ -48,13 +48,9 @@ private struct TrustHeader: View {
     var body: some View {
         VStack(spacing: 16) {
             Image(systemName: "lock.shield")
-                .font(.system(size: 24, weight: .semibold))
+                .font(.system(size: 32, weight: .semibold))
                 .foregroundColor(AppTheme.Text.primary)
-                .frame(width: 56, height: 56)
-                .background(
-                    RoundedRectangle(cornerRadius: 16, style: .continuous)
-                        .fill(AppTheme.Surface.controlActive)
-                )
+                .frame(width: 64, height: 64)
 
             Text("Scribe is private by default")
                 .font(.system(size: 32, weight: .bold))
@@ -169,11 +165,7 @@ private struct TrustPill: View {
         .frame(height: 42)
         .background(
             Capsule()
-                .fill(AppTheme.Surface.control.opacity(0.84))
-        )
-        .overlay(
-            Capsule()
-                .stroke(AppTheme.Border.subtle, lineWidth: 1)
+                .fill(OnboardingLayout.elevatedSurfaceFill)
         )
     }
 }

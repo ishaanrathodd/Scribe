@@ -273,6 +273,27 @@ class AudioDeviceManager: ObservableObject {
         }
     }
 
+    /// On first-run setup, prefer the Mac's built-in microphone without asking
+    /// the user to choose an input device. If the Mac has no built-in input,
+    /// retain the system input as the safe fallback.
+    func selectBuiltInMicrophoneForOnboarding() {
+        let selectBuiltIn = { [weak self] in
+            guard let self else { return }
+
+            if let builtIn = self.availableDevices.first(where: { self.isBuiltInDevice($0.id) }) {
+                self.selectDeviceAndSwitchToCustomMode(id: builtIn.id)
+            } else {
+                self.selectInputMode(.systemDefault)
+            }
+        }
+
+        if availableDevices.isEmpty {
+            loadAvailableDevices(completion: selectBuiltIn)
+        } else {
+            selectBuiltIn()
+        }
+    }
+
     func selectInputMode(_ mode: AudioInputMode) {
         inputMode = mode
         UserDefaults.standard.audioInputModeRawValue = mode.rawValue

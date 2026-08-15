@@ -2,8 +2,8 @@ import AppKit
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// Ask Mode keeps its conversations separate from transcription history, but
-/// uses the same selection, export, deletion, and analysis workflow.
+/// Ask conversations use the same selection, export, deletion, and analysis
+/// workflow as transcription history, within the shared History destination.
 struct AskHistoryView: View {
     @EnvironmentObject private var engine: ScribeEngine
     @EnvironmentObject private var recorderUIManager: RecorderUIManager

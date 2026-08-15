@@ -115,7 +115,7 @@ private struct ShortcutVisualization: View {
         .fixedSize(horizontal: true, vertical: false)
         .background {
             RoundedRectangle(cornerRadius: 6)
-                .fill(isRecording ? AppTheme.Accent.fill : AppTheme.Surface.control)
+                .fill(isRecording ? AppTheme.Accent.fill : Color.black)
         }
         .overlay {
             RoundedRectangle(cornerRadius: 6)

@@ -22,7 +22,7 @@ struct AppSidebar: View {
 
 private extension ViewType {
     static let primaryItems: [ViewType] = [
-        .insights, .modes, .transcribeAudio, .history, .askHistory, .dictionary, .models, .audio,
+        .insights, .modes, .transcribeAudio, .history, .dictionary, .models, .audio,
     ]
 
     static let secondaryItems: [ViewType] = [.settings]
@@ -32,7 +32,6 @@ private extension ViewType {
         case .insights: return "chart.line.uptrend.xyaxis"
         case .transcribeAudio: return "waveform.path"
         case .history: return "doc.text.fill"
-        case .askHistory: return "bubble.left.and.bubble.right.fill"
         case .models: return "cpu"
         case .modes: return "sparkles.square.fill.on.square"
         case .audio: return "mic.fill"

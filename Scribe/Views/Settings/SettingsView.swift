@@ -217,13 +217,6 @@ struct SettingsView: View {
                     showLanguageRestartAlert = true
                 }
 
-                Picker("Recorder Style", selection: $recorderUIManager.recorderPanelStyle) {
-                    ForEach(RecorderPanelStyle.allCases) { style in
-                        Text(style.displayName).tag(style)
-                    }
-                }
-                .pickerStyle(.menu)
-
                 Toggle(isOn: $showLiveTranscript) {
                     HStack(spacing: 4) {
                         Text("Live Text Display")

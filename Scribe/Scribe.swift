@@ -350,6 +350,10 @@ struct ScribeApp: App {
                         .background(
                             WindowAccessor { window in
                                 WindowManager.shared.configureWindow(window)
+                                window.styleMask.insert(.fullSizeContentView)
+                                window.titlebarAppearsTransparent = true
+                                window.titleVisibility = .hidden
+                                window.backgroundColor = .windowBackgroundColor
                             }
                         )
                 }

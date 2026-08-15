@@ -54,7 +54,7 @@ enum OnboardingStage: String, CaseIterable {
         case .microphone:
             return String(localized: "Choose Microphone")
         case .model:
-            return String(localized: "Configure Transcription Model")
+            return String(localized: "Preparing Scribe")
         case .api:
             return String(localized: "Verify API Key")
         case .experience:
@@ -73,7 +73,7 @@ enum OnboardingStage: String, CaseIterable {
         case .microphone:
             return String(localized: "Pick the microphone Scribe should use for recordings.")
         case .model:
-            return String(localized: "Use NVIDIA's Parakeet model locally, or connect a cloud transcription provider.")
+            return String(localized: "Scribe is preparing the private, on-device models it needs to transcribe and refine your voice.")
         case .api:
             return String(
                 localized:

@@ -43,7 +43,7 @@ struct ModeConfigDraft {
             isAIEnhancementEnabled = false
             selectedPromptId = inheritedConfig?.selectedPrompt.flatMap { UUID(uuidString: $0) }
             selectedTranscriptionModelName = inheritedConfig?.selectedTranscriptionModelName
-            isRealtimeTranscriptionEnabled = true
+            isRealtimeTranscriptionEnabled = false
             selectedLanguage = inheritedConfig?.selectedLanguage
             isTextFormattingEnabled = true
             useClipboardContext = false

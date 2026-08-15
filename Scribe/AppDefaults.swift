@@ -39,7 +39,7 @@ enum AppDefaults {
             "SelectedLanguage": "en",
             "AppendTrailingSpace": true,
             "RecorderType": "mini",
-            RecorderDisplaySettingsKeys.showLiveTranscript: true,
+            RecorderDisplaySettingsKeys.showLiveTranscript: false,
 
             // Cleanup
             CleanupSettingsKeys.isTranscriptionCleanupEnabled: false,

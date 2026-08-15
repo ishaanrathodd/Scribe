@@ -169,6 +169,7 @@ enum ModeRuntimeResolver {
     ) -> EnhancementRuntimeConfiguration {
         let mode = mode ?? ModeManager.shared.currentEffectiveConfiguration
         let provider = resolvedProvider(
+            mode: mode,
             providerName: mode?.selectedAIProvider,
             aiService: aiService
         )
@@ -223,6 +224,7 @@ enum ModeRuntimeResolver {
     }
 
     private static func resolvedProvider(
+        mode: ModeConfig?,
         providerName: String?,
         aiService: AIService
     ) -> AIProvider? {
@@ -232,6 +234,12 @@ enum ModeRuntimeResolver {
             // state is refreshing at launch; using it here made Ask Mode appear
             // unconfigured even though the selected provider was valid.
             return AIProvider(persistedValue: providerName)
+        }
+
+        if mode?.outputMode == .respond {
+            // Ask Mode must never fall back to Sotto Cleanup. It needs a
+            // connected cloud provider before it can answer a question.
+            return aiService.connectedProviders.first(where: { $0.requiresAPIKey })
         }
 
         return aiService.connectedProviders.first

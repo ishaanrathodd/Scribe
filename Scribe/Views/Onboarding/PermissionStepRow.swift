@@ -13,116 +13,77 @@ struct PermissionStepRow: View {
     let onQuit: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .center, spacing: 14) {
-                stepNumberView
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .center, spacing: 12) {
+                Image(systemName: descriptorSystemImage)
+                    .font(.body.weight(.medium))
+                    .frame(width: 20)
+                    .foregroundStyle(status.isGranted ? .green : .secondary)
 
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 2) {
                     Text(LocalizedStringKey(descriptor.title))
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundColor(AppTheme.Text.primary)
+                        .font(.body.weight(.medium))
 
                     Text(LocalizedStringKey(descriptor.subtitle))
-                        .font(.system(size: 12))
-                        .foregroundColor(AppTheme.Text.muted)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
 
-                Spacer(minLength: 10)
+                Spacer(minLength: 12)
 
-                if status.isGranted || isLocked {
-                    statusBadge
+                if status.isGranted {
+                    Image(systemName: "checkmark.circle")
+                        .font(.system(size: 28, weight: .regular))
+                        .foregroundStyle(.green)
+                } else if isLocked {
+                    Text("Locked")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
                 } else {
-                    actionButton
+                    Button(LocalizedStringKey(actionTitle), action: onAction)
+                        .buttonStyle(.borderedProminent)
+                        .buttonBorderShape(.capsule)
+                        .controlSize(.large)
                 }
             }
 
             if isActive && !isLocked && showsRestartHint {
                 restartHint
-                    .padding(.leading, 44)
+                    .padding(.leading, 32)
             }
         }
-        .padding(14)
-        .background(
-            AppMaterialCardBackground(
-                isSelected: isActive && !isLocked,
-                cornerRadius: 10
-            )
-        )
+        .padding(.vertical, 12)
         .opacity(isLocked ? 0.55 : 1)
-        .contentShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .contentShape(Rectangle())
         .onTapGesture {
             guard !isLocked else { return }
             onSelect()
         }
     }
 
-    private var stepNumberView: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 9, style: .continuous)
-                .fill(status.isGranted ? AppTheme.Selection.fill : AppTheme.Surface.controlActive)
-
-            if status.isGranted {
-                Image(systemName: "checkmark")
-                    .font(.system(size: 12, weight: .bold))
-                    .foregroundColor(AppTheme.Text.primary)
-            } else {
-                Text("\(stepNumber)")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(isActive && !isLocked ? AppTheme.Text.primary : AppTheme.Text.muted)
-            }
-        }
-        .frame(width: 30, height: 30)
-    }
-
-    private var actionButton: some View {
-        Button(action: onAction) {
-            Text(LocalizedStringKey(actionTitle))
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(AppTheme.Action.primaryForeground)
-                .frame(minWidth: 94)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 8)
-                .background(
-                    RoundedRectangle(cornerRadius: AppTheme.Radius.control, style: .continuous)
-                        .fill(AppTheme.Action.primaryFill)
-                )
-        }
-        .buttonStyle(.plain)
-    }
-
-    private var statusBadge: some View {
-        Text(isLocked ? LocalizedStringKey("Locked") : LocalizedStringKey(status.label))
-            .font(.system(size: 12, weight: .semibold))
-            .foregroundColor(isLocked ? AppTheme.Text.muted : statusTone)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 7)
-            .background(isLocked ? AppTheme.Surface.subtle : statusTone.opacity(0.12))
-            .clipShape(Capsule())
-    }
-
-    private var statusTone: Color {
-        switch status {
-        case .denied, .restricted:
-            return AppTheme.Status.error
+    private var descriptorSystemImage: String {
+        switch descriptor.title {
+        case "Microphone":
+            return "mic"
+        case "Accessibility":
+            return "accessibility"
         default:
-            return AppTheme.Text.secondary
+            return "rectangle.on.rectangle"
         }
     }
 
     private var restartHint: some View {
         HStack(spacing: 8) {
-            Text("Restart Scribe after enabling Screen Recording.")
-                .font(.system(size: 12))
-                .foregroundColor(AppTheme.Text.muted)
+            Text("Quit and reopen Scribe after enabling Screen Recording.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
 
             Button("Quit") {
                 onQuit()
             }
-            .font(.system(size: 12, weight: .semibold))
-            .buttonStyle(.plain)
-            .foregroundColor(AppTheme.Action.secondaryForeground)
+            .buttonStyle(.link)
         }
     }
 }

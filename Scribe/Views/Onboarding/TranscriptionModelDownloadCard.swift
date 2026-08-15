@@ -17,7 +17,7 @@ struct TranscriptionModelDownloadCard: View {
             }
         }
         .padding(18)
-        .background(AppMaterialCardBackground(cornerRadius: 12))
+        .background(OnboardingCardSurface())
     }
 
     private var header: some View {

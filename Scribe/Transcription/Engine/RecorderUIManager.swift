@@ -3,18 +3,12 @@ import SwiftUI
 import os
 
 enum RecorderPanelStyle: String, CaseIterable, Identifiable {
-    case notch
     case mini
 
     var id: String { rawValue }
 
     var displayName: String {
-        switch self {
-        case .notch:
-            return String(localized: "Notch")
-        case .mini:
-            return String(localized: "Mini")
-        }
+        String(localized: "Pill")
     }
 
     static var stored: RecorderPanelStyle {
@@ -56,7 +50,6 @@ class RecorderUIManager: ObservableObject, RecorderPanelPresenting {
         }
     }
 
-    private var notchWindowManager: NotchWindowManager?
     private var miniWindowManager: MiniWindowManager?
 
     private weak var engine: ScribeEngine?
@@ -78,37 +71,7 @@ class RecorderUIManager: ObservableObject, RecorderPanelPresenting {
     private func showRecorderPanel() {
         guard let engine = engine, let recorder = recorder else { return }
 
-        switch recorderPanelStyle {
-        case .notch:
-            if notchWindowManager == nil {
-                notchWindowManager = NotchWindowManager(
-                    engine: engine,
-                    recorder: recorder,
-                    assistantSession: engine.assistantSession,
-                    onRecordButtonTapped: { [weak self] in
-                        Task { @MainActor in
-                            await self?.toggleRecorderPanel()
-                        }
-                    },
-                    onCloseTapped: { [weak self] in
-                        Task { @MainActor in
-                            await self?.dismissRecorderPanel()
-                        }
-                    },
-                    onAssistantFollowUp: { [weak engine] text in
-                        Task { @MainActor in
-                            await engine?.sendAssistantFollowUp(text)
-                        }
-                    },
-                    onOpenHistory: {
-                        MainWindowNavigation.shared.navigate(to: .askHistory)
-                        WindowManager.shared.showMainWindow()
-                    }
-                )
-            }
-            notchWindowManager?.show()
-        case .mini:
-            if miniWindowManager == nil {
+        if miniWindowManager == nil {
                 miniWindowManager = MiniWindowManager(
                     engine: engine,
                     recorder: recorder,
@@ -134,35 +97,23 @@ class RecorderUIManager: ObservableObject, RecorderPanelPresenting {
                         }
                     },
                     onOpenHistory: {
-                        MainWindowNavigation.shared.navigate(to: .askHistory)
+                        MainWindowNavigation.shared.navigate(to: .history)
                         WindowManager.shared.showMainWindow()
                     }
                 )
-            }
-            miniWindowManager?.show()
         }
+        miniWindowManager?.show()
     }
 
     private func hideRecorderPanel() {
-        switch recorderPanelStyle {
-        case .notch:
-            notchWindowManager?.hide()
-        case .mini:
-            miniWindowManager?.hide()
-        }
+        miniWindowManager?.hide()
     }
 
     private func rebuildVisiblePanel(previousStyle: RecorderPanelStyle) {
         guard isRecorderPanelVisible else { return }
 
-        switch previousStyle {
-        case .notch:
-            notchWindowManager?.destroyWindow()
-            notchWindowManager = nil
-        case .mini:
-            miniWindowManager?.destroyWindow()
-            miniWindowManager = nil
-        }
+        miniWindowManager?.destroyWindow()
+        miniWindowManager = nil
 
         Task { @MainActor in
             try? await Task.sleep(nanoseconds: 50_000_000)

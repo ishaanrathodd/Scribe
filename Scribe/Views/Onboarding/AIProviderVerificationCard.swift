@@ -29,9 +29,8 @@ struct AIProviderVerificationCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            providerSummary
-
             if shouldShowAPIKeyEntry {
+                providerSummary
                 apiKeyField
                 verificationFooter
             } else {
@@ -39,7 +38,10 @@ struct AIProviderVerificationCard: View {
             }
         }
         .padding(16)
-        .background(AppMaterialCardBackground(cornerRadius: 10))
+        .background(
+            RoundedRectangle(cornerRadius: OnboardingLayout.cardCornerRadius, style: .continuous)
+                .fill(OnboardingLayout.elevatedSurfaceFill)
+        )
         .onAppear { refreshVerificationState() }
         .onReceive(NotificationCenter.default.publisher(for: .aiProviderKeyChanged)) { _ in
             refreshVerificationState()
@@ -73,22 +75,18 @@ struct AIProviderVerificationCard: View {
 
             Spacer(minLength: 0)
 
-            if providerOptions.count > 1 {
+            if shouldShowAPIKeyEntry, providerOptions.count > 1 {
                 Button {
                     isSwitchingProvider.toggle()
                 } label: {
                     HStack(spacing: 6) {
                         Text("Switch AI provider")
                         Image(systemName: isSwitchingProvider ? "chevron.up" : "chevron.down")
-                            .font(.system(size: 9, weight: .bold))
                     }
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundColor(AppTheme.Text.secondary)
-                    .padding(.horizontal, 11)
-                    .padding(.vertical, 7)
-                    .background(Capsule().fill(AppTheme.Surface.controlActive))
                 }
-                .buttonStyle(.plain)
+                .buttonStyle(.bordered)
+                .buttonBorderShape(.capsule)
+                .controlSize(.large)
                 .popover(isPresented: $isSwitchingProvider, arrowEdge: .bottom) {
                     AIProviderSelectionCard(
                         providerOptions: providerOptions,
@@ -117,28 +115,16 @@ struct AIProviderVerificationCard: View {
                         HStack(spacing: 4) {
                             Text("Get API key")
                             Image(systemName: "arrow.up.right")
-                                .font(.system(size: 9, weight: .semibold))
                         }
-                        .font(.system(size: 11, weight: .semibold))
-                        .foregroundColor(AppTheme.Text.secondary)
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(.link)
+                    .controlSize(.regular)
                 }
             }
 
             SecureField(apiKeyPlaceholder, text: $apiKey)
-                .textFieldStyle(.plain)
-                .font(.system(size: 13))
-                .padding(.horizontal, 12)
-                .frame(height: 38)
-                .background(
-                    RoundedRectangle(cornerRadius: 9, style: .continuous)
-                        .fill(AppTheme.Surface.control)
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 9, style: .continuous)
-                        .stroke(AppTheme.Border.control.opacity(0.45), lineWidth: 1)
-                )
+                .textFieldStyle(.roundedBorder)
+                .controlSize(.large)
         }
     }
 
@@ -157,16 +143,10 @@ struct AIProviderVerificationCard: View {
 
                     Text(isVerifying ? LocalizedStringKey("Testing...") : LocalizedStringKey("Test connection"))
                 }
-                .font(.system(size: 12, weight: .semibold))
-                .foregroundColor(canVerify ? AppTheme.Action.primaryForeground : AppTheme.Action.disabledForeground)
-                .padding(.horizontal, 14)
-                .padding(.vertical, 8)
-                .background(
-                    Capsule()
-                        .fill(canVerify ? AppTheme.Action.primaryFill : AppTheme.Action.disabledFill)
-                )
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.borderedProminent)
+            .buttonBorderShape(.capsule)
+            .controlSize(.large)
             .disabled(!canVerify)
         }
         .padding(.top, 2)
@@ -174,21 +154,24 @@ struct AIProviderVerificationCard: View {
 
     private var verifiedProviderSummary: some View {
         HStack(alignment: .center, spacing: 12) {
-            HStack(spacing: 9) {
-                Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(AppTheme.Status.positive)
+            ProviderBrandIcon(
+                descriptor: providerDescriptor(for: selectedProvider),
+                fallbackSystemImage: "sparkles",
+                isSelected: true,
+                size: 28,
+                iconSize: 15
+            )
 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Connection verified.")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundColor(AppTheme.Text.primary)
-                }
-            }
+            Text(selectedProvider.rawValue)
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundColor(AppTheme.Text.primary)
 
             Spacer(minLength: 12)
+
+            Image(systemName: "checkmark.circle")
+                .font(.system(size: 28, weight: .regular))
+                .foregroundStyle(.green)
         }
-        .padding(.top, 2)
     }
 
     @ViewBuilder
@@ -336,7 +319,7 @@ private struct AIProviderSelectionCard: View {
             }
         }
         .padding(16)
-        .background(ProviderSurface(cornerRadius: 12))
+        .background(OnboardingCardSurface())
     }
 }
 
@@ -377,8 +360,8 @@ private struct ProviderChoiceButton: View {
             }
             .padding(.horizontal, 10)
             .frame(height: 54)
-            .background(ProviderSurface(isActive: isSelected, cornerRadius: 10))
-            .contentShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+            .background(OnboardingCardSurface(isSelected: isSelected, cornerRadius: 12))
+            .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         }
         .buttonStyle(.plain)
         .help(provider.rawValue)

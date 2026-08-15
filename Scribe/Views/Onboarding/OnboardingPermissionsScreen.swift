@@ -12,7 +12,6 @@ struct OnboardingPermissionsScreen: View {
     let onSelect: (OnboardingPermissionKind) -> Void
     let onAction: (OnboardingPermissionKind) -> Void
     let onQuit: () -> Void
-    let onRecheck: () -> Void
     let onContinue: () -> Void
 
     var body: some View {
@@ -23,37 +22,47 @@ struct OnboardingPermissionsScreen: View {
             permissionList
         } bottomBar: {
             OnboardingBottomBar(
-                leadingTitle: "Recheck",
+                leadingTitle: nil,
                 primaryTitle: "Continue",
                 isPrimaryEnabled: isComplete,
-                onLeading: onRecheck,
+                onLeading: nil,
                 onPrimary: onContinue
             )
         }
     }
 
     private var permissionList: some View {
-        VStack(spacing: 10) {
-            ForEach(OnboardingPermissionKind.allCases) { permission in
-                PermissionStepRow(
-                    stepNumber: stepNumber(permission),
-                    descriptor: permission.descriptor,
-                    status: status(permission),
-                    isActive: !isComplete && activePermission == permission,
-                    isLocked: isLocked(permission),
-                    showsRestartHint: permission == .screenRecording && hasRequestedScreenRecording
-                        && !status(.screenRecording).isGranted,
-                    actionTitle: actionTitle(permission),
-                    onSelect: {
-                        guard !isLocked(permission) else { return }
-                        onSelect(permission)
-                    },
-                    onAction: {
-                        onAction(permission)
-                    },
-                    onQuit: onQuit
-                )
+        VStack(alignment: .leading, spacing: 14) {
+            VStack(spacing: 0) {
+                ForEach(OnboardingPermissionKind.allCases) { permission in
+                    PermissionStepRow(
+                        stepNumber: stepNumber(permission),
+                        descriptor: permission.descriptor,
+                        status: status(permission),
+                        isActive: !isComplete && activePermission == permission,
+                        isLocked: isLocked(permission),
+                        showsRestartHint: permission == .screenRecording && hasRequestedScreenRecording
+                            && !status(.screenRecording).isGranted,
+                        actionTitle: actionTitle(permission),
+                        onSelect: {
+                            guard !isLocked(permission) else { return }
+                            onSelect(permission)
+                        },
+                        onAction: {
+                            onAction(permission)
+                        },
+                        onQuit: onQuit
+                    )
+
+                    if permission != .screenRecording {
+                        Divider()
+                            .padding(.leading, 32)
+                    }
+                }
             }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 4)
+            .background(OnboardingCardSurface())
         }
     }
 }

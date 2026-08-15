@@ -8,6 +8,7 @@ struct OnboardingView: View {
     @EnvironmentObject var aiService: AIService
     @EnvironmentObject var enhancementService: AIEnhancementService
     @StateObject private var coordinator = OnboardingCoordinator()
+    @ObservedObject private var cleanupService = ScribeRefineService.shared
     let contentMaxWidth: CGFloat = 560
 
     var body: some View {
@@ -38,24 +39,16 @@ struct OnboardingView: View {
                         onQuit: {
                             NSApplication.shared.terminate(nil)
                         },
-                        onRecheck: coordinator.permissions.refreshPermissionStatuses,
-                        onContinue: coordinator.flow.goToMicrophoneStep
-                    )
-                    .transition(.opacity)
-                case .microphone:
-                    OnboardingMicrophoneScreen(
-                        contentMaxWidth: contentMaxWidth,
-                        onBack: coordinator.flow.goToPermissionsStep,
                         onContinue: coordinator.flow.goToModelStep
                     )
                     .transition(.opacity)
+                case .microphone:
+                    Color.clear
+                        .onAppear(perform: coordinator.flow.goToModelStep)
                 case .model:
                     OnboardingModelScreen(
                         contentMaxWidth: contentMaxWidth,
                         localModel: coordinator.requiredTranscriptionModel,
-                        setupKind: coordinator.transcriptionSetupKind,
-                        providerOptions: coordinator.onboardingTranscriptionProviderOptions,
-                        selectedProviderKey: coordinator.selectedOnboardingTranscriptionProviderKeyBinding(),
                         isLocalDownloaded: isTranscriptionModelDownloaded,
                         isLocalDownloading: coordinator.requiredTranscriptionModel.map {
                             fluidAudioModelManager.isFluidAudioModelDownloading($0)
@@ -64,15 +57,13 @@ struct OnboardingView: View {
                             fluidAudioModelManager.downloadStatus(for: $0)
                         },
                         isSetupReady: isTranscriptionSetupReady,
-                        onSelectSetupKind: coordinator.flow.selectOnboardingTranscriptionSetup,
                         onDownload: {
                             coordinator.flow.downloadTranscriptionModel(
                                 $0,
                                 modelManager: fluidAudioModelManager
                             )
                         },
-                        onVerificationChanged: coordinator.flow.refreshTranscriptionSetupVerification,
-                        onBack: coordinator.flow.goToMicrophoneStep,
+                        onBack: coordinator.flow.goToPermissionsStep,
                         onContinue: {
                             coordinator.flow.goToAPIStep(
                                 isTranscriptionSetupReady: isTranscriptionSetupReady,
@@ -166,7 +157,8 @@ struct OnboardingView: View {
                         },
                         onContinue: {
                             coordinator.flow.finishOnboardingAfterTrust(
-                                isTranscriptionSetupReady: isTranscriptionSetupReady
+                                isTranscriptionSetupReady: isTranscriptionSetupReady,
+                                enhancementService: enhancementService
                             ) {
                                 hasCompletedOnboardingV2 = true
                             }
@@ -177,17 +169,17 @@ struct OnboardingView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            OnboardingProgressBadge(
-                currentStep: coordinator.currentStepNumber,
-                totalSteps: coordinator.totalStepCount
-            )
-            .padding(.leading, 28)
-            .padding(.bottom, 26)
-            .allowsHitTesting(false)
-
         }
         .frame(minWidth: 820, minHeight: 680)
         .animation(.easeInOut(duration: 0.22), value: coordinator.stage)
+        .background(
+            WindowAccessor { window in
+                window.styleMask.insert(.fullSizeContentView)
+                window.titlebarAppearsTransparent = true
+                window.titleVisibility = .hidden
+                window.backgroundColor = .windowBackgroundColor
+            }
+        )
         .onAppear {
             coordinator.flow.ensureDefaultOnboardingTranscriptionProvider()
             coordinator.flow.refreshTranscriptionSetupVerification()

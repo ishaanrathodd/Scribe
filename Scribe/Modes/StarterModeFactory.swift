@@ -2,14 +2,38 @@ import AppKit
 import Foundation
 
 enum StarterModeFactory {
-    static let defaultTranscriptionModelName = "parakeet-tdt-0.6b-v3"
+    static let defaultTranscriptionModelName = "parakeet-unified-0.6b"
+
+    /// Ask Mode starts with the fast Gemini Flash Lite model whenever the
+    /// selected provider exposes it. The local starter modes intentionally do
+    /// not use this selection: they run through Sotto Cleanup on-device.
+    static func preferredCloudModel(
+        for provider: AIProvider,
+        fallback: String? = nil
+    ) -> String {
+        if provider == .openRouter {
+            return "google/gemini-3.5-flash-lite"
+        }
+
+        if let flashLite = provider.availableModels.first(where: {
+            $0.localizedCaseInsensitiveContains("gemini-3.5-flash-lite")
+        }) {
+            return flashLite
+        }
+
+        if let fallback, !fallback.isEmpty {
+            return fallback
+        }
+
+        return provider.defaultModel
+    }
 
     static func install(
         kinds: [StarterModeKind],
         provider: AIProvider,
         modelName: String?,
         transcriptionModelName: String = defaultTranscriptionModelName,
-        isRealtimeTranscriptionEnabled: Bool = true,
+        isRealtimeTranscriptionEnabled: Bool = false,
         selectedLanguage: String = "auto",
         installedApps: [InstalledAppInfo]? = nil
     ) {
@@ -72,7 +96,30 @@ enum StarterModeFactory {
         selectedLanguage: String,
         installedApps: [InstalledAppInfo]
     ) -> ModeConfig {
-        ModeConfig(
+        let isAssistant = template.kind == .assistant
+        let aiProvider: AIProvider?
+        let aiModel: String?
+
+        if isAssistant {
+            // Ask Mode is deliberately cloud-only. Do not silently fall back
+            // to the local cleanup engine when a cloud API key is unavailable.
+            let hasCloudKey = provider.requiresAPIKey
+                && APIKeyManager.shared.hasAPIKey(forProvider: provider.rawValue)
+            aiProvider = hasCloudKey ? provider : nil
+            aiModel = hasCloudKey
+                ? Self.preferredCloudModel(for: provider, fallback: modelName)
+                : nil
+        } else if template.usesAIEnhancement {
+            // Enhancement, Email, and any other paste-oriented starter modes
+            // use the on-device cleanup model by default.
+            aiProvider = .scribeRefine
+            aiModel = AIProvider.scribeRefine.defaultModel
+        } else {
+            aiProvider = nil
+            aiModel = nil
+        }
+
+        return ModeConfig(
             id: template.id,
             name: template.name,
             icon: template.icon,
@@ -88,8 +135,8 @@ enum StarterModeFactory {
             useSelectedTextContext: template.useSelectedTextContext,
             useScreenCapture: template.useScreenCapture,
             isTextFormattingEnabled: true,
-            selectedAIProvider: template.usesAIEnhancement ? provider.rawValue : nil,
-            selectedAIModel: template.usesAIEnhancement ? (modelName ?? provider.defaultModel) : nil,
+            selectedAIProvider: aiProvider?.rawValue,
+            selectedAIModel: aiModel,
             outputMode: template.outputMode,
             autoSendKey: .none,
             isEnabled: true,

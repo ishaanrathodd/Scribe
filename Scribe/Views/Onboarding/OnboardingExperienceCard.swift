@@ -65,7 +65,7 @@ struct OnboardingExperienceCard: View {
         }
         .frame(maxWidth: .infinity)
         .frame(height: panelHeight)
-        .background(AppTheme.Surface.window.opacity(0.86))
+        .background(Color.black)
         .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
@@ -95,7 +95,7 @@ struct OnboardingExperienceCard: View {
         }
         .padding(.horizontal, 12)
         .frame(height: 32)
-        .background(AppTheme.Surface.control.opacity(0.48))
+        .background(Color.white.opacity(0.12))
     }
 
     private var trafficLights: some View {

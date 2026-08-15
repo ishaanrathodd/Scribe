@@ -1,7 +1,91 @@
 import SwiftData
 import SwiftUI
 
+/// A single, native history destination.  Dictations and Ask conversations stay
+/// separate data sets, while sharing one familiar switcher and sidebar item.
 struct InlineHistoryView: View {
+    private enum HistoryKind: String, CaseIterable, Identifiable {
+        case transcriptions = "Transcriptions"
+        case ask = "Ask"
+
+        var id: String { rawValue }
+    }
+
+    @State private var selectedKind: HistoryKind = .transcriptions
+
+    var body: some View {
+        VStack(spacing: 0) {
+            historySelector
+                .padding(.horizontal, 24)
+                .padding(.vertical, 12)
+
+            Divider()
+
+            Group {
+                switch selectedKind {
+                case .transcriptions:
+                    TranscriptionHistoryContentView()
+                case .ask:
+                    AskHistoryView()
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    @ViewBuilder
+    private var historySelector: some View {
+        if #available(macOS 26.0, *) {
+            HStack(spacing: 2) {
+                historySelectorButton(.transcriptions)
+                historySelectorButton(.ask)
+            }
+            .padding(3)
+            // Keep this control mechanically identical to the Dictionary
+            // section selector, so the two top-level switches feel native and
+            // consistent in macOS 26.
+            .frame(width: 300, height: 42)
+            .glassEffect(.regular.interactive(), in: Capsule())
+            .accessibilityElement(children: .contain)
+            .accessibilityLabel("History type")
+        } else {
+            Picker("History", selection: $selectedKind) {
+                ForEach(HistoryKind.allCases) { kind in
+                    Text(kind.rawValue).tag(kind)
+                }
+            }
+            .labelsHidden()
+            .pickerStyle(.segmented)
+            .fixedSize()
+            .accessibilityLabel("History type")
+        }
+    }
+
+    @available(macOS 26.0, *)
+    private func historySelectorButton(_ kind: HistoryKind) -> some View {
+        Button {
+            selectedKind = kind
+        } label: {
+            Text(kind.rawValue)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(.primary)
+                .lineLimit(1)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .background {
+            if selectedKind == kind {
+                Capsule()
+                    .fill(Color.white.opacity(0.16))
+            }
+        }
+        .animation(.easeInOut(duration: 0.16), value: selectedKind)
+    }
+}
+
+private struct TranscriptionHistoryContentView: View {
     @Environment(\.modelContext) private var modelContext
     @State private var searchText = ""
     @State private var expandedId: UUID?

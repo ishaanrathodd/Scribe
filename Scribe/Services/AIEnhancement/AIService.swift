@@ -104,7 +104,7 @@ enum AIProvider: String, CaseIterable {
         case .custom:
             return CustomAIProviderManager.shared.defaultModelName
         case .openRouter:
-            return "openai/gpt-oss-120b"
+            return "google/gemini-3.5-flash-lite"
         }
     }
 
@@ -337,7 +337,7 @@ class AIService: ObservableObject {
         {
             self.selectedProvider = provider
         } else {
-            self.selectedProvider = .gemini
+            self.selectedProvider = .openRouter
         }
 
         if selectedProvider.requiresAPIKey {
