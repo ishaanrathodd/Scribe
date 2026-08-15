@@ -59,7 +59,8 @@ class TranscriptionPipeline {
         recordingContextSnapshot: @escaping () async -> RecordingContextSnapshot? = { nil },
         outputConfiguration: @escaping () -> OutputRuntimeConfiguration,
         onStateChange: @escaping (RecordingState) -> Void,
-        shouldCancel: () -> Bool,
+        onEnhancementPartial: @escaping (String) -> Void = { _ in },
+        shouldCancel: @escaping () -> Bool,
         onCancel: @escaping () async -> Void,
         onDismiss: @escaping () async -> Void,
         assistant: AssistantHooks = .inactive
@@ -190,7 +191,11 @@ class TranscriptionPipeline {
                         let enhancementResult = try await enhancementService.enhance(
                             textForAI,
                             configuration: resolvedEnhancementConfiguration,
-                            contextSnapshot: contextSnapshot
+                            contextSnapshot: contextSnapshot,
+                            onPartial: shouldRespondInRecorder ? nil : { partialText in
+                                guard !shouldCancel() else { return }
+                                onEnhancementPartial(partialText)
+                            }
                         )
                         transcription.enhancedText = enhancementResult.text
                         transcription.aiEnhancementModelName =

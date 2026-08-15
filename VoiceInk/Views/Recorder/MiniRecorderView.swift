@@ -28,7 +28,10 @@ struct MiniRecorderView<S: RecorderStateProvider & ObservableObject>: View {
     private var hasLiveTranscript: Bool {
         showLiveTranscript
             && !isAskMode
-            && stateProvider.recordingState == .recording
+            && (
+                stateProvider.recordingState == .recording
+                    || (stateProvider.recordingState == .enhancing && !stateProvider.partialTranscript.isEmpty)
+            )
     }
 
     private var hasAssistantResponse: Bool {

@@ -37,8 +37,6 @@ class AIEnhancementService: ObservableObject {
         let stored = UserDefaults.standard.integer(forKey: "AssistantTimeoutSeconds")
         return stored > 0 ? TimeInterval(stored) : 75
     }
-    private let rateLimitInterval: TimeInterval = 1.0
-    private var lastRequestTime: Date?
     private let modelContext: ModelContext
 
     @Published var lastCapturedClipboard: String?
@@ -100,16 +98,6 @@ class AIEnhancementService: ObservableObject {
         }
 
         return APIKeyManager.shared.hasAPIKey(forProvider: provider.rawValue)
-    }
-
-    private func waitForRateLimit() async throws {
-        if let lastRequest = lastRequestTime {
-            let timeSinceLastRequest = Date().timeIntervalSince(lastRequest)
-            if timeSinceLastRequest < rateLimitInterval {
-                try await Task.sleep(nanoseconds: UInt64((rateLimitInterval - timeSinceLastRequest) * 1_000_000_000))
-            }
-        }
-        lastRequestTime = Date()
     }
 
     private func getSystemMessage(
@@ -223,7 +211,8 @@ class AIEnhancementService: ObservableObject {
     private func makeRequest(
         text: String,
         configuration: EnhancementRuntimeConfiguration,
-        contextSnapshot: RecordingContextSnapshot?
+        contextSnapshot: RecordingContextSnapshot?,
+        onPartial: ((String) -> Void)?
     ) async throws -> (text: String, systemMessage: String?, userMessage: String?) {
         guard isConfigured(for: configuration) else {
             throw EnhancementError.notConfigured
@@ -264,6 +253,7 @@ class AIEnhancementService: ObservableObject {
 
         let modelName = configuration.modelName ?? provider.defaultModel
         let isAssistantMode = configuration.mode?.outputMode == .respond
+        let maximumCompletionTokens = EnhancementLatencyPolicy.maximumCompletionTokens(for: text)
         let formattedText = "\n<TRANSCRIPT>\n\(text)\n</TRANSCRIPT>"
         let requestText = isAssistantMode ? text : formattedText
         let requestTimeout =
@@ -323,8 +313,6 @@ class AIEnhancementService: ObservableObject {
             }
         }
 
-        try await waitForRateLimit()
-
         do {
             let result: String
             switch provider {
@@ -344,6 +332,7 @@ class AIEnhancementService: ObservableObject {
                     model: modelName,
                     messages: [.user(requestText)],
                     systemPrompt: systemMessage,
+                    maxTokens: maximumCompletionTokens,
                     timeout: requestTimeout
                 )
             case .custom:
@@ -353,15 +342,37 @@ class AIEnhancementService: ObservableObject {
                 else {
                     throw EnhancementError.notConfigured
                 }
-                result = try await OpenAILLMClient.chatCompletion(
-                    baseURL: baseURL,
-                    apiKey: customConfiguration.apiKey,
-                    model: customConfiguration.modelName,
-                    messages: [.user(requestText)],
-                    systemPrompt: systemMessage,
-                    temperature: 0.3,
-                    timeout: requestTimeout
+                let extraBody = EnhancementLatencyPolicy.openAICompatibleBody(
+                    modelName: customConfiguration.modelName,
+                    maximumCompletionTokens: maximumCompletionTokens
                 )
+                if let onPartial {
+                    var partialText = ""
+                    result = try await OpenAIStreamingClient.chatCompletion(
+                        baseURL: baseURL,
+                        apiKey: customConfiguration.apiKey,
+                        model: customConfiguration.modelName,
+                        messages: [.user(requestText)],
+                        systemPrompt: systemMessage,
+                        temperature: 0.3,
+                        extraBody: extraBody,
+                        timeout: requestTimeout
+                    ) { delta in
+                        partialText.append(contentsOf: delta)
+                        onPartial(partialText)
+                    }
+                } else {
+                    result = try await OpenAILLMClient.chatCompletion(
+                        baseURL: baseURL,
+                        apiKey: customConfiguration.apiKey,
+                        model: customConfiguration.modelName,
+                        messages: [.user(requestText)],
+                        systemPrompt: systemMessage,
+                        temperature: 0.3,
+                        extraBody: extraBody,
+                        timeout: requestTimeout
+                    )
+                }
             default:
                 guard let baseURL = URL(string: provider.baseURL) else {
                     throw EnhancementError.customError(
@@ -372,22 +383,44 @@ class AIEnhancementService: ObservableObject {
                     for: provider,
                     modelName: modelName
                 )
-                let extraBody = ReasoningConfig.getExtraBodyParameters(
-                    for: provider,
+                let extraBody = EnhancementLatencyPolicy.openAICompatibleBody(
                     modelName: modelName,
-                    enablingWebSearch: configuration.isWebSearchEnabled
+                    maximumCompletionTokens: maximumCompletionTokens,
+                    existing: ReasoningConfig.getExtraBodyParameters(
+                        for: provider,
+                        modelName: modelName,
+                        enablingWebSearch: configuration.isWebSearchEnabled
+                    )
                 )
-                result = try await OpenAILLMClient.chatCompletion(
-                    baseURL: baseURL,
-                    apiKey: try apiKey(for: provider, modelName: modelName),
-                    model: modelName,
-                    messages: [.user(requestText)],
-                    systemPrompt: systemMessage,
-                    temperature: temperature,
-                    reasoningEffort: reasoningEffort,
-                    extraBody: extraBody,
-                    timeout: requestTimeout
-                )
+                if let onPartial {
+                    var partialText = ""
+                    result = try await OpenAIStreamingClient.chatCompletion(
+                        baseURL: baseURL,
+                        apiKey: try apiKey(for: provider, modelName: modelName),
+                        model: modelName,
+                        messages: [.user(requestText)],
+                        systemPrompt: systemMessage,
+                        temperature: temperature,
+                        reasoningEffort: reasoningEffort,
+                        extraBody: extraBody,
+                        timeout: requestTimeout
+                    ) { delta in
+                        partialText.append(contentsOf: delta)
+                        onPartial(partialText)
+                    }
+                } else {
+                    result = try await OpenAILLMClient.chatCompletion(
+                        baseURL: baseURL,
+                        apiKey: try apiKey(for: provider, modelName: modelName),
+                        model: modelName,
+                        messages: [.user(requestText)],
+                        systemPrompt: systemMessage,
+                        temperature: temperature,
+                        reasoningEffort: reasoningEffort,
+                        extraBody: extraBody,
+                        timeout: requestTimeout
+                    )
+                }
             }
             return (
                 AIEnhancementOutputFilter.filter(
@@ -447,6 +480,7 @@ class AIEnhancementService: ObservableObject {
         text: String,
         configuration: EnhancementRuntimeConfiguration,
         contextSnapshot: RecordingContextSnapshot?,
+        onPartial: ((String) -> Void)?,
         maxRetries: Int = 3,
         initialDelay: TimeInterval = 1.0
     ) async throws -> (text: String, systemMessage: String?, userMessage: String?) {
@@ -458,7 +492,8 @@ class AIEnhancementService: ObservableObject {
                 return try await makeRequest(
                     text: text,
                     configuration: configuration,
-                    contextSnapshot: contextSnapshot
+                    contextSnapshot: contextSnapshot,
+                    onPartial: onPartial
                 )
             } catch let error as EnhancementError {
                 switch error {
@@ -521,7 +556,8 @@ class AIEnhancementService: ObservableObject {
     func enhance(
         _ text: String,
         configuration: EnhancementRuntimeConfiguration,
-        contextSnapshot: RecordingContextSnapshot? = nil
+        contextSnapshot: RecordingContextSnapshot? = nil,
+        onPartial: ((String) -> Void)? = nil
     ) async throws -> AIEnhancementResult {
         let startTime = Date()
         let promptName = configuration.prompt?.title
@@ -530,10 +566,16 @@ class AIEnhancementService: ObservableObject {
             let requestResult = try await makeRequestWithRetry(
                 text: text,
                 configuration: configuration,
-                contextSnapshot: contextSnapshot
+                contextSnapshot: contextSnapshot,
+                onPartial: onPartial
             )
             let endTime = Date()
             let duration = endTime.timeIntervalSince(startTime)
+            let providerName = configuration.provider?.rawValue ?? "Unconfigured"
+            let modelName = configuration.modelName ?? configuration.provider?.defaultModel ?? "Unconfigured"
+            logger.info(
+                "Enhancement completed provider=\(providerName, privacy: .public) model=\(modelName, privacy: .public) inputCharacters=\(text.count, privacy: .public) outputCharacters=\(requestResult.text.count, privacy: .public) duration=\(duration, format: .fixed(precision: 3), privacy: .public)s"
+            )
             return AIEnhancementResult(
                 text: requestResult.text,
                 duration: duration,

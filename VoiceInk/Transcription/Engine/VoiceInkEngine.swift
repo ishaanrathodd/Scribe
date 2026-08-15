@@ -590,6 +590,13 @@ class VoiceInkEngine: NSObject, ObservableObject {
             onStateChange: { [weak self] state in
                 guard let self, self.activePipelineTranscriptionID == transcriptionID else { return }
                 self.recordingState = state
+                if state == .enhancing {
+                    self.partialTranscript = ""
+                }
+            },
+            onEnhancementPartial: { [weak self] partialText in
+                guard let self, self.activePipelineTranscriptionID == transcriptionID else { return }
+                self.partialTranscript = partialText
             },
             shouldCancel: { [weak self] in
                 guard let self else { return false }
