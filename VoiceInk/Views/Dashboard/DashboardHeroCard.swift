@@ -8,8 +8,8 @@ enum DashboardHeroHeadline {
 }
 
 struct DashboardHeroCard: View {
-    private static let headlineFont: Font = .system(size: 23, weight: .bold, design: .rounded)
-    private static let highlightedHeadlineFont: Font = .system(size: 30, weight: .black, design: .rounded)
+    private static let headlineFont: Font = .system(size: 31, weight: .medium, design: .serif)
+    private static let highlightedHeadlineFont: Font = .system(size: 31, weight: .medium, design: .serif)
 
     let headline: DashboardHeroHeadline
     let subtext: String
@@ -37,9 +37,9 @@ struct DashboardHeroCard: View {
             }
             .padding(.top, 8)
         }
-        .padding(.horizontal, 28)
-        .padding(.vertical, 18)
-        .frame(maxWidth: .infinity, minHeight: 160, alignment: .leading)
+        .padding(.horizontal, 36)
+        .padding(.vertical, 24)
+        .frame(maxWidth: .infinity, minHeight: 188, alignment: .leading)
         .background(DashboardImpactBackground())
         .clipShape(RoundedRectangle(cornerRadius: DashboardLayout.cardCornerRadius, style: .continuous))
     }
@@ -90,7 +90,7 @@ struct DashboardHeroCard: View {
 }
 
 private struct DashboardMomentumActionLabel: View {
-    private static let cornerRadius: CGFloat = 12
+    private static let cornerRadius: CGFloat = 10
 
     let title: LocalizedStringKey
     let icon: String
@@ -104,10 +104,10 @@ private struct DashboardMomentumActionLabel: View {
             Image(systemName: icon)
                 .font(.system(size: 13, weight: .semibold))
         }
-        .font(.system(size: 13, weight: .semibold))
+        .font(.system(size: 15, weight: .semibold))
         .foregroundStyle(foregroundColor)
-        .padding(.horizontal, 18)
-        .frame(minHeight: 40)
+        .padding(.horizontal, 20)
+        .frame(minHeight: 44)
         .background(backgroundColor)
         .clipShape(RoundedRectangle(cornerRadius: Self.cornerRadius, style: .continuous))
         .overlay(
@@ -119,7 +119,7 @@ private struct DashboardMomentumActionLabel: View {
 
     private var foregroundColor: Color {
         if isPrimary {
-            return Color.white
+            return DashboardMomentumBackground.actionForeground
         }
 
         return AppTheme.Text.primary
@@ -127,7 +127,7 @@ private struct DashboardMomentumActionLabel: View {
 
     private var backgroundColor: Color {
         if isPrimary {
-            return DashboardMomentumBackground.accent
+            return DashboardMomentumBackground.actionBackground
         }
 
         return Color.white.opacity(0.82)
@@ -142,7 +142,7 @@ private struct DashboardMomentumActionLabel: View {
     }
 
     private var shadowColor: Color {
-        isPrimary ? DashboardMomentumBackground.accent.opacity(0.18) : Color.black.opacity(0.06)
+        isPrimary ? Color.black.opacity(0.20) : Color.black.opacity(0.06)
     }
 }
 
@@ -152,6 +152,16 @@ private struct DashboardImpactBackground: View {
             Image("momentum-hero-bg")
                 .resizable()
                 .scaledToFill()
+
+            LinearGradient(
+                colors: [
+                    Color.black.opacity(0.60),
+                    Color.black.opacity(0.34),
+                    Color.black.opacity(0.04)
+                ],
+                startPoint: .leading,
+                endPoint: .trailing
+            )
         }
         .clipShape(RoundedRectangle(cornerRadius: DashboardLayout.cardCornerRadius, style: .continuous))
         .overlay(
@@ -162,7 +172,9 @@ private struct DashboardImpactBackground: View {
 }
 
 private struct DashboardMomentumBackground {
-    static let accent = Color(red: 0.76, green: 0.31, blue: 0.08)
-    static let headline = Color(red: 0.10, green: 0.08, blue: 0.06)
-    static let subtext = Color(red: 0.40, green: 0.34, blue: 0.28)
+    static let accent = Color.white
+    static let headline = Color.white
+    static let subtext = Color.white.opacity(0.86)
+    static let actionBackground = Color(red: 0.92, green: 0.90, blue: 0.84)
+    static let actionForeground = Color(red: 0.16, green: 0.16, blue: 0.17)
 }

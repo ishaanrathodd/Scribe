@@ -216,6 +216,53 @@ struct ModelManagementView: View {
     }
 
     private var modelFilterPicker: some View {
+        Group {
+            if #available(macOS 26.0, *) {
+                liquidGlassModelFilterPicker
+            } else {
+                modelFilterPickerFallback
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .center)
+        .onChange(of: selectedFilter) { _, _ in
+            activePanel = nil
+        }
+    }
+
+    @available(macOS 26.0, *)
+    private var liquidGlassModelFilterPicker: some View {
+        HStack(spacing: 2) {
+            ForEach(ModelFilter.allCases) { filter in
+                liquidGlassModelFilterButton(filter)
+            }
+        }
+        .padding(3)
+        .frame(width: 300, height: 42)
+        .glassEffect(.regular.interactive(), in: Capsule())
+    }
+
+    @available(macOS 26.0, *)
+    private func liquidGlassModelFilterButton(_ filter: ModelFilter) -> some View {
+        Button {
+            selectedFilter = filter
+        } label: {
+            Text(filter.title)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(.primary)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .background {
+            if selectedFilter == filter {
+                Capsule()
+                    .fill(Color.white.opacity(0.16))
+            }
+        }
+        .animation(.easeInOut(duration: 0.16), value: selectedFilter)
+    }
+
+    private var modelFilterPickerFallback: some View {
         Picker("Model source", selection: $selectedFilter) {
             ForEach(ModelFilter.allCases) { filter in
                 Text(filter.title).tag(filter)
@@ -224,10 +271,6 @@ struct ModelManagementView: View {
         .pickerStyle(.segmented)
         .labelsHidden()
         .frame(width: 320)
-        .frame(maxWidth: .infinity, alignment: .center)
-        .onChange(of: selectedFilter) { _, _ in
-            activePanel = nil
-        }
     }
 
     private var localModelsForm: some View {
@@ -255,10 +298,6 @@ struct ModelManagementView: View {
                 importLocalModelButton
             }
 
-            Section {
-            LocalEnhancementServiceManagementView()
-                .environmentObject(aiService)
-            }
         }
         .formStyle(.grouped)
         .scrollContentBackground(.hidden)

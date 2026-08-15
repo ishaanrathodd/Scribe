@@ -53,6 +53,55 @@ struct DictionarySettingsView: View {
     }
 
     private var sectionSelector: some View {
+        Group {
+            if #available(macOS 26.0, *) {
+                liquidGlassSectionSelector
+            } else {
+                sectionPicker
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .center)
+    }
+
+    @available(macOS 26.0, *)
+    private var liquidGlassSectionSelector: some View {
+        HStack(spacing: 2) {
+            liquidGlassSectionButton(.replacements)
+            liquidGlassSectionButton(.spellings)
+        }
+        .padding(3)
+        .frame(width: 300, height: 42)
+        .glassEffect(.regular.interactive(), in: Capsule())
+    }
+
+    @available(macOS 26.0, *)
+    private func liquidGlassSectionButton(_ section: DictionarySection) -> some View {
+        Button {
+            selectedSection = section
+        } label: {
+            Text(section.rawValue)
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(.primary)
+                .lineLimit(1)
+                .padding(.horizontal, 6)
+                .frame(
+                    minWidth: section == .replacements ? 172 : nil,
+                    maxWidth: section == .spellings ? .infinity : nil,
+                    maxHeight: .infinity
+                )
+                .contentShape(Capsule())
+        }
+        .buttonStyle(.plain)
+        .background {
+            if selectedSection == section {
+                Capsule()
+                    .fill(Color.white.opacity(0.16))
+            }
+        }
+        .animation(.easeInOut(duration: 0.16), value: selectedSection)
+    }
+
+    private var sectionPicker: some View {
         Picker("Dictionary section", selection: $selectedSection) {
             ForEach(DictionarySection.allCases, id: \.self) { section in
                 Text(section.rawValue).tag(section)
@@ -61,7 +110,6 @@ struct DictionarySettingsView: View {
         .pickerStyle(.segmented)
         .labelsHidden()
         .frame(width: 320)
-        .frame(maxWidth: .infinity, alignment: .center)
     }
 
     private var selectedSectionForm: some View {

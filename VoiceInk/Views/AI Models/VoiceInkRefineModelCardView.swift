@@ -27,13 +27,6 @@ struct VoiceInkRefineModelCardView: View {
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundStyle(Color(.labelColor))
 
-            Text("New")
-                .font(.system(size: 10, weight: .medium))
-                .foregroundColor(.black)
-                .padding(.horizontal, 6)
-                .padding(.vertical, 2)
-                .background(Capsule().fill(Color(red: 0.96, green: 0.79, blue: 0.63)))
-
             Spacer()
         }
     }
@@ -41,7 +34,6 @@ struct VoiceInkRefineModelCardView: View {
     private var metadataSection: some View {
         HStack(spacing: 12) {
             Label("Enhancement Model", systemImage: "sparkles")
-            Label("On-Device", systemImage: "checkmark.shield")
             Label {
                 Text(verbatim: VoiceInkRefineService.downloadSizeDescription)
             } icon: {

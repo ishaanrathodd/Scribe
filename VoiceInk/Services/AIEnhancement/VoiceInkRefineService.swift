@@ -26,7 +26,7 @@ final class VoiceInkRefineService: ObservableObject {
     static let shared = VoiceInkRefineService()
 
     static let providerName = "Sotto Cleanup"
-    static let modelName = "Sotto Cleanup LFM2.5 350M"
+    static let modelName = "Sotto Cleanup"
     /// Sotto is trained as a raw completion model. The XPC engine applies its
     /// documented `### Input` / `### Output` completion template directly.
     static let systemPrompt = ""
