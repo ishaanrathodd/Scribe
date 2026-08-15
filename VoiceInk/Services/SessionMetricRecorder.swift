@@ -59,6 +59,39 @@ enum SessionMetricRecorder {
         return true
     }
 
+    /// Session metrics are derived from a completed transcription, so they must
+    /// be removed with that transcription. Keeping an orphaned metric makes
+    /// Dashboard Insights report activity the user has explicitly deleted.
+    static func removeMetrics(
+        for transcriptionIDs: Set<UUID>,
+        in modelContext: ModelContext
+    ) throws {
+        guard !transcriptionIDs.isEmpty else { return }
+
+        let metrics = try modelContext.fetch(FetchDescriptor<SessionMetric>())
+        for metric in metrics where transcriptionIDs.contains(metric.transcriptionId) {
+            modelContext.delete(metric)
+        }
+    }
+
+    /// Repairs metrics left behind by history removals from older app versions.
+    /// This also makes the stats store self-healing if a transcript is removed
+    /// through a path that did not have a chance to delete its metric first.
+    @discardableResult
+    static func removeOrphanedMetrics(in modelContext: ModelContext) throws -> Int {
+        let activeTranscriptionIDs = Set(
+            try modelContext.fetch(FetchDescriptor<Transcription>()).map(\.id)
+        )
+        let metrics = try modelContext.fetch(FetchDescriptor<SessionMetric>())
+        let orphanedMetrics = metrics.filter { !activeTranscriptionIDs.contains($0.transcriptionId) }
+
+        for metric in orphanedMetrics {
+            modelContext.delete(metric)
+        }
+
+        return orphanedMetrics.count
+    }
+
     private static func finalTextForCounting(from transcription: Transcription) -> String {
         if let enhancedText = transcription.enhancedText,
             transcription.enhancementDuration != nil,

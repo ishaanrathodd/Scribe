@@ -7,6 +7,12 @@ enum DashboardStatsLoader {
             try Task.checkCancellation()
 
             let backgroundContext = ModelContext(modelContainer)
+            let removedMetricCount = try SessionMetricRecorder.removeOrphanedMetrics(
+                in: backgroundContext
+            )
+            if removedMetricCount > 0 {
+                try backgroundContext.save()
+            }
             let count = try backgroundContext.fetchCount(FetchDescriptor<SessionMetric>())
 
             try Task.checkCancellation()
@@ -58,6 +64,7 @@ enum DashboardStatsLoader {
             let windows = DashboardPeriodWindows()
             let now = windows.now
             let calendar = windows.calendar
+            var recentActivityDays = Self.activityDays(dayCount: 42, now: now, calendar: calendar)
             var todayProductivity = Self.hourlyProductivityPoints(now: now, calendar: calendar)
             var lastSevenDayProductivity = Self.productivityPoints(
                 dayCount: 7, now: now, calendar: calendar, labelStyle: .weekday)
@@ -80,6 +87,10 @@ enum DashboardStatsLoader {
             let thisYearMonthIndices = Dictionary(
                 uniqueKeysWithValues: thisYearProductivity.enumerated().map { index, point in
                     (startOfMonth(for: point.date, calendar: calendar), index)
+                })
+            let recentActivityIndices = Dictionary(
+                uniqueKeysWithValues: recentActivityDays.enumerated().map { index, day in
+                    (calendar.startOfDay(for: day.date), index)
                 })
             var offset = 0
 
@@ -139,6 +150,10 @@ enum DashboardStatsLoader {
                     }
 
                     let metricDay = calendar.startOfDay(for: metric.timestamp)
+                    if let activityIndex = recentActivityIndices[metricDay] {
+                        recentActivityDays[activityIndex].wordCount += metric.wordCount
+                        recentActivityDays[activityIndex].sessionCount += 1
+                    }
                     if let weekIndex = sevenDayIndices[metricDay] {
                         lastSevenDayProductivity[weekIndex].words += metric.wordCount
                     }
@@ -304,7 +319,8 @@ enum DashboardStatsLoader {
                 lastSevenDayPeakHours: Self.peakHoursSummary(from: lastSevenDayPeakHours),
                 lastThirtyDayPeakHours: Self.peakHoursSummary(from: lastThirtyDayPeakHours),
                 thisYearPeakHours: Self.peakHoursSummary(from: thisYearPeakHours),
-                allTimePeakHours: Self.peakHoursSummary(from: allTimePeakHours)
+                allTimePeakHours: Self.peakHoursSummary(from: allTimePeakHours),
+                recentActivityDays: recentActivityDays
             )
         }
 
@@ -348,6 +364,20 @@ enum DashboardStatsLoader {
                 accessibilityLabel: accessibilityFormatter.string(from: date),
                 words: wordsByMonth[startOfMonth(for: date, calendar: calendar), default: 0]
             )
+        }
+    }
+
+    private static func activityDays(
+        dayCount: Int,
+        now: Date,
+        calendar: Calendar
+    ) -> [DashboardActivityDay] {
+        let today = calendar.startOfDay(for: now)
+        return (0..<dayCount).compactMap { offset in
+            guard let date = calendar.date(byAdding: .day, value: offset - (dayCount - 1), to: today) else {
+                return nil
+            }
+            return DashboardActivityDay(date: date)
         }
     }
 

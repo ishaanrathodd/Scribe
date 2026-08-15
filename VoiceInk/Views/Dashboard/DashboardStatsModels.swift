@@ -137,6 +137,17 @@ struct DashboardProductivityPoint: Codable, Equatable, Identifiable, Sendable {
     var words: Int = 0
 }
 
+struct DashboardActivityDay: Codable, Equatable, Identifiable, Sendable {
+    var id: Date { date }
+    let date: Date
+    var wordCount: Int = 0
+    var sessionCount: Int = 0
+
+    var isActive: Bool {
+        wordCount > 0 || sessionCount > 0
+    }
+}
+
 enum ModelInsightKind: String, Codable, Sendable {
     case transcription
     case enhancement
@@ -275,6 +286,7 @@ struct DashboardStatsSummary: Codable, Equatable, Sendable {
     var lastThirtyDayPeakHours: DashboardPeakHoursSummary = .empty
     var thisYearPeakHours: DashboardPeakHoursSummary = .empty
     var allTimePeakHours: DashboardPeakHoursSummary = .empty
+    var recentActivityDays: [DashboardActivityDay] = []
 }
 
 extension DashboardStatsSummary {

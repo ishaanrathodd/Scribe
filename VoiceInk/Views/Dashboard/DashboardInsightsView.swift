@@ -3,23 +3,20 @@ import SwiftUI
 struct DashboardInsightsView: View {
     @Binding var selectedPeriod: DashboardInsightPeriod
     let productivityPoints: [DashboardProductivityPoint]
+    let totals: DashboardMetricTotals
+    let activityDays: [DashboardActivityDay]
     let peakHoursSummary: DashboardPeakHoursSummary
     let timeSavedSummary: DashboardTimeSavedSummary
-    let modelUsage: ModelUsageSummary
-    let modelPerformanceSummaries: [ModelPerformanceSummary]
     let updatedAtText: String
     let isRefreshingStats: Bool
-    let onBack: () -> Void
     let onRefreshStats: () -> Void
-    let onViewModelUsage: () -> Void
-    let onViewModelPerformance: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 22) {
             header
 
             DashboardProductivitySummaryStrip(
-                summary: timeSavedSummary
+                totals: totals
             )
 
             DashboardProductivityCard(
@@ -32,15 +29,8 @@ struct DashboardInsightsView: View {
 
             insightSummaryCards
 
-            ModelUsageCard(
-                summary: modelUsage,
-                onViewMore: onViewModelUsage
-            )
+            DashboardStreakCard(days: activityDays)
 
-            ModelPerformanceCard(
-                summaries: modelPerformanceSummaries,
-                onViewMore: onViewModelPerformance
-            )
         }
         .frame(maxWidth: .infinity, alignment: .topLeading)
     }
@@ -60,31 +50,20 @@ struct DashboardInsightsView: View {
         HStack(alignment: .top, spacing: 16) {
             VStack(alignment: .leading, spacing: 3) {
                 Text("Scribe Insights")
-                    .font(.system(size: 26, weight: .bold, design: .rounded))
+                    .font(InsightsTypography.pageTitle)
                     .foregroundStyle(AppTheme.Text.primary)
 
                 Text("A closer look at your Scribe usage.")
-                    .font(.system(size: 13, weight: .medium))
+                    .font(InsightsTypography.supportingText)
                     .foregroundStyle(AppTheme.Text.secondary)
             }
 
             Spacer()
 
-            HStack(spacing: 8) {
-                AppIconButton(
-                    systemName: "chevron.left",
-                    help: "Back to dashboard",
-                    size: 34,
-                    iconSize: 12,
-                    cornerRadius: 17,
-                    action: onBack
-                )
-
-                InsightPeriodPicker(
-                    title: "Insights period",
-                    selection: $selectedPeriod
-                )
-            }
+            InsightPeriodPicker(
+                title: "Insights period",
+                selection: $selectedPeriod
+            )
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }

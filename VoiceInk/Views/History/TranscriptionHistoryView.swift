@@ -439,6 +439,11 @@ struct TranscriptionHistoryView: View {
         }
 
         selectedTranscriptions.remove(transcription)
+        do {
+            try SessionMetricRecorder.removeMetrics(for: [transcription.id], in: modelContext)
+        } catch {
+            print("Error deleting transcription metrics: \(error.localizedDescription)")
+        }
         modelContext.delete(transcription)
     }
 
@@ -446,6 +451,7 @@ struct TranscriptionHistoryView: View {
         do {
             try modelContext.save()
             NotificationCenter.default.post(name: .transcriptionDeleted, object: nil)
+            NotificationCenter.default.post(name: .sessionMetricsDidChange, object: nil)
             await loadInitialContent()
         } catch {
             print("Error saving deletion: \(error.localizedDescription)")

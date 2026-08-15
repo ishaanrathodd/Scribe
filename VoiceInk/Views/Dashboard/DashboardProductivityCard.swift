@@ -12,7 +12,7 @@ struct DashboardProductivityCard: View {
         VStack(alignment: .leading, spacing: 18) {
             HStack(alignment: .center, spacing: 16) {
                 Text(period.chartTitle)
-                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                    .font(InsightsTypography.cardTitle)
                     .foregroundStyle(AppTheme.Text.primary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.84)
@@ -21,7 +21,7 @@ struct DashboardProductivityCard: View {
 
                 HStack(spacing: 8) {
                     Text(statusText)
-                        .font(.system(size: 12, weight: .medium))
+                        .font(InsightsTypography.supportingText)
                         .foregroundStyle(AppTheme.Text.muted)
                         .lineLimit(1)
                         .minimumScaleFactor(0.86)
@@ -41,7 +41,7 @@ struct DashboardProductivityCard: View {
         }
         .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(DashboardInsightCardBackground(cornerRadius: 16))
+        .background(DashboardInsightCardBackground(cornerRadius: 12))
     }
 
     private var statusText: String {
@@ -49,23 +49,28 @@ struct DashboardProductivityCard: View {
     }
 }
 struct DashboardProductivitySummaryStrip: View {
-    let summary: DashboardTimeSavedSummary
+    let totals: DashboardMetricTotals
+
+    private var wordsPerMinute: Int {
+        guard totals.duration > 0 else { return 0 }
+        return Int((Double(totals.words) / totals.duration * 60).rounded())
+    }
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             metricCell(
-                title: "Time saved",
-                value: summary.hasData ? Formatters.formattedSavedTime(summary.timeSaved) : "--",
-                systemName: "clock"
+                title: "Words per minute",
+                value: wordsPerMinute > 0 ? Formatters.formattedNumber(wordsPerMinute) : "--",
+                systemName: "speedometer"
             )
             metricCell(
                 title: "Words dictated",
-                value: summary.hasData ? Formatters.formattedNumber(summary.wordCount) : "--",
+                value: totals.words > 0 ? Formatters.formattedNumber(totals.words) : "--",
                 systemName: "list.bullet.rectangle"
             )
             metricCell(
                 title: "Sessions",
-                value: summary.hasData ? Formatters.formattedCompactNumber(summary.sessionCount) : "--",
+                value: totals.count > 0 ? Formatters.formattedNumber(totals.count) : "--",
                 systemName: "mic"
             )
         }
@@ -73,31 +78,23 @@ struct DashboardProductivitySummaryStrip: View {
 
     private func metricCell(title: LocalizedStringKey, value: String, systemName: String) -> some View {
         HStack(alignment: .center, spacing: 14) {
-            ZStack {
-                RoundedRectangle(cornerRadius: 13, style: .continuous)
-                    .fill(AppTheme.Surface.controlActive.opacity(0.72))
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 13, style: .continuous)
-                            .stroke(AppTheme.Border.subtle.opacity(0.80), lineWidth: 1)
-                    )
-
-                Image(systemName: systemName)
-                    .font(.system(size: 17, weight: .semibold))
-                    .symbolRenderingMode(.monochrome)
-                    .foregroundStyle(AppTheme.Text.secondary.opacity(0.86))
-            }
-            .frame(width: 44, height: 44)
+            Image(systemName: systemName)
+                .font(.system(size: 24, weight: .medium))
+                .symbolRenderingMode(.monochrome)
+                .foregroundStyle(AppTheme.Text.secondary.opacity(0.92))
+                .frame(width: 28, height: 44)
             .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 5) {
                 Text(title)
-                    .font(.system(size: 11, weight: .bold))
+                    .font(InsightsTypography.metricLabel)
+                    .tracking(0.8)
                     .foregroundStyle(AppTheme.Text.secondary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.76)
 
                 Text(value)
-                    .font(.system(size: 23, weight: .bold, design: .rounded))
+                    .font(InsightsTypography.metricValue)
                     .foregroundStyle(AppTheme.Text.primary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.66)
@@ -108,7 +105,7 @@ struct DashboardProductivitySummaryStrip: View {
         .padding(.horizontal, 16)
         .padding(.vertical, 14)
         .frame(minWidth: 132, maxWidth: .infinity, minHeight: 86, alignment: .leading)
-        .background(DashboardInsightCardBackground(cornerRadius: 16))
+        .background(DashboardInsightCardBackground(cornerRadius: 12))
     }
 }
 

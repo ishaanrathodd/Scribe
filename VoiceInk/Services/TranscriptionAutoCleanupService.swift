@@ -75,11 +75,17 @@ class TranscriptionAutoCleanupService {
             }
         }
 
+        do {
+            try SessionMetricRecorder.removeMetrics(for: [transcription.id], in: modelContext)
+        } catch {
+            logger.error("Failed to delete transcription metrics: \(error, privacy: .public)")
+        }
         modelContext.delete(transcription)
 
         do {
             try modelContext.save()
             NotificationCenter.default.post(name: .transcriptionDeleted, object: nil)
+            NotificationCenter.default.post(name: .sessionMetricsDidChange, object: nil)
         } catch {
             logger.error("Failed to save after transcription deletion: \(error, privacy: .public)")
         }
@@ -115,6 +121,7 @@ class TranscriptionAutoCleanupService {
                     try? FileManager.default.removeItem(at: url)
                 }
                 backgroundContext.delete(transcription)
+                try SessionMetricRecorder.removeMetrics(for: [transcription.id], in: backgroundContext)
                 deletedCount += 1
             }
             if deletedCount > 0 {
@@ -122,6 +129,7 @@ class TranscriptionAutoCleanupService {
                 logger.notice("Cleaned up \(deletedCount, privacy: .public) old transcription(s)")
                 await MainActor.run {
                     NotificationCenter.default.post(name: .transcriptionDeleted, object: nil)
+                    NotificationCenter.default.post(name: .sessionMetricsDidChange, object: nil)
                 }
             }
         } catch {

@@ -15,6 +15,7 @@ struct DashboardContent: View {
     private static let automaticStatsRefreshMetricLimit = 2_000
     private static let statsRefreshDebounceNanoseconds: UInt64 = 750_000_000
     let modelContext: ModelContext
+    private let startsInInsights: Bool
 
     @State private var statsSummary: DashboardStatsSummary = .empty
     @State private var hasLoadedStatsSnapshot: Bool = false
@@ -28,6 +29,7 @@ struct DashboardContent: View {
     @State private var selectedInsightPeriod: DashboardInsightPeriod = .allTime
     @State private var isAccessibilityEnabled = AXIsProcessTrusted()
     @EnvironmentObject private var updaterViewModel: UpdaterViewModel
+    @EnvironmentObject private var navigation: MainWindowNavigation
     @ObservedObject private var modeManager = ModeManager.shared
     @State private var isSystemInfoCopied = false
     @State private var isEditingDisplayName = false
@@ -44,14 +46,16 @@ struct DashboardContent: View {
         return descriptor
     }
 
-    init(modelContext: ModelContext) {
+    init(modelContext: ModelContext, startsInInsights: Bool = false) {
         self.modelContext = modelContext
+        self.startsInInsights = startsInInsights
 
         let cachedSummary = DashboardStatsCache.shared.currentSummary()
         let cachedMetadata = DashboardStatsCache.shared.currentMetadata()
         _statsSummary = State(initialValue: cachedSummary ?? .empty)
         _hasLoadedStatsSnapshot = State(initialValue: cachedSummary != nil)
         _statsSnapshotGeneratedAt = State(initialValue: cachedMetadata?.generatedAt)
+        _isInsightsViewPresented = State(initialValue: startsInInsights)
     }
 
     var body: some View {
@@ -95,6 +99,10 @@ struct DashboardContent: View {
             if shouldRefreshStatsAfterMetricChange {
                 scheduleDashboardStatsRefresh(debounce: true, allowSkipWhenFresh: false)
             }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .transcriptionDeleted)) { _ in
+            DashboardStatsCache.shared.markStale()
+            scheduleDashboardStatsRefresh(debounce: false, allowSkipWhenFresh: false)
         }
         .onDisappear {
             dashboardStatsTask?.cancel()
@@ -387,16 +395,6 @@ struct DashboardContent: View {
         allowSkipWhenFresh: Bool
     ) async {
         do {
-            if allowSkipWhenFresh {
-                let shouldRefreshAutomatically =
-                    SessionMetricMigrationService.shared.isRunning
-                    || DashboardStatsCache.shared.shouldRefreshSnapshotAutomatically()
-
-                guard shouldRefreshAutomatically else {
-                    return
-                }
-            }
-
             let shouldStartRefresh = await MainActor.run {
                 guard generation == dashboardStatsLoadGeneration else {
                     return false
@@ -459,16 +457,13 @@ struct DashboardContent: View {
         DashboardInsightsView(
             selectedPeriod: $selectedInsightPeriod,
             productivityPoints: selectedProductivityPoints,
+            totals: selectedTotals,
+            activityDays: statsSummary.recentActivityDays,
             peakHoursSummary: selectedPeakHours,
             timeSavedSummary: selectedTimeSavedSummary,
-            modelUsage: selectedModelUsage,
-            modelPerformanceSummaries: selectedModelPerformance,
             updatedAtText: statsUpdatedAtText,
             isRefreshingStats: isDashboardStatsRefreshing,
-            onBack: { isInsightsViewPresented = false },
-            onRefreshStats: refreshDashboardStats,
-            onViewModelUsage: openModelUsagePanel,
-            onViewModelPerformance: openModelPerformancePanel
+            onRefreshStats: refreshDashboardStats
         )
     }
 
@@ -725,35 +720,13 @@ struct DashboardContent: View {
     }
 
     private var formattedAllTimeWords: String {
-        let words = Formatters.formattedCompactNumber(statsSummary.totalWords)
+        let words = Formatters.formattedNumber(statsSummary.totalWords)
         let wordUnit = statsSummary.totalWords == 1 ? String(localized: "word") : String(localized: "words")
         return String(localized: "\(words) \(wordUnit)")
     }
 
     private var formattedProgressBenchmarkText: String {
-        switch DashboardProgressBenchmark.equivalence(for: statsSummary.totalWords) {
-        case .matched(let title):
-            return String(localized: "Dictated \(formattedAllTimeWords), equivalent to \(title).")
-        case .repeated(let title, let count):
-            return String(
-                localized:
-                    "Dictated \(formattedAllTimeWords), equivalent to \(title) \(formattedBenchmarkMultiple(count)).")
-        case .remaining(let words, let title):
-            guard words > 0, !title.isEmpty else {
-                return String(localized: "Dictated \(formattedAllTimeWords).")
-            }
-
-            let remainingWords = Formatters.formattedNumber(words)
-            return String(localized: "Dictated \(formattedAllTimeWords), \(remainingWords) words from \(title).")
-        }
-    }
-
-    private func formattedBenchmarkMultiple(_ count: Int) -> String {
-        if count == 2 {
-            return String(localized: "twice")
-        }
-
-        return String(localized: "\(Formatters.formattedNumber(count)) times")
+        String(localized: "Dictated \(formattedAllTimeWords).")
     }
 }
 

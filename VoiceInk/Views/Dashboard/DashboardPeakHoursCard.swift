@@ -24,7 +24,7 @@ struct DashboardPeakHoursCard: View {
         .fixedSize(horizontal: false, vertical: true)
         .padding(18)
         .frame(maxWidth: .infinity, minHeight: 196, maxHeight: 196, alignment: .topLeading)
-        .background(DashboardInsightCardBackground(cornerRadius: 16))
+        .background(DashboardInsightCardBackground(cornerRadius: 12))
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Peak dictation hours")
         .accessibilityValue(accessibilityValue)
@@ -33,7 +33,7 @@ struct DashboardPeakHoursCard: View {
     private var header: some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
             Text("Peak Dictation Hours")
-                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .font(InsightsTypography.cardTitle)
                 .foregroundStyle(AppTheme.Text.primary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.84)
@@ -42,11 +42,11 @@ struct DashboardPeakHoursCard: View {
 
             HStack(spacing: 5) {
                 Image(systemName: "clock")
-                    .font(.system(size: 12, weight: .semibold))
+                    .font(InsightsTypography.metricLabel)
                     .foregroundStyle(AppTheme.Text.secondary.opacity(0.78))
 
                 Text(canShowPattern ? windowText : "--")
-                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                    .font(InsightsTypography.supportingText)
                     .foregroundStyle(AppTheme.Text.secondary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.76)

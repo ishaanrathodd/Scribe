@@ -43,7 +43,7 @@ struct DashboardTimeSavedCard: View {
 
     var body: some View {
         ZStack(alignment: .leading) {
-            DashboardInsightCardBackground(cornerRadius: 16)
+            DashboardInsightCardBackground(cornerRadius: 12)
 
             content
                 .frame(height: 196 - (20 * 2), alignment: .topLeading)
@@ -57,19 +57,20 @@ struct DashboardTimeSavedCard: View {
     private var content: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("You saved")
-                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .font(InsightsTypography.cardTitle)
                 .foregroundStyle(AppTheme.Text.primary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.84)
 
             Text(summary.hasData ? savedTimeText : "--")
-                .font(.system(size: 58, weight: .heavy, design: .rounded))
+                .font(InsightsTypography.prominentMetricValue)
                 .foregroundStyle(savedTint)
                 .lineLimit(1)
                 .minimumScaleFactor(0.46)
 
             Text(period.timeSavedContext)
-                .font(.system(size: 13, weight: .bold, design: .rounded))
+                .font(InsightsTypography.metricLabel)
+                .tracking(0.8)
                 .foregroundStyle(AppTheme.Text.secondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.82)
@@ -77,7 +78,7 @@ struct DashboardTimeSavedCard: View {
             Spacer(minLength: 12)
 
             Text(workdaySavingsText)
-                .font(.system(size: 13, weight: .semibold))
+                .font(InsightsTypography.supportingText)
                 .foregroundStyle(AppTheme.Text.secondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.76)
