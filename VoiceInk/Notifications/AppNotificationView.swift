@@ -8,9 +8,6 @@ struct AppNotificationView: View {
     let onTap: (() -> Void)?
     var actionButton: (label: String, action: () -> Void)? = nil
 
-    @State private var progress: Double = 1.0
-    @State private var timer: Timer?
-
     enum NotificationType {
         case error
         case warning
@@ -37,101 +34,76 @@ struct AppNotificationView: View {
     }
 
     var body: some View {
-        ZStack {
-            HStack(alignment: .center, spacing: 12) {
-                // Type icon
-                Image(systemName: type.iconName)
-                    .font(.system(size: 16, weight: .medium))
-                    .foregroundColor(type.iconColor)
-                    .frame(width: 20, height: 20)
+        HStack(alignment: .center, spacing: 12) {
+            Image(systemName: type.iconName)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(type.iconColor)
+                .frame(width: 30, height: 30)
+                .background(type.iconColor.opacity(0.16), in: Circle())
+                .accessibilityHidden(true)
 
-                // Single message text
-                Text(title)
-                    .font(.system(size: 12))
-                    .fontWeight(.medium)
-                    .foregroundColor(.white)
-                    .lineLimit(2)
-                    .multilineTextAlignment(.leading)
+            Text(title)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(AppTheme.Text.primary)
+                .lineLimit(2)
+                .multilineTextAlignment(.leading)
 
-                Spacer()
+            Spacer(minLength: 8)
 
-                if let actionButton {
-                    Button(action: {
-                        actionButton.action()
-                        onClose()
-                    }) {
-                        Text(actionButton.label)
-                            .font(.system(size: 11, weight: .semibold))
-                            .foregroundColor(.white)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color.white.opacity(0.14))
-                            .clipShape(RoundedRectangle(cornerRadius: 6))
-                    }
-                    .buttonStyle(PlainButtonStyle())
+            if let actionButton {
+                Button(action: {
+                    actionButton.action()
+                    onClose()
+                }) {
+                    Text(actionButton.label)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(AppTheme.Text.primary)
+                        .padding(.horizontal, 12)
+                        .frame(height: 30)
                 }
-
-                Button(action: onClose) {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 10, weight: .medium))
-                        .foregroundColor(.white.opacity(0.6))
+                .buttonStyle(.plain)
+                .background {
+                    Capsule(style: .continuous)
+                        .fill(AppTheme.Surface.controlActive.opacity(0.84))
+                        .overlay {
+                            Capsule(style: .continuous)
+                                .stroke(AppTheme.Border.subtle, lineWidth: 0.8)
+                        }
                 }
-                .buttonStyle(PlainButtonStyle())
-                .frame(width: 16, height: 16)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
+
+            Button(action: onClose) {
+                Image(systemName: "xmark")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(AppTheme.Text.secondary)
+                    .frame(width: 28, height: 28)
+                    .background(AppTheme.Surface.controlActive.opacity(0.72), in: Circle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Dismiss notification")
         }
-        .frame(minWidth: 220, maxWidth: 750, minHeight: 44)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .frame(minWidth: 260, maxWidth: 720, minHeight: 52)
         .background(
-            RoundedRectangle(cornerRadius: AppTheme.Radius.card, style: .continuous)
+            Capsule(style: .continuous)
                 .fill(.clear)
                 .background(
                     ZStack {
-                        // Base dark background
-                        Color.black.opacity(0.9)
-
-                        // Subtle gradient overlay
-                        LinearGradient(
-                            colors: [
-                                Color.black.opacity(0.95),
-                                Color(red: 0.15, green: 0.15, blue: 0.15).opacity(0.9),
-                            ],
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-
-                        // Very subtle visual effect for depth
-                        VisualEffectView(material: .hudWindow, blendingMode: .withinWindow)
-                            .opacity(0.05)
+                        VisualEffectView(material: .hudWindow, blendingMode: .behindWindow)
+                        // Keep the material depth from the recorder UI, but make
+                        // notifications reliably legible over any foreground app.
+                        AppTheme.Surface.control.opacity(0.95)
+                        Color.white.opacity(0.025)
                     }
-                    .clipShape(RoundedRectangle(cornerRadius: AppTheme.Radius.card, style: .continuous))
+                    .clipShape(Capsule(style: .continuous))
                 )
         )
         .overlay(
-            // Subtle inner border
-            RoundedRectangle(cornerRadius: AppTheme.Radius.card, style: .continuous)
-                .strokeBorder(Color.white.opacity(0.1), lineWidth: 0.5)
+            Capsule(style: .continuous)
+                .strokeBorder(Color.white.opacity(0.18), lineWidth: 0.8)
         )
-        .overlay(
-            VStack {
-                Spacer()
-                GeometryReader { geometry in
-                    Rectangle()
-                        .fill(type.iconColor.opacity(0.8))
-                        .frame(width: geometry.size.width * max(0, progress), height: 2)
-                        .animation(.linear(duration: 0.1), value: progress)
-                }
-                .frame(height: 2)
-            }
-            .clipShape(RoundedRectangle(cornerRadius: AppTheme.Radius.card, style: .continuous))
-        )
-        .onAppear {
-            startProgressTimer()
-        }
-        .onDisappear {
-            timer?.invalidate()
-        }
+        .shadow(color: .black.opacity(0.20), radius: 14, y: 7)
         .onTapGesture {
             if let onTap = onTap {
                 onTap()
@@ -140,18 +112,4 @@ struct AppNotificationView: View {
         }
     }
 
-    private func startProgressTimer() {
-        let updateInterval: TimeInterval = 0.1
-        let totalSteps = duration / updateInterval
-        let stepDecrement = 1.0 / totalSteps
-
-        timer = Timer.scheduledTimer(withTimeInterval: updateInterval, repeats: true) { _ in
-            if progress > 0 {
-                progress = max(0, progress - stepDecrement)
-            } else {
-                timer?.invalidate()
-                timer = nil
-            }
-        }
-    }
 }
