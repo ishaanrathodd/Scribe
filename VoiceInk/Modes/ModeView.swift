@@ -78,7 +78,7 @@ struct ModeView: View {
                     ContentUnavailableView(
                         "No Modes",
                         systemImage: "square.grid.2x2",
-                        description: Text("Add a mode to control how VoiceInk transcribes and formats your speech.")
+                        description: Text("Add a mode to control how Scribe transcribes and formats your speech.")
                     )
                 } else {
                     Form {

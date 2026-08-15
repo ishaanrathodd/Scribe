@@ -48,7 +48,7 @@ struct ModeConfigFormView: View {
     private var configuredSelectedAIProvider: AIProvider? {
         let selectedProvider: AIProvider?
         if let providerName = draft.selectedAIProvider {
-            selectedProvider = AIProvider(rawValue: providerName)
+            selectedProvider = AIProvider(persistedValue: providerName)
         } else {
             selectedProvider = aiProviderOptions.first
         }
@@ -389,7 +389,7 @@ struct ModeConfigFormView: View {
                         }
                     }
                     .onChange(of: draft.selectedAIProvider) { _, newValue in
-                        if let provider = newValue.flatMap({ AIProvider(rawValue: $0) }) {
+                        if let provider = newValue.flatMap({ AIProvider(persistedValue: $0) }) {
                             switch provider {
                             case .localCLI:
                                 draft.selectedAIModel = nil

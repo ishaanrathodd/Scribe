@@ -15,10 +15,24 @@ enum AIProvider: String, CaseIterable {
     case soniox = "Soniox"
     case speechmatics = "Speechmatics"
     case assemblyAI = "AssemblyAI"
-    case voiceInkRefine = "VoiceInk Refine"
+    case voiceInkRefine = "Sotto Cleanup"
     case ollama = "Ollama"
     case localCLI = "Local CLI"
     case custom = "Custom"
+
+    /// Keep existing modes and the prior global selection working after the
+    /// built-in cleanup engine was replaced with Sotto.
+    init?(persistedValue: String) {
+        if persistedValue == "VoiceInk Refine" {
+            self = .voiceInkRefine
+        } else {
+            self.init(rawValue: persistedValue)
+        }
+    }
+
+    static func canonicalPersistedValue(_ value: String) -> String {
+        AIProvider(persistedValue: value)?.rawValue ?? value
+    }
 
     var baseURL: String {
         switch self {
@@ -319,7 +333,7 @@ class AIService: ObservableObject {
         }
 
         if let savedProvider = userDefaults.string(forKey: "selectedAIProvider"),
-            let provider = AIProvider(rawValue: savedProvider)
+            let provider = AIProvider(persistedValue: savedProvider)
         {
             self.selectedProvider = provider
         } else {

@@ -294,7 +294,7 @@ struct ModelManagementView: View {
             Button("Import Local Model…", systemImage: "square.and.arrow.down", action: presentImportPanel)
                 .buttonStyle(.bordered)
             InfoTip(
-                "Add a custom fine-tuned whisper model to use with VoiceInk. Select the downloaded .bin file.",
+                "Add a custom fine-tuned whisper model to use with Scribe. Select the downloaded .bin file.",
                 learnMoreURL: "https://tryvoiceink.com/docs/custom-local-whisper-models"
             )
             .help("Read more about custom local models")
@@ -389,7 +389,7 @@ struct ModelManagementView: View {
     }
 
     private func confirmDeleteVoiceInkRefineModel() {
-        alertTitle = String(localized: "Delete VoiceInk Refine?")
+        alertTitle = String(localized: "Delete Sotto Cleanup?")
         alertMessage = String(
             localized: "The model will need to be downloaded again before a Mode can use it."
         )

@@ -66,14 +66,14 @@ struct DashboardHeroCard: View {
 
         switch headline {
         case .calculatingProgress:
-            highlightedValue = String(localized: "VoiceInk progress")
+            highlightedValue = String(localized: "Scribe progress")
             text = AttributedString(localized: "Calculating \(highlightedValue).")
         case .startRecordingProgress:
-            highlightedValue = String(localized: "VoiceInk progress")
+            highlightedValue = String(localized: "Scribe progress")
             text = AttributedString(localized: "Start recording to build \(highlightedValue).")
         case .savedTime(let value):
             highlightedValue = value
-            text = AttributedString(localized: "You have saved \(highlightedValue) with VoiceInk")
+            text = AttributedString(localized: "You have saved \(highlightedValue) with Scribe")
         }
 
         text.font = Self.headlineFont

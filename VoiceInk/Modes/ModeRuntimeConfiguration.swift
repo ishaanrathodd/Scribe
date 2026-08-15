@@ -231,7 +231,7 @@ enum ModeRuntimeResolver {
             // drives the settings UI and can briefly be empty while Keychain/API-key
             // state is refreshing at launch; using it here made Ask Mode appear
             // unconfigured even though the selected provider was valid.
-            return AIProvider(rawValue: providerName)
+            return AIProvider(persistedValue: providerName)
         }
 
         return aiService.connectedProviders.first

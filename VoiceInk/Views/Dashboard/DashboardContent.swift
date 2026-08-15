@@ -497,7 +497,7 @@ struct DashboardContent: View {
                 .buttonStyle(.plain)
                 .fixedSize(horizontal: true, vertical: true)
                 .disabled(!updaterViewModel.canCheckForUpdates)
-                .help("Open the VoiceInk \(availableUpdate.displayVersion) update")
+                .help("Open the Scribe \(availableUpdate.displayVersion) update")
                 .accessibilityLabel("Update Available")
                 .accessibilityValue(Text(verbatim: availableUpdate.displayVersion))
                 .accessibilityHint("Opens the update window")
@@ -672,7 +672,7 @@ struct DashboardContent: View {
 
     private var headerSubtitle: String {
         guard hasLoadedStatsSnapshot else {
-            return String(localized: "Pulling together your VoiceInk activity.")
+            return String(localized: "Pulling together your Scribe activity.")
         }
 
         guard statsSummary.totalCount > 0 else {
@@ -779,7 +779,7 @@ private struct DashboardAccessibilityReminder: View {
                     .foregroundStyle(.primary)
                     .lineLimit(1)
 
-                Text("Required for VoiceInk shortcuts and app-wide controls to work properly.")
+                Text("Required for Scribe shortcuts and app-wide controls to work properly.")
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
                     .lineLimit(2)
@@ -819,7 +819,7 @@ private struct DashboardNoModesReminder: View {
                     .foregroundStyle(.primary)
                     .lineLimit(1)
 
-                Text("VoiceInk needs at least one mode to record. Create one to start dictating.")
+                Text("Scribe needs at least one mode to record. Create one to start dictating.")
                     .font(.system(size: 11))
                     .foregroundStyle(.secondary)
                     .lineLimit(2)

@@ -378,7 +378,7 @@ private final class AskHistoryExportService {
     func export(conversations: [AskConversation]) {
         let panel = NSSavePanel()
         panel.allowedContentTypes = [.json]
-        panel.nameFieldStringValue = "VoiceInk-ask-history.json"
+        panel.nameFieldStringValue = "Scribe-ask-history.json"
         panel.begin { result in
             guard result == .OK, let url = panel.url else { return }
             do {

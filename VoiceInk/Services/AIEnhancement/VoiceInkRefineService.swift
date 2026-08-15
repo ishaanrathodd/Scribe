@@ -15,9 +15,9 @@ enum VoiceInkRefineError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .unavailable:
-            return String(localized: "VoiceInk Refine requires an Apple silicon Mac with at least 16 GB of memory.")
+            return String(localized: "Sotto Cleanup requires an Apple silicon Mac with at least 8 GB of memory.")
         case .modelNotDownloaded:
-            return String(localized: "VoiceInk Refine is not downloaded.")
+            return String(localized: "Sotto Cleanup is not downloaded.")
         }
     }
 }
@@ -25,14 +25,14 @@ enum VoiceInkRefineError: LocalizedError {
 final class VoiceInkRefineService: ObservableObject {
     static let shared = VoiceInkRefineService()
 
-    static let providerName = "VoiceInk Refine"
-    static let modelName = "VoiceInk Refine V1"
-    static let systemPrompt = """
-        Transform raw ASR input into polished text. Preserve the original meaning and tone. Handle punctuation, capitalization, and spoken formatting cues properly. Remove fillers, repetitions, false starts, and discarded self-corrections. Output only the final text.
-        """
-    static let repositoryID = "beingpax/VoiceInk-Refine-V1"
-    static let pinnedRevision = "ad665418d3850e379e29236e66be3ddc0ac0bf04"
-    static let minimumMemoryBytes: UInt64 = 16 * 1_024 * 1_024 * 1_024
+    static let providerName = "Sotto Cleanup"
+    static let modelName = "Sotto Cleanup LFM2.5 350M"
+    /// Sotto is trained as a raw completion model. The XPC engine applies its
+    /// documented `### Input` / `### Output` completion template directly.
+    static let systemPrompt = ""
+    static let repositoryID = "juanquivilla/sotto-cleanup-lfm25-350m-mlx-5bit"
+    static let pinnedRevision = "1b04172dbb5aeb2d9a585881592f6473e21e4889"
+    static let minimumMemoryBytes: UInt64 = 8 * 1_024 * 1_024 * 1_024
     static var downloadSizeDescription: String {
         ByteCountFormatter.string(
             fromByteCount: VoiceInkRefineModelDownloader.totalBytes,
@@ -63,9 +63,9 @@ final class VoiceInkRefineService: ObservableObject {
         case .available:
             return nil
         case .unsupportedIntel:
-            return String(localized: "Available on Apple silicon Macs with at least 16 GB of memory.")
+            return String(localized: "Available on Apple silicon Macs with at least 8 GB of memory.")
         case .insufficientMemory:
-            return String(localized: "Requires at least 16 GB of memory.")
+            return String(localized: "Requires at least 8 GB of memory.")
         }
     }
 
@@ -133,7 +133,7 @@ final class VoiceInkRefineService: ObservableObject {
             NotificationCenter.default.post(name: .AppSettingsDidChange, object: nil)
         } catch {
             downloadError = error.localizedDescription
-            logger.error("Failed to delete VoiceInk Refine: \(error.localizedDescription, privacy: .public)")
+            logger.error("Failed to delete Sotto Cleanup: \(error.localizedDescription, privacy: .public)")
         }
     }
 
@@ -231,7 +231,7 @@ final class VoiceInkRefineService: ObservableObject {
                 downloadError = nil
             } catch {
                 downloadError = error.localizedDescription
-                logger.error("Failed to download VoiceInk Refine: \(error.localizedDescription, privacy: .public)")
+                logger.error("Failed to download Sotto Cleanup: \(error.localizedDescription, privacy: .public)")
             }
         #else
             downloadError = VoiceInkRefineError.unavailable.localizedDescription

@@ -182,7 +182,7 @@ final class AssistantSession: ObservableObject {
 
     func restore(_ conversation: AskConversation) {
         conversationID = conversation.id
-        provider = conversation.providerRawValue.flatMap(AIProvider.init(rawValue:))
+        provider = conversation.providerRawValue.flatMap(AIProvider.init(persistedValue:))
         modelName = conversation.modelName
         modeName = conversation.modeName
         modeEmoji = conversation.modeEmoji

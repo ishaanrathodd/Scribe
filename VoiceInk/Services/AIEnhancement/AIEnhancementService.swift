@@ -706,7 +706,11 @@ class AIEnhancementService: ObservableObject {
         var didUpdateModes = false
 
         for index in updatedConfigurations.indices {
-            if updatedConfigurations[index].selectedAIProvider == AIProvider.voiceInkRefine.rawValue {
+            if updatedConfigurations[index].selectedAIProvider
+                .flatMap(AIProvider.init(persistedValue:)) == .voiceInkRefine
+            {
+                updatedConfigurations[index].selectedAIProvider = AIProvider.voiceInkRefine.rawValue
+                didUpdateModes = true
                 if updatedConfigurations[index].selectedAIModel != VoiceInkRefineService.modelName {
                     updatedConfigurations[index].selectedAIModel = VoiceInkRefineService.modelName
                     didUpdateModes = true

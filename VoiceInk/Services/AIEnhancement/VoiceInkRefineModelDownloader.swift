@@ -49,61 +49,15 @@ final class VoiceInkRefineModelDownloader: @unchecked Sendable {
     }
 
     static let files: [ModelFile] = [
-        ModelFile(
-            path: ".gitattributes",
-            size: 1_570,
-            sha256: "34448b82c17d60fec9b65b1f093c115ddbaadc04beb1b0140b6bfed2e012a930"
-        ),
-        ModelFile(
-            path: "LICENSE-QWEN-APACHE-2.0.txt",
-            size: 11_544,
-            sha256: "bbedc3fda3305820b977265f01b8619d87570a6739de3a5582c3464840f1e57a"
-        ),
-        ModelFile(
-            path: "LICENSE.md",
-            size: 275,
-            sha256: "ab9ec0078c932a50c5dc077d58fd1b77aa1f8ad395cc93c314cce84fa5263e11"
-        ),
-        ModelFile(
-            path: "README.md",
-            size: 965,
-            sha256: "c4fd4a4e32552136f44dbd9526ee6ba97e02078ba520e89ab0e68de518642a0b"
-        ),
-        ModelFile(
-            path: "THIRD_PARTY_NOTICES.md",
-            size: 479,
-            sha256: "bb910585f2eab7e4fdc42b434f50d3c27fd29737ce32644ee2c0c26981015c19"
-        ),
-        ModelFile(
-            path: "chat_template.jinja",
-            size: 6_412,
-            sha256: "83b19588ce0999213e4a36b855e104d3937c6271bb5711400dd399407233a3d4"
-        ),
-        ModelFile(
-            path: "config.json",
-            size: 2_479,
-            sha256: "257f7f080bde674382cb09df314bf4f2b5d4f5c6b6465d3a8d6c98d8443b5b12"
-        ),
-        ModelFile(
-            path: "model.safetensors",
-            size: 1_059_404_951,
-            sha256: "3cdfe2f506f71f2c5d5af23aa8fe3572989d2f364a7317322220621a86aaf5f6"
-        ),
-        ModelFile(
-            path: "model.safetensors.index.json",
-            size: 60_786,
-            sha256: "3b2dffa510d1d73decdbc12d5e1bc7d6a9f7b2deb631bfd84238a1f8fc4e0fd1"
-        ),
-        ModelFile(
-            path: "tokenizer.json",
-            size: 19_989_325,
-            sha256: "06b9509352d2af50381ab2247e083b80d32d5c0aba91c272ca9ff729b6a0e523"
-        ),
-        ModelFile(
-            path: "tokenizer_config.json",
-            size: 582,
-            sha256: "f7c2417da2c86b4fa75c6bbabc8be6cbc8de0ec971bd153f49fd1d0907ed2b1e"
-        ),
+        ModelFile(path: ".gitattributes", size: 1_519, sha256: "11ad7efa24975ee4b0c3c3a38ed18737f0658a5f75a0a96787b576a78a023361"),
+        ModelFile(path: "README.md", size: 1_998, sha256: "977c0f9c964486b864905b8bb75ce91f869fc57764c2fea1bf11465e837da8ff"),
+        ModelFile(path: "chat_template.jinja", size: 1_296, sha256: "89e790f027916b5a2bca145a6a8454e06ffc7a5043bf3b6d97829aff86bb543f"),
+        ModelFile(path: "config.json", size: 1_688, sha256: "57a80b8e9b1e99e6ad68b2bed1109e7ff83d3c87117946a238b1c6f4b104d340"),
+        ModelFile(path: "generation_config.json", size: 141, sha256: "14f2335f0fd2010db80e256ef955b79c0ad2c03d243a98d48317346870f9fe00"),
+        ModelFile(path: "model.safetensors", size: 243_830_312, sha256: "9e9f5057c16184b904ce4d7e06eba5b54cd0cb46117141ebeb14db3c5ad48b61"),
+        ModelFile(path: "model.safetensors.index.json", size: 23_413, sha256: "9ee0b6ff83ca30a7f0a8f50c13a0fce80246d04275a8cb6776c3625f02fe1bb4"),
+        ModelFile(path: "tokenizer.json", size: 4_733_016, sha256: "4905ab82b2cfc25e0c88adc8f4eeffe759c57c5626312b30b0aaeaf8ad3379bc"),
+        ModelFile(path: "tokenizer_config.json", size: 582, sha256: "ee4f8e9d086856eaa4aa4e8dc7d748e2cdc951fbae2d31ac21edf51e86e8948e"),
     ]
 
     static let totalBytes = files.reduce(Int64(0)) { $0 + $1.size }

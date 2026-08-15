@@ -422,7 +422,7 @@ private struct ModelProviderIdentity {
 
     private static func identity(for provider: ModelProvider) -> ModelProviderIdentity {
         let cloudProvider = CloudProviderRegistry.provider(for: provider)
-        let aiProvider = AIProvider(rawValue: provider.rawValue)
+        let aiProvider = AIProvider(persistedValue: provider.rawValue)
         let displayName: String
         let providerKey: String
         let fallbackSystemImage: String

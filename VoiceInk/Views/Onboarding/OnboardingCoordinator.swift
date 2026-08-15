@@ -336,7 +336,7 @@ final class OnboardingCoordinator: ObservableObject {
     }
 
     var selectedOnboardingProvider: AIProvider {
-        if let storedProvider = AIProvider(rawValue: storedOnboardingAIProvider),
+        if let storedProvider = AIProvider(persistedValue: storedOnboardingAIProvider),
             onboardingProviderOptions.contains(storedProvider)
         {
             return storedProvider

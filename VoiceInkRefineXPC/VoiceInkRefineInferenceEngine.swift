@@ -16,11 +16,11 @@ enum VoiceInkRefineInferenceError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .unavailable:
-            return "VoiceInk Refine requires Apple silicon."
+            return "Sotto Cleanup requires Apple silicon."
         case .modelNotLoaded:
-            return "VoiceInk Refine could not load the selected model."
+            return "Sotto Cleanup could not load the selected model."
         case .emptyOutput:
-            return "VoiceInk Refine returned an empty response."
+            return "Sotto Cleanup returned an empty response."
         }
     }
 }
@@ -33,7 +33,7 @@ actor VoiceInkRefineInferenceEngine {
         }
 
         private static let activeCacheLimitBytes = 64 * 1_024 * 1_024
-        private static let maximumGenerationTokens = 8_192
+        private static let maximumGenerationTokens = 512
 
         private var modelContainer: MLXLMCommon.ModelContainer?
         private var preparationTask: Task<Void, Error>?
@@ -107,20 +107,26 @@ actor VoiceInkRefineInferenceEngine {
                 throw VoiceInkRefineInferenceError.modelNotLoaded
             }
 
+            let prompt = completionPrompt(for: transcript)
             let inputTokenCount = await modelContainer.encode(transcript).count
             let maximumOutputTokens = Self.maximumOutputTokens(
                 forInputTokenCount: inputTokenCount
-            )
-            let session = makeSession(
-                using: modelContainer,
-                systemPrompt: systemPrompt,
-                maximumOutputTokens: maximumOutputTokens
             )
 
             var output = ""
 
             do {
-                for try await event in session.streamDetails(to: transcript) {
+                let tokenIDs = await modelContainer.encode(prompt)
+                let input = LMInput(tokens: MLXArray(tokenIDs))
+                let stream = try await modelContainer.generate(
+                    input: input,
+                    parameters: GenerateParameters(
+                        maxTokens: maximumOutputTokens,
+                        temperature: 0
+                    )
+                )
+
+                for await event in stream {
                     try Task.checkCancellation()
                     switch event {
                     case .chunk(let text):
@@ -131,17 +137,16 @@ actor VoiceInkRefineInferenceEngine {
                         break
                     }
                 }
-                await session.clear()
             } catch {
-                await session.clear()
                 throw error
             }
 
-            guard !output.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            let cleanedOutput = cleanCompletionOutput(output)
+            guard !cleanedOutput.isEmpty else {
                 throw VoiceInkRefineInferenceError.emptyOutput
             }
 
-            return output
+            return cleanedOutput
         #else
             throw VoiceInkRefineInferenceError.unavailable
         #endif
@@ -190,16 +195,16 @@ actor VoiceInkRefineInferenceEngine {
 
             guard !isWarmed else { return }
 
-            let warmupSession = makeSession(
-                using: container,
-                systemPrompt: systemPrompt,
-                maximumOutputTokens: 1
-            )
+            let warmupPrompt = completionPrompt(for: "Speech")
             do {
-                _ = try await warmupSession.respond(to: "Speech")
-                await warmupSession.clear()
+                let tokenIDs = await container.encode(warmupPrompt)
+                let input = LMInput(tokens: MLXArray(tokenIDs))
+                let stream = try await container.generate(
+                    input: input,
+                    parameters: GenerateParameters(maxTokens: 1, temperature: 0)
+                )
+                for await _ in stream {}
             } catch {
-                await warmupSession.clear()
                 throw error
             }
             try Task.checkCancellation()
@@ -224,20 +229,13 @@ actor VoiceInkRefineInferenceEngine {
             return loadedContainer
         }
 
-        private func makeSession(
-            using container: MLXLMCommon.ModelContainer,
-            systemPrompt: String,
-            maximumOutputTokens: Int
-        ) -> ChatSession {
-            ChatSession(
-                container,
-                instructions: systemPrompt,
-                generateParameters: GenerateParameters(
-                    maxTokens: maximumOutputTokens,
-                    temperature: 0.3
-                ),
-                additionalContext: ["enable_thinking": false]
-            )
+        private func completionPrompt(for transcript: String) -> String {
+            "### Input:\n\(transcript)\n\n### Output:\n"
+        }
+
+        private func cleanCompletionOutput(_ output: String) -> String {
+            let completion = output.components(separatedBy: "###").first ?? output
+            return completion.trimmingCharacters(in: .whitespacesAndNewlines)
         }
 
         private func waitForPreparationTask(
@@ -253,11 +251,8 @@ actor VoiceInkRefineInferenceEngine {
         private static func maximumOutputTokens(
             forInputTokenCount inputTokenCount: Int
         ) -> Int {
-            let scaledTokenLimit =
-                inputTokenCount > maximumGenerationTokens / 2
-                ? maximumGenerationTokens
-                : inputTokenCount * 2
-            return min(max(scaledTokenLimit, 256), maximumGenerationTokens)
+            let scaledTokenLimit = Int(Double(inputTokenCount) * 1.6) + 32
+            return min(max(scaledTokenLimit, 96), maximumGenerationTokens)
         }
     #endif
 }

@@ -49,7 +49,7 @@ struct ModeConfigDraft {
             useClipboardContext = false
             useSelectedTextContext = false
             useScreenCapture = true
-            selectedAIProvider = inheritedConfig?.selectedAIProvider
+            selectedAIProvider = inheritedConfig?.selectedAIProvider.map(AIProvider.canonicalPersistedValue)
             selectedAIModel = inheritedConfig?.selectedAIModel
             outputMode = .paste
             isWebSearchEnabled = false
@@ -77,7 +77,7 @@ struct ModeConfigDraft {
             useClipboardContext = latestConfig.useClipboardContext
             useSelectedTextContext = latestConfig.useSelectedTextContext
             useScreenCapture = latestConfig.useScreenCapture
-            selectedAIProvider = latestConfig.selectedAIProvider
+            selectedAIProvider = latestConfig.selectedAIProvider.map(AIProvider.canonicalPersistedValue)
             selectedAIModel = latestConfig.selectedAIModel
             outputMode = latestConfig.outputMode
             isWebSearchEnabled = latestConfig.isWebSearchEnabled
@@ -95,7 +95,7 @@ struct ModeConfigDraft {
 
     mutating func applyAddModeDefaults(snapshot: ModeFormWarmupSnapshot) {
         let connectedProviders = snapshot.connectedAIProviders
-        let inheritedProvider = selectedAIProvider.flatMap(AIProvider.init(rawValue:))
+        let inheritedProvider = selectedAIProvider.flatMap(AIProvider.init(persistedValue:))
         let provider =
             inheritedProvider.flatMap { provider in
                 connectedProviders.contains(provider) ? provider : nil
@@ -134,7 +134,7 @@ struct ModeConfigDraft {
     }
 
     mutating func ensurePromptSelection(firstPromptId: UUID?) {
-        guard selectedAIProvider != AIProvider.voiceInkRefine.rawValue else {
+        guard selectedAIProvider.flatMap(AIProvider.init(persistedValue:)) != .voiceInkRefine else {
             return
         }
 

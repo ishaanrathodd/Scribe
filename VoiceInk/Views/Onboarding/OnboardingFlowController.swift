@@ -395,7 +395,7 @@ final class OnboardingFlowController {
     }
 
     func ensureDefaultOnboardingProvider() {
-        if let storedProvider = AIProvider(rawValue: coordinator.storedOnboardingAIProvider),
+        if let storedProvider = AIProvider(persistedValue: coordinator.storedOnboardingAIProvider),
             coordinator.onboardingProviderOptions.contains(storedProvider)
         {
             return
