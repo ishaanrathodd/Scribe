@@ -30,10 +30,8 @@ enum AppPresentationPolicy {
 
     static func restoreAccessoryIfNeededAfterUserFacingWindowClosed() {
         DispatchQueue.main.async {
-            let menuBarOnly = UserDefaults.standard.bool(forKey: "IsMenuBarOnly")
             let hasVisibleUserWindows = !WindowDiagnostics.visibleUserFacingWindows().isEmpty
 
-            guard menuBarOnly else { return }
             guard !hasVisibleUserWindows else { return }
 
             NSApplication.shared.setActivationPolicy(.accessory)
@@ -177,5 +175,7 @@ extension WindowManager: NSWindowDelegate {
         if window.identifier == Self.mainWindowIdentifier {
             mainWindow = nil
         }
+
+        AppPresentationPolicy.restoreAccessoryIfNeededAfterUserFacingWindowClosed()
     }
 }

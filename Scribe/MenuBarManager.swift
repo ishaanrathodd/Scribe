@@ -33,8 +33,7 @@ class MenuBarManager: ObservableObject {
     }
 
     @objc private func userFacingWindowWillClose(_ notification: Notification) {
-        guard isMenuBarOnly,
-            let window = notification.object as? NSWindow,
+        guard let window = notification.object as? NSWindow,
             window.level == .normal,
             window.styleMask.contains(.titled)
         else {

@@ -147,9 +147,6 @@ struct ScribeApp: App {
         let recordingShortcutManager = RecordingShortcutManager(engine: engine, recorderUIManager: recorderUIManager)
         _recordingShortcutManager = StateObject(wrappedValue: recordingShortcutManager)
 
-        // Scribe is a normal Dock application; it no longer has a status-bar
-        // entry, so never leave it in the old menu-bar-only presentation mode.
-        UserDefaults.standard.set(false, forKey: "IsMenuBarOnly")
         let menuBarManager = MenuBarManager()
         _menuBarManager = StateObject(wrappedValue: menuBarManager)
         menuBarManager.configure(modelContainer: resolvedContainer, engine: engine)
