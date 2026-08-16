@@ -46,19 +46,11 @@ class CursorPaster {
 
     @MainActor
     private static func performPasteSession(_ text: String) async -> PasteResult {
-        // Do not fire Cmd-V into an arbitrary focused control. When there is
-        // no editable target, preserve the transcription for a manual paste.
-        guard hasFocusedEditableTextInput() else {
-            let copied = ClipboardManager.copyToClipboard(text)
-            if copied {
-                logger.notice("No focused editable input; copied transcription to clipboard")
-                return .copiedToClipboard
-            }
-
-            logger.error("No focused editable input and failed to copy transcription to clipboard")
-            return .commandNotPosted
-        }
-
+        // Dictation is explicitly user-triggered, so always attempt to insert
+        // its result at the current cursor. Some editors (including Zed
+        // Preview) do not expose their editable buffer to macOS accessibility,
+        // and blocking the paste based on that incomplete metadata makes those
+        // editors fail despite accepting a normal Cmd-V.
         let pasteboard = NSPasteboard.general
         let shouldRestoreClipboard = UserDefaults.standard.bool(forKey: "restoreClipboardAfterPaste")
         let savedContents = shouldRestoreClipboard ? snapshotClipboard(from: pasteboard) : []
@@ -156,74 +148,6 @@ class CursorPaster {
             }
             return item
         }
-    }
-
-    @MainActor
-    private static func hasFocusedEditableTextInput() -> Bool {
-        guard AXIsProcessTrusted() else { return false }
-
-        let systemWideElement = AXUIElementCreateSystemWide()
-        var value: CFTypeRef?
-        guard
-            AXUIElementCopyAttributeValue(
-                systemWideElement,
-                kAXFocusedUIElementAttribute as CFString,
-                &value
-            ) == .success,
-            let value,
-            CFGetTypeID(value) == AXUIElementGetTypeID()
-        else {
-            return false
-        }
-
-        let focusedElement = value as! AXUIElement
-
-        var roleValue: CFTypeRef?
-        guard AXUIElementCopyAttributeValue(
-            focusedElement,
-            kAXRoleAttribute as CFString,
-            &roleValue
-        ) == .success,
-            let role = roleValue as? String
-        else {
-            return false
-        }
-
-        let textInputRoles = [
-            kAXTextFieldRole,
-            kAXTextAreaRole,
-            kAXComboBoxRole,
-        ]
-
-        if textInputRoles.contains(role) {
-            return true
-        }
-
-        // Browsers expose rich text editors as AXWebArea. A plain web page
-        // has the same role, so only treat it as a paste target when macOS
-        // explicitly marks that particular web area editable. Apple Mail's
-        // compose body is also an AXWebArea, but it does not publish the
-        // AXEditable attribute even though it is an editable HTML content
-        // view. Accept that one known editor explicitly.
-        guard role == "AXWebArea" || role == "AXHTMLContent" else { return false }
-
-        if NSWorkspace.shared.frontmostApplication?.bundleIdentifier == "com.apple.mail" {
-            return true
-        }
-
-        var editableValue: CFTypeRef?
-        guard
-            AXUIElementCopyAttributeValue(
-                focusedElement,
-                "AXEditable" as CFString,
-                &editableValue
-            ) == .success,
-            let editable = editableValue as? Bool
-        else {
-            return false
-        }
-
-        return editable
     }
 
     // MARK: - AppleScript paste
